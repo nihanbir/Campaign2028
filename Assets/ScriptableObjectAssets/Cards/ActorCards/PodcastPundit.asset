@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95901944522651e4c8326ee335cb65b9, type: 3}
+  m_Name: PodcastPundit
+  m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
+  actorName: Podcast Pundit
+  artwork: {fileID: -5221570103682935930, guid: 90b27cb0f55e8fb4ea3c8a45001ff516, type: 3}
+  team: 1
+  actorType: 5
+  intelligence: 3
+  wealth: 4
+  influence: 4
+  victimhood: 4
+  commitment: 2
+  weapons: 1

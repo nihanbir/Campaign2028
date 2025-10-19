@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca207cdad4ceda744919e99d2c12fd90, type: 3}
+  m_Name: China
+  m_EditorClassIdentifier: Assembly-CSharp::AllegianceCardSO
+  allegianceName: China
+  artwork: {fileID: -4303887008485036629, guid: 3de3c82b44a73d7409f0b5b8e339e6b0, type: 3}
+  allegiance: 1
