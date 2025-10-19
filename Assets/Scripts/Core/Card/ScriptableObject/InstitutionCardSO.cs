@@ -5,7 +5,6 @@ using UnityEngine;
 public class InstitutionCardSO : ScriptableObject
 {
     public string institutionName;
-    [TextArea(2, 4)]
     public Sprite artwork;
     
     public InstitutionType institutionType;

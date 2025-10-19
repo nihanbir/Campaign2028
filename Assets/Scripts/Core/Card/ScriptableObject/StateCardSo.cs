@@ -5,7 +5,6 @@ using UnityEngine;
 public class StateCardSO : ScriptableObject
 {
     public string stateName;
-    [TextArea(2, 4)]
     public Sprite artwork;
     
     public int electoralVotes;

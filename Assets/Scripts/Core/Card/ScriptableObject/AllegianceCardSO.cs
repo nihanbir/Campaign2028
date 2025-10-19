@@ -4,7 +4,6 @@ using UnityEngine;
 public class AllegianceCardSO : ScriptableObject
 {
     public string allegianceName;
-    [TextArea(2, 4)]
     public Sprite artwork;
     
     public AllegianceType allegiance;

@@ -4,7 +4,6 @@ using UnityEngine;
 public class ActorCardSO : ScriptableObject
 {
     public string actorName;
-    [TextArea(2, 4)]
     public Sprite artwork;
     
     public ActorTeam team;
