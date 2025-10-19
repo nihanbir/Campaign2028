@@ -21,5 +21,6 @@ public enum InstitutionType
     Media,
     WhiteHouse,
     Pentagon,
-    CIA
+    CIA,
+    WallStreet
 }
