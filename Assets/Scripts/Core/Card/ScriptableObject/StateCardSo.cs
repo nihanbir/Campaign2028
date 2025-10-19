@@ -6,7 +6,6 @@ public class StateCardSO : ScriptableObject
 {
     public string stateName;
     [TextArea(2, 4)]
-    public string description;
     public Sprite artwork;
     
     public int electoralVotes;

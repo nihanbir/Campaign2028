@@ -6,7 +6,6 @@ public class InstitutionCardSO : ScriptableObject
 {
     public string institutionName;
     [TextArea(2, 4)]
-    public string description;
     public Sprite artwork;
     
     public InstitutionType institutionType;
