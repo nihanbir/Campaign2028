@@ -17,7 +17,6 @@ public class EventCardSO : ScriptableObject
         return new EventCard
         {
             cardName = eventName,
-            description = description,
             artwork = artwork,
             eventType = eventType,
             mustPlayImmediately = mustPlayImmediately,

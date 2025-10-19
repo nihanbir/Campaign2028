@@ -24,7 +24,6 @@ public class ActorCardSO : ScriptableObject
         var card = new ActorCard
         {
             cardName = actorName,
-            description = description,
             artwork = artwork,
             team = team,
             actorType = actorType

@@ -20,7 +20,6 @@ public class StateCardSO : ScriptableObject
         return new StateCard
         {
             cardName = stateName,
-            description = description,
             artwork = artwork,
             electoralVotes = electoralVotes,
             redSuccessRolls = new List<int>(redSuccessRolls),

@@ -18,7 +18,6 @@ public class InstitutionCardSO : ScriptableObject
         return new InstitutionCard
         {
             cardName = institutionName,
-            description = description,
             artwork = artwork,
             institutionType = institutionType,
             redSuccessRolls = new List<int>(redSuccessRolls),

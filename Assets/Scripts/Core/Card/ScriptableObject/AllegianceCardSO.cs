@@ -15,7 +15,6 @@ public class AllegianceCardSO : ScriptableObject
         return new AllegianceCard
         {
             cardName = allegianceName,
-            description = description,
             artwork = artwork,
             allegiance = allegiance
         };
