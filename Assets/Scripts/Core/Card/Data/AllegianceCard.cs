@@ -8,7 +8,6 @@ public class AllegianceCard : Card
 
 public enum AllegianceType
 {
-    USA_Democrats,
-    USA_Republicans,
+    USA,
     China
 }
