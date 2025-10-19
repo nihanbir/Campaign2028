@@ -27,9 +27,12 @@ public enum ActorTeam
 
 public enum ActorType
 {
+    // Red Team
     SouthernRural,
     TechOligarch,
     TradWife,
+    
+    // Blue Team
     ANTIFA,
     SocialJusticeKaren,
     PodcastPundit
