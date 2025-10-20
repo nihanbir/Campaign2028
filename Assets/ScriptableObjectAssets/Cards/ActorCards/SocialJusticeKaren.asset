@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: SocialJusticeKaren
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
   actorName: Social Justice Karen
-  description: 
-  artwork: {fileID: -7416840895964042104, guid: d9c191f808b5d5640a01e2c41491e1ff, type: 3}
+  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
   team: 1
   actorType: 4
+  evScore: 0
+  instScore: 0
+  isCaptured: 0
+  isRevealed: 0
   intelligence: 3
   wealth: 3
   influence: 2

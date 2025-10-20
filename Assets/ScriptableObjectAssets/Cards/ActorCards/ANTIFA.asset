@@ -12,11 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95901944522651e4c8326ee335cb65b9, type: 3}
   m_Name: ANTIFA
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
-  actorName: ANTIFA_Operative
-  description: 
-  artwork: {fileID: -5552451496677025555, guid: feea6d9967ce6694ca71d11405143b8f, type: 3}
+  actorName: ANTIFA
+  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
   team: 1
   actorType: 3
+  evScore: 0
+  instScore: 0
+  isCaptured: 0
+  isRevealed: 0
   intelligence: 3
   wealth: 2
   influence: 2

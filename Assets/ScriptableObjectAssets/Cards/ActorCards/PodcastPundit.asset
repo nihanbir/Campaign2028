@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: PodcastPundit
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
   actorName: Podcast Pundit
-  artwork: {fileID: -5221570103682935930, guid: 90b27cb0f55e8fb4ea3c8a45001ff516, type: 3}
+  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
   team: 1
   actorType: 5
+  evScore: 0
+  instScore: 0
+  isCaptured: 0
+  isRevealed: 0
   intelligence: 3
   wealth: 4
   influence: 4

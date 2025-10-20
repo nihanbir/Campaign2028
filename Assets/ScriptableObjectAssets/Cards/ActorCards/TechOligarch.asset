@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: TechOligarch
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
   actorName: Tech Oligarch
-  artwork: {fileID: 7651465124576865203, guid: 58b2232e2a164eb46808cd42b8785302, type: 3}
+  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
   team: 0
   actorType: 1
+  evScore: 0
+  instScore: 0
+  isCaptured: 0
+  isRevealed: 0
   intelligence: 4
   wealth: 6
   influence: 4
