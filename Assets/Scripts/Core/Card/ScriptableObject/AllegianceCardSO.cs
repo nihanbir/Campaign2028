@@ -5,6 +5,7 @@ public class AllegianceCardSO : ScriptableObject
 {
     public string allegianceName;
     public Sprite artwork;
+    public Sprite backSide;
     
     public AllegianceType allegiance;
     

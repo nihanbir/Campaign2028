@@ -13,5 +13,6 @@ public enum EventType
     ExtraRoll,
     NeedTwo,
     Challenge,
+    LoseTurn,
     ChineseAgent
 }

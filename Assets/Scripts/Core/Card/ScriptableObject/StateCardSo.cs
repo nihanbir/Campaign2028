@@ -6,6 +6,7 @@ public class StateCardSO : ScriptableObject
 {
     public string stateName;
     public Sprite artwork;
+    public Sprite backSide;
     
     public int electoralVotes;
     public List<int> redSuccessRolls = new List<int>();

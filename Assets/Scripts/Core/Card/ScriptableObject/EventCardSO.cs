@@ -4,8 +4,8 @@ using UnityEngine;
 public class EventCardSO : ScriptableObject
 {
     public string eventName;
-    [TextArea(2, 4)]
     public Sprite artwork;
+    public Sprite backSide;
     
     public EventType eventType;
     public bool mustPlayImmediately;

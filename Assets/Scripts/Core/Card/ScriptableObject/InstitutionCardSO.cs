@@ -6,6 +6,7 @@ public class InstitutionCardSO : ScriptableObject
 {
     public string institutionName;
     public Sprite artwork;
+    public Sprite backSide;
     
     public InstitutionType institutionType;
     public List<int> redSuccessRolls = new List<int>();

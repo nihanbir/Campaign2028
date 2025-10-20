@@ -9,13 +9,16 @@ public class ActorCardSO : ScriptableObject
     public ActorTeam team;
     public ActorType actorType;
     
+    [HideInInspector] public bool isCaptured = false;
+    [HideInInspector] public bool isRevealed = false;
+    
     [Header("Battle Stats")]
-    public int intelligence = 3;   // Die 1
-    public int wealth = 3;         // Die 2
-    public int influence = 3;      // Die 3
-    public int victimhood = 3;     // Die 4
-    public int commitment = 3;     // Die 5
-    public int weapons = 3;        // Die 6
+    public int intelligence;   // Die 1
+    public int wealth;         // Die 2
+    public int influence;      // Die 3
+    public int victimhood;     // Die 4
+    public int commitment;     // Die 5
+    public int weapons;        // Die 6
     
     public ActorCard ToCard()
     {
@@ -24,7 +27,10 @@ public class ActorCardSO : ScriptableObject
             cardName = actorName,
             artwork = artwork,
             team = team,
-            actorType = actorType
+            actorType = actorType,
+            isCaptured = isCaptured,
+            isRevealed = isRevealed,
+            
         };
         
         card.stats[1] = intelligence;

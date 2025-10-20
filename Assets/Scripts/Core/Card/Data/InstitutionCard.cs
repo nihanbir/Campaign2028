@@ -20,7 +20,6 @@ public enum InstitutionType
     Congress,
     Media,
     WhiteHouse,
-    Pentagon,
     CIA,
     WallStreet
 }
