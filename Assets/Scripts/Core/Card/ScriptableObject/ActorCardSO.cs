@@ -9,8 +9,8 @@ public class ActorCardSO : ScriptableObject
     public ActorTeam team;
     public ActorType actorType;
     
-    [HideInInspector] public bool isCaptured = false;
-    [HideInInspector] public bool isRevealed = false;
+    [HideInInspector] public int evScore;
+    [HideInInspector] public int instScore;
     
     [Header("Battle Stats")]
     public int intelligence;   // Die 1
@@ -28,9 +28,8 @@ public class ActorCardSO : ScriptableObject
             artwork = artwork,
             team = team,
             actorType = actorType,
-            isCaptured = isCaptured,
-            isRevealed = isRevealed,
-            
+            evScore = evScore,
+            instScore = instScore,
         };
         
         card.stats[1] = intelligence;

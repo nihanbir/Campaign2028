@@ -2,12 +2,15 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class ActorCard : Card
 {
     public ActorTeam team;
     public ActorType actorType;
+    [HideInInspector] public int evScore;
+    [HideInInspector] public int instScore;
     public Dictionary<int, int> stats = new Dictionary<int, int>
     {
         {1, 0}, // Intelligence
