@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1665b82b376194468e74f83ca559e6a, type: 3}
+  m_Name: Dakotas
+  m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
+  stateName: Dakotas
+  artwork: {fileID: -7050467451112355835, guid: 53a31818359af774b90dbabf2ca35171, type: 3}
+  electoralVotes: 6
+  redSuccessRolls: 03000000040000000500000006000000
+  blueSuccessRolls: 02000000
+  hasRollAgain: 0
+  hasSecession: 1

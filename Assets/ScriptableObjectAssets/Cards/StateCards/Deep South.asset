@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1665b82b376194468e74f83ca559e6a, type: 3}
+  m_Name: Deep South
+  m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
+  stateName: Deep South
+  artwork: {fileID: 8362409348838028280, guid: 237e67f8569995143811c0efe18b901b, type: 3}
+  electoralVotes: 23
+  redSuccessRolls: 03000000040000000500000006000000
+  blueSuccessRolls: 02000000
+  hasRollAgain: 0
+  hasSecession: 1

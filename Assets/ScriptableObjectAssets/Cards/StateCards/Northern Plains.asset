@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1665b82b376194468e74f83ca559e6a, type: 3}
+  m_Name: Northern Plains
+  m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
+  stateName: Northern Plains
+  artwork: {fileID: -8512705895007130853, guid: 6c6ef830330c2dd4d823b8bbd7125061, type: 3}
+  electoralVotes: 11
+  redSuccessRolls: 03000000040000000500000006000000
+  blueSuccessRolls: 02000000
+  hasRollAgain: 0
+  hasSecession: 1
