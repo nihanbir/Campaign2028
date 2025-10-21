@@ -119,6 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &234126392 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4652025799629714667, guid: 648c5530fed3c134daf04e1edc9d2eb7, type: 3}
+  m_PrefabInstance: {fileID: 7582439398727145261}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &516569703
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,6 +380,14 @@ MonoBehaviour:
   playerActorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 978547509}
   spacingBetweenActorCards: 300
+  rollDiceButton: {fileID: 234126392}
+  diceFaces:
+  - {fileID: 4379547202609923276, guid: 67e065fd331f65d449653f91b1d6628e, type: 3}
+  - {fileID: -8397132692876888525, guid: 6650cd30f16c22941867a9c86754008c, type: 3}
+  - {fileID: -3138510821884332752, guid: 8ec0afa63e20867478e1cca72419d323, type: 3}
+  - {fileID: -5874486030743072056, guid: 4c8ccfaf0bf4f91488bc256d107fe109, type: 3}
+  - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
+  - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
 --- !u!1 &807429230
 GameObject:
   m_ObjectHideFlags: 0
