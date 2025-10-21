@@ -1,11 +1,14 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ActorDisplayCard : DisplayCard
 {
     private ActorCard _actor;
     public TextMeshProUGUI EVScoreText;
     public TextMeshProUGUI InstScoreText;
+    public TextMeshProUGUI nameText;
+    public Image image;
 
     public void SetActor(ActorCard actor)
     {
@@ -13,7 +16,7 @@ public class ActorDisplayCard : DisplayCard
         UpdateUI();
     }
 
-    private void UpdateUI()
+    public override void UpdateUI()
     {
         if (_actor == null)
         {
