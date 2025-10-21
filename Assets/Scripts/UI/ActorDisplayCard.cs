@@ -7,12 +7,14 @@ public class ActorDisplayCard : DisplayCard
     public TextMeshProUGUI EVScoreText;
     public TextMeshProUGUI InstScoreText;
 
-    public override void InitializeCard()
+    public void SetActor(ActorCard actor)
     {
-        base.InitializeCard();
-        Player firstPlayer = GameManager.Instance.players[0];
-        _actor = firstPlayer.assignedActor;
+        _actor = actor;
+        UpdateUI();
+    }
 
+    private void UpdateUI()
+    {
         if (_actor == null)
         {
             Debug.Log("Player has no assigned actor.");
@@ -24,6 +26,5 @@ public class ActorDisplayCard : DisplayCard
 
         EVScoreText.text = _actor.evScore.ToString();
         InstScoreText.text = _actor.instScore.ToString();
-        
     }
 }

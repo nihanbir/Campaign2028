@@ -16,12 +16,6 @@ public class DisplayCard : MonoBehaviour
             Debug.Log("GameManager or players not initialized.");
             return;
         }
-        InitializeCard();
-    }
-
-    public virtual void InitializeCard()
-    {
-        
     }
 }
 

@@ -15,8 +15,7 @@ public class GameManager : MonoBehaviour
     public List<Player> players;
     public int currentPlayerIndex = 0;
     public Player CurrentPlayer => players[currentPlayerIndex];
-
-
+    
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -51,7 +50,6 @@ public class GameManager : MonoBehaviour
             Debug.Log($"{player.playerName} assigned actor: {chosenActor.cardName}");
         }
     }
-
     
     void InitializeActorDeck()
     {
