@@ -1,12 +1,20 @@
-
+using UnityEngine.EventSystems;
 using TMPro;
 
-public class UnassignedPlayerDisplayCard : DisplayCard
+public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
 {
+    public Player player;
     public TextMeshProUGUI playerID;
 
-    public void SetUnassignedPlayerCard(string playerID)
+    public void SetUnassignedPlayerCard(Player player)
     {
-        this.playerID.text = "Player " + playerID;
+        this.player = player;
+        playerID.text = "Player " + player.playerID;
+    }
+    
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if(!player) return;
+        SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(player, this);
     }
 }

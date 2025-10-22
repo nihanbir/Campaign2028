@@ -1,8 +1,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class ActorDisplayCard : DisplayCard
+public class ActorDisplayCard : DisplayCard, IPointerClickHandler
 {
     private ActorCard _actor;
     public TextMeshProUGUI EVScoreText;
@@ -29,5 +30,16 @@ public class ActorDisplayCard : DisplayCard
 
         EVScoreText.text = _actor.evScore.ToString();
         InstScoreText.text = _actor.instScore.ToString();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        // Notify the SetupPhaseUIManager that this actor card was selected
+        SetupPhaseUIManager.Instance.SelectActorCard(this);
+    }
+
+    public ActorCard GetActorCard()
+    {
+        return _actor;
     }
 }
