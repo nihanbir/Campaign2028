@@ -446,6 +446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 761285299}
   - component: {fileID: 761285300}
+  - component: {fileID: 761285301}
   m_Layer: 0
   m_Name: GameUIManager
   m_TagString: Untagged
@@ -488,6 +489,26 @@ MonoBehaviour:
   - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
   - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
   phaseText: {fileID: 4359298127492457271}
+--- !u!114 &761285301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761285298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
+  setupGamephase: {fileID: 2553868797784039015}
+  rollDiceButton: {fileID: 2553868797784039017}
+  playerDisplayPrefab: {fileID: 3225722543939314804, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
+  playerUIParent: {fileID: 2553868797784039018}
+  spacingBetweenPlayerCards: 150
+  actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  actorUIParent: {fileID: 1522997684}
+  spacingBetweenActorCards: 200
 --- !u!1 &807429230
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,57 +560,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1612.9716, y: 719.75854, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &810960975
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 810960977}
-  - component: {fileID: 810960976}
-  m_Layer: 0
-  m_Name: SetupPhaseUIManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &810960976
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 810960975}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
-  setupGamephase: {fileID: 2553868797784039015}
-  rollDiceButton: {fileID: 2553868797784039017}
-  spacingBetweenCards: 300
-  playerDisplayPrefab: {fileID: 3225722543939314804, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
-  playerUIParent: {fileID: 2553868797784039018}
-  actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
-  actorUIParent: {fileID: 1522997684}
---- !u!4 &810960977
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 810960975}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 592.7427, y: 570.40454, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -925,9 +895,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 686502860033822401, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.6599121
+      objectReference: {fileID: 0}
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4493667434307722987, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.657959
+      objectReference: {fileID: 0}
+    - target: {fileID: 5195964978856550199, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.6599121
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x
@@ -1082,5 +1068,4 @@ SceneRoots:
   - {fileID: 1600293382}
   - {fileID: 761285299}
   - {fileID: 2553868797784039014}
-  - {fileID: 810960977}
   - {fileID: 1628572270}
