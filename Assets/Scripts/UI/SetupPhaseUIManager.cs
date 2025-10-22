@@ -22,10 +22,12 @@ public class SetupPhaseUIManager : MonoBehaviour
     public GameObject actorDisplayPrefab; // Assign prefab in inspector
     public Transform actorUIParent; // Assign a UI container (e.g., a panel) in inspector
     public float spacingBetweenActorCards = 300;
-
-    private List<Player> unassignedPlayers;
-    private List<ActorCard> unassignedActorCards;
     
+    [Header("Assigned Actor Card")]
+    public Transform assignedActorUIParent;
+    public float spacingBetweenAssignedCards = 100;
+
+    private int assignedActorCardCount;
     private ActorDisplayCard selectedActorCard;
 
     private void Awake()
@@ -37,8 +39,6 @@ public class SetupPhaseUIManager : MonoBehaviour
     private void Start()
     {
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        unassignedPlayers = GameManager.Instance.players;
-        unassignedActorCards = GameManager.Instance.actorDeck;
         
         CreateUnassignedPlayerUI();
         CreateActorCardUI();
@@ -116,6 +116,33 @@ public class SetupPhaseUIManager : MonoBehaviour
         }
     }
     
+    void UpdateAssignedActorUI(Player player)
+    {
+        GameObject uiInstance = Instantiate(actorDisplayPrefab, assignedActorUIParent);
+        ActorDisplayCard displayCard = uiInstance.GetComponent<ActorDisplayCard>();
+        if (displayCard)
+        {
+            displayCard.SetActor(player.assignedActor);
+            
+            int count = GameManager.Instance.players.Count;
+            // Calculate total width of all cards including spacing
+            float totalWidth = (count - 1) * spacingBetweenPlayerCards;
+            
+            RectTransform rt = uiInstance.GetComponent<RectTransform>();
+            if (rt)
+            {
+                float xPos = assignedActorCardCount * spacingBetweenAssignedCards - totalWidth / 2;
+
+                rt.anchoredPosition = new Vector2(xPos, 0);
+            }
+        }
+        else
+        {
+            Debug.LogError("PlayerActorDisplayPrefab missing ActorDisplayCard component.");
+        }
+    }
+
+    
     public void OnRollDiceClicked()
     {
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
@@ -144,11 +171,14 @@ public class SetupPhaseUIManager : MonoBehaviour
             Debug.Log($"Assigned actor {actorToAssign.cardName} to player {player.playerID}");
             
             playerCard.gameObject.SetActive(false);
-            unassignedPlayers.Remove(player);
-
+            
+            assignedActorCardCount++;
+            
             // Optionally remove or disable the assigned actor card so it can't be assigned again
             RemoveAssignedActorCard(selectedActorCard);
-
+            
+            UpdateAssignedActorUI(player);
+        
             // Clear selection
             selectedActorCard = null;
         }
@@ -163,6 +193,5 @@ public class SetupPhaseUIManager : MonoBehaviour
         // Disable or destroy the actor card UI so it can't be assigned again
         actorCard.gameObject.SetActive(false);
         
-        unassignedActorCards.Remove(actorCard.GetActorCard());
     }
 }
