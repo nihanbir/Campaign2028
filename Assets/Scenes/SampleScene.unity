@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 172211631}
   - component: {fileID: 172211630}
   m_Layer: 0
-  m_Name: Player (2)
+  m_Name: AIPlayer (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
   playerName: 
-  playerID: 0
+  playerID: 2
   assignedActor:
     cardName: 
     artwork: {fileID: 0}
@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 210027821}
   - component: {fileID: 210027820}
   m_Layer: 0
-  m_Name: Player (3)
+  m_Name: AIPlayer (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
   playerName: 
-  playerID: 0
+  playerID: 3
   assignedActor:
     cardName: 
     artwork: {fileID: 0}
@@ -250,7 +250,7 @@ GameObject:
   - component: {fileID: 516569705}
   - component: {fileID: 516569706}
   m_Layer: 0
-  m_Name: Player (1)
+  m_Name: AIPlayer (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
   playerName: 
-  playerID: 0
+  playerID: 1
   assignedActor:
     cardName: 
     artwork: {fileID: 0}
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 920864601}
   - component: {fileID: 920864600}
   m_Layer: 0
-  m_Name: Player (4)
+  m_Name: AIPlayer (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -602,7 +602,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
   playerName: 
-  playerID: 0
+  playerID: 4
   assignedActor:
     cardName: 
     artwork: {fileID: 0}
@@ -643,7 +643,7 @@ GameObject:
   - component: {fileID: 1473444821}
   - component: {fileID: 1473444820}
   m_Layer: 0
-  m_Name: Player (5)
+  m_Name: AIPlayer (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -662,7 +662,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
   playerName: 
-  playerID: 0
+  playerID: 5
   assignedActor:
     cardName: 
     artwork: {fileID: 0}
