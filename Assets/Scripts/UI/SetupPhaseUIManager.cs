@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 public class SetupPhaseUIManager : MonoBehaviour
 {
@@ -157,7 +153,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     public void AssignSelectedActorToPlayer(Player player, UnassignedPlayerDisplayCard playerCard)
     {
-        if (selectedActorCard == null)
+        if (selectedActorCard)
         {
             Debug.LogWarning("No actor card selected to assign.");
             return;
