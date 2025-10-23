@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,8 +31,6 @@ public class SetupPhaseUIManager : MonoBehaviour
     private int assignedActorCardCount;
     private ActorDisplayCard selectedActorCard;
     private CanvasGroup canvasGroup;
-    private List<Player> playersToRoll; // players who need to roll dice this round
-    private bool rerollActive = false;
 
     private void Awake()
     {
@@ -46,12 +45,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
 
         CreateUnassignedPlayerUI();
-        
-        // Initially all players roll
-        playersToRoll = new List<Player>(GameManager.Instance.players);
-        
-        GameManager.Instance.StartTurn();
-
     }
 
     private void EnableCanvasGroup(bool enable)
@@ -64,12 +57,13 @@ public class SetupPhaseUIManager : MonoBehaviour
     {
         int index = 0;
         
-        int count = GameManager.Instance.gameDeckData.GetActorDeck().Count;
+        int count = SetupPhaseGameManager.Instance.actorDeck.Count;
+        
         
         // Calculate total width of all cards including spacing
         float totalWidth = (count - 1) * spacingBetweenActorCards;
 
-        foreach (var card in GameManager.Instance.gameDeckData.GetActorDeck())
+        foreach (var card in SetupPhaseGameManager.Instance.actorDeck)
         {
             GameObject uiInstance = Instantiate(actorDisplayPrefab, actorUIParent);
             ActorDisplayCard displayCard = uiInstance.GetComponent<ActorDisplayCard>();
@@ -97,17 +91,17 @@ public class SetupPhaseUIManager : MonoBehaviour
     void CreateUnassignedPlayerUI()
     {
         int index = 0;
-        if (!GameManager.Instance)
+        if (!SetupPhaseGameManager.Instance)
         {
             Debug.LogError("GameManager instance is not set");
             return;
         }
-        int count = GameManager.Instance.players.Count;
+        int count = SetupPhaseGameManager.Instance.players.Count;
         
         // Calculate total width of all cards including spacing
         float totalWidth = (count - 1) * spacingBetweenPlayerCards;
 
-        foreach (var player in GameManager.Instance.players)
+        foreach (var player in SetupPhaseGameManager.Instance.players)
         {
             GameObject uiInstance = Instantiate(playerDisplayPrefab, playerUIParent);
             UnassignedPlayerDisplayCard displayCard = uiInstance.GetComponent<UnassignedPlayerDisplayCard>();
@@ -115,7 +109,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             {
                 displayCard.SetUnassignedPlayerCard(player);
                 unassignedPlayerCards.Add(displayCard);
-                // unassignedPlayers.Add(player);
             }
             else
             {
@@ -142,7 +135,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         {
             displayCard.SetActor(player.assignedActor);
             
-            int count = GameManager.Instance.players.Count;
+            int count = SetupPhaseGameManager.Instance.players.Count;
             // Calculate total width of all cards including spacing
             float totalWidth = (count - 1) * spacingBetweenPlayerCards;
             
@@ -162,89 +155,20 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     public void OnRollDiceClicked()
     {
-        
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
+        var currentPlayer = SetupPhaseGameManager.Instance.CurrentPlayer;
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         
         var currentPlayerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
         currentPlayerCard.SetRolledDice(GameUIManager.Instance._diceRoll);
         
-        // Remove player from playersToRoll since they rolled
-        playersToRoll.Remove(currentPlayer);
-        
-        if (playersToRoll.Count == 0)
-        {
-            // All players rolled, check for ties
-            rerollActive = CheckForDiceRollTies();
-        }
-        
-        GameManager.Instance.EndTurn();
+        SetupPhaseGameManager.Instance.PlayerRolledDice();
     }
-
-    private bool CheckForDiceRollTies()
-    {
-        // Group players by diceRoll
-        Dictionary<int, List<Player>> rollGroups = new Dictionary<int, List<Player>>();
-        
-        foreach (var card in unassignedPlayerCards)
-        {
-            int roll = card.diceRoll;
-
-            if (!rollGroups.ContainsKey(roll))
-                rollGroups[roll] = new List<Player>();
-
-            rollGroups[roll].Add(card.player);
-        }
-
-        // Find all tie groups (rolls with more than 1 player)
-        foreach (var group in rollGroups)
-        {
-            if (group.Value.Count > 1)
-            {
-                playersToRoll.AddRange(group.Value);
-            }
-        }
-
-        if (playersToRoll.Count > 0)
-        {
-            Debug.Log($"Ties detected for dice rolls. Players tied: {string.Join(", ", playersToRoll.ConvertAll(p => p.playerID.ToString()))}. They will reroll.");
-            return true;
-        }
-        
-        Debug.Log("No ties detected. Proceeding with game.");
-        return false;
-    }
-
+    
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
-        if (rerollActive)
+        if (SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer))
         {
-            int index = 0;
-            foreach (var card in unassignedPlayerCards)
-            {
-                if (playersToRoll.Contains(card.player))
-                {
-                    card.diceRoll = 0;
-                    card.diceImage.gameObject.SetActive(false);
-                }
-                else
-                {
-                    // Optionally disable or hide dice for players not rerolling
-                    card.diceImage.gameObject.SetActive(true);
-                }
-            }
-            
-            // Set current player to tied player
-            GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.IndexOf(playersToRoll[index]);
-            currentPlayer = playersToRoll[index];
-            index++;
-        }
-        
-        if (AIManager.Instance.IsAIPlayer(currentPlayer))
-        {
-            var aiPlayer = AIManager.Instance.GetAIPlayer(currentPlayer);
-            StartCoroutine(AITurnCoroutine(aiPlayer));
             EnableCanvasGroup(false);
         }
         else
@@ -256,18 +180,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             }
         }
         // Optionally, highlight current player's UI card
-    }
-    
-    private IEnumerator AITurnCoroutine(Player aiPlayer)
-    {
-        // Wait a short delay to simulate thinking
-        yield return new WaitForSeconds(1f);
-
-        var playerCard = GetUnassignedPlayerCardForPlayer(aiPlayer);
-        if (playerCard && playerCard.diceRoll == 0)
-        {
-            OnRollDiceClicked();
-        }
     }
     
     public void SelectActorCard(ActorDisplayCard actorCard)
@@ -285,7 +197,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             return;
         }
         
-        if (player != GameManager.Instance.CurrentPlayer)
+        if (player != SetupPhaseGameManager.Instance.CurrentPlayer)
         {
             Debug.LogWarning("It's not this player's turn.");
             return;
@@ -312,7 +224,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             // Clear selection
             selectedActorCard = null;
             
-            GameManager.Instance.EndTurn();
+            SetupPhaseGameManager.Instance.EndTurn();
         }
         else
         {

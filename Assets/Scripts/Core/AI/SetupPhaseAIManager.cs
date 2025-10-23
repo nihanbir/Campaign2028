@@ -1,12 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 // Manages all AI players in the game
-public class AIManager : MonoBehaviour
+public class SetupPhaseAIManager : MonoBehaviour
 {
-    public static AIManager Instance;
+    public static SetupPhaseAIManager Instance;
+    
     
     [Header("AI Configuration")]
     public int numberOfAIPlayers = 5;
@@ -50,9 +52,9 @@ public class AIManager : MonoBehaviour
         aiPlayers.Add(ai);
         
         // Register with game manager
-        if (GameManager.Instance != null)
+        if (SetupPhaseGameManager.Instance != null)
         {
-            GameManager.Instance.players.Add(ai);
+            SetupPhaseGameManager.Instance.players.Add(ai);
         }
     }
     
@@ -68,20 +70,20 @@ public class AIManager : MonoBehaviour
         return player as AIPlayer;
     }
     
-    // Execute AI turn
-    public IEnumerator ExecuteAITurn(Player player, Card currentCard, EventCard drawnEvent)
+    public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
-        AIPlayer ai = GetAIPlayer(player);
-        if (ai == null)
+        // Wait a short delay to simulate thinking
+        yield return new WaitForSeconds(1f);
+        
+        var playerCard = SetupPhaseUIManager.Instance.GetUnassignedPlayerCardForPlayer(aiPlayer);
+        if (playerCard && SetupPhaseGameManager.Instance.currentStage == SetupStage.Roll 
+                            || SetupPhaseGameManager.Instance.currentStage == SetupStage.Reroll)
         {
-            Debug.LogWarning("Tried to execute AI turn for non-AI player");
-            yield break;
+            yield return StartCoroutine(aiPlayer.RollDice());
         }
-
-        if (GameManager.Instance.currentPhase == GamePhase.Setup)
+        else
         {
-            yield return StartCoroutine(ai.TakeTurn(currentCard, drawnEvent));
+            //assign an actor to a player
         }
-        yield return StartCoroutine(ai.TakeTurn(currentCard, drawnEvent));
     }
 }

@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &104391213 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6219165856140682981, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &172211629
 GameObject:
   m_ObjectHideFlags: 0
@@ -494,6 +489,7 @@ MonoBehaviour:
   - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
   - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
   phaseText: {fileID: 4359298127492457271}
+  _diceRoll: 0
 --- !u!114 &761285301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -511,6 +507,7 @@ MonoBehaviour:
   playerDisplayPrefab: {fileID: 3225722543939314804, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
   playerUIParent: {fileID: 2553868797784039018}
   spacingBetweenPlayerCards: 150
+  unassignedPlayerCards: []
   actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   actorUIParent: {fileID: 1522997684}
   spacingBetweenActorCards: 200
@@ -805,6 +802,7 @@ GameObject:
   - component: {fileID: 1600293382}
   - component: {fileID: 1600293383}
   - component: {fileID: 1600293384}
+  - component: {fileID: 1600293385}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -841,16 +839,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameDeckData: {fileID: 11400000, guid: 965170f6ea635314486a120580c20f90, type: 2}
   actorDeck: []
-  allegianceDeck: []
-  stateDeck: []
-  institutionDeck: []
-  eventDeck: []
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0
   currentPhase: 0
-  secededStatesCount: 0
-  totalEVsInGame: 549
 --- !u!114 &1600293384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -866,45 +858,13 @@ MonoBehaviour:
   numberOfAIPlayers: 5
   mixPersonalities: 0
   aiPlayerPrefab: {fileID: 0}
---- !u!1 &1628572269
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1628572270}
-  - component: {fileID: 1628572271}
-  m_Layer: 0
-  m_Name: MainPhaseUIManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1628572270
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1628572269}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 592.7427, y: 570.40454, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1628572271
+--- !u!114 &1600293385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1628572269}
+  m_GameObject: {fileID: 1600293380}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
@@ -923,25 +883,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 686502860033822401, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
+    - target: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -1.3999023
       objectReference: {fileID: 0}
     - target: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.65997314
+      value: -0.6599121
       objectReference: {fileID: 0}
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
       objectReference: {fileID: 0}
-    - target: {fileID: 4493667434307722987, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.657959
-      objectReference: {fileID: 0}
     - target: {fileID: 5195964978856550199, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.65997314
+      value: -0.6599121
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x
@@ -1026,10 +982,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6219165856140682981, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2553868797784039025}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
 --- !u!1 &2553868797784039015 stripped
 GameObject:
@@ -1063,18 +1016,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7075911402009855571, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
   m_PrefabInstance: {fileID: 2553868797784039014}
   m_PrefabAsset: {fileID: 0}
---- !u!225 &2553868797784039025
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 104391213}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &4359298127492457271 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2082190262839266344, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
@@ -1111,4 +1052,3 @@ SceneRoots:
   - {fileID: 1600293382}
   - {fileID: 761285299}
   - {fileID: 2553868797784039014}
-  - {fileID: 1628572270}

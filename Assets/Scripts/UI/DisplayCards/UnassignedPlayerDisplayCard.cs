@@ -32,7 +32,7 @@ public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         if(!player) return;
-        if (player == GameManager.Instance.CurrentPlayer) return;
+        if (player == SetupPhaseGameManager.Instance.CurrentPlayer) return;
         SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(player, this);
     }
 

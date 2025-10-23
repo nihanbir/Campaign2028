@@ -7,6 +7,6 @@ public class Player : MonoBehaviour
     public int playerID;
     public ActorCard assignedActor;
     
-    private GameManager _gameManager;
+    private SetupPhaseGameManager _setupPhaseGameManager;
     
 }

@@ -5,7 +5,7 @@ public class DisplayCard : MonoBehaviour
 {
     void Start()
     {
-        if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
+        if (SetupPhaseGameManager.Instance == null || SetupPhaseGameManager.Instance.players.Count == 0)
         {
             Debug.Log("GameManager or players not initialized.");
             return;

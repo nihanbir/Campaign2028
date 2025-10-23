@@ -17,13 +17,12 @@ public class AIPlayer : Player
     public bool rolledDice;
     
     // Main AI turn logic
-    public virtual IEnumerator TakeTurn(Card currentCard, EventCard drawnEvent)
+    public virtual IEnumerator RollDice()
     {
         
         yield return new WaitForSeconds(0.5f);
         
-        // GameUIManager.Instance.OnRollDiceClicked();
-        
+        SetupPhaseUIManager.Instance.OnRollDiceClicked();
     }
     
 }
