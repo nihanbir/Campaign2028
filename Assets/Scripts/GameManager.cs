@@ -71,11 +71,28 @@ public class GameManager : MonoBehaviour
     public void SetupPhase()
     {
         currentPhase = GamePhase.Setup;
-        
     }
     
     #endregion
     
+    public void StartTurn()
+    {
+        Player current = CurrentPlayer;
+        Debug.Log($"Player {current.playerID} turn started.");
+
+        // Notify UI manager to enable interaction for current player
+        SetupPhaseUIManager.Instance.OnPlayerTurnStarted(current);
+    }
+
+    public void EndTurn()
+    {
+        Debug.Log($"Player {CurrentPlayer.playerID} turn ended.");
+
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+
+        StartTurn();
+    }
+
 }
 
 

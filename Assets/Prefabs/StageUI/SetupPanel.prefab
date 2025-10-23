@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.62631387}
   m_AnchorMax: {x: 1, y: 0.8578724}
-  m_AnchoredPosition: {x: 0, y: 1.06604}
+  m_AnchoredPosition: {x: 0, y: -0.7079468}
   m_SizeDelta: {x: 0, y: -2.130005}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2466159150987846918
@@ -236,6 +236,7 @@ GameObject:
   - component: {fileID: 590234058828219355}
   - component: {fileID: 4294091404621125284}
   - component: {fileID: 6097095633143882996}
+  - component: {fileID: 2532124056049916474}
   m_Layer: 5
   m_Name: SetupPanel
   m_TagString: Untagged
@@ -306,6 +307,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &2532124056049916474
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085586330490423814}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2778742110003720283
 GameObject:
   m_ObjectHideFlags: 0

@@ -10,7 +10,7 @@ public class GameUIManager : MonoBehaviour
     public Sprite[] diceFaces; // 6 sprites for dice faces 1-6
     public TextMeshProUGUI phaseText;
     
-    private int _diceRoll;
+    [HideInInspector] public int _diceRoll;
 
     private void Awake()
     {
@@ -50,27 +50,33 @@ public class GameUIManager : MonoBehaviour
     public void OnRollDiceClicked(Button diceButton)
     {
         _diceRoll = Random.Range(1, 7);
+        SetDiceSprite(diceButton.image);
+    }
+
+    public void SetDiceSprite(Image diceImage)
+    {
         switch (_diceRoll)
         {
             case 1:
-                diceButton.image.sprite = diceFaces[0];
+                diceImage.sprite = diceFaces[0];
                 return;
             case 2:
-                diceButton.image.sprite = diceFaces[1];
+                diceImage.sprite = diceFaces[1];
                 return;
             case 3:
-                diceButton.image.sprite = diceFaces[2];
+                diceImage.sprite = diceFaces[2];
                 return;
             case 4:
-                diceButton.image.sprite = diceFaces[3];
+                diceImage.sprite = diceFaces[3];
                 return;
             case 5:
-                diceButton.image.sprite = diceFaces[4];
+                diceImage.sprite = diceFaces[4];
                 return;
             case 6:
-                diceButton.image.sprite = diceFaces[5];
+                diceImage.sprite = diceFaces[5];
                 return;
         }
     }
+
     #endregion Dice & Actions
 }

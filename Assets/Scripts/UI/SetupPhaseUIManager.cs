@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,17 +16,22 @@ public class SetupPhaseUIManager : MonoBehaviour
     public Transform playerUIParent; // Assign in inspector: parent transform for player UI elements
     public float spacingBetweenPlayerCards = 150;
     
+    [HideInInspector] public List<UnassignedPlayerDisplayCard> unassignedPlayerCards;
+    // private List<Player> unassignedPlayers;
+    
     [Header("Actor Card")]
     public GameObject actorDisplayPrefab; // Assign prefab in inspector
     public Transform actorUIParent; // Assign a UI container (e.g., a panel) in inspector
     public float spacingBetweenActorCards = 300;
+    // private List<ActorDisplayCard> unassignedActorCards;
     
     [Header("Assigned Actor Card")]
     public Transform assignedActorUIParent;
     public float spacingBetweenAssignedCards = 100;
-
+    
     private int assignedActorCardCount;
     private ActorDisplayCard selectedActorCard;
+    private CanvasGroup canvasGroup;
 
     private void Awake()
     {
@@ -36,9 +43,18 @@ public class SetupPhaseUIManager : MonoBehaviour
     {
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
-        CreateUnassignedPlayerUI();
-        CreateActorCardUI();
+        canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
 
+        CreateUnassignedPlayerUI();
+        
+        GameManager.Instance.StartTurn();
+
+    }
+
+    private void EnableCanvasGroup(bool enable)
+    {
+        canvasGroup.interactable = enable;
+        canvasGroup.blocksRaycasts = enable;
     }
 
     void CreateActorCardUI()
@@ -57,6 +73,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             if (displayCard)
             {
                 displayCard.SetActor(card);
+                // unassignedActorCards.Add(displayCard);
             }
             else
             {
@@ -94,10 +111,12 @@ public class SetupPhaseUIManager : MonoBehaviour
             if (displayCard)
             {
                 displayCard.SetUnassignedPlayerCard(player);
+                unassignedPlayerCards.Add(displayCard);
+                // unassignedPlayers.Add(player);
             }
             else
             {
-                Debug.LogError("ActivePlayerDisplayPrefab missing ActivePlayerDisplayCard component.");
+                Debug.LogError("PlayerDisplayPrefab missing PlayerDisplayCard component.");
             }
 
             RectTransform rt = uiInstance.GetComponent<RectTransform>();
@@ -137,11 +156,49 @@ public class SetupPhaseUIManager : MonoBehaviour
             Debug.LogError("PlayerActorDisplayPrefab missing ActorDisplayCard component.");
         }
     }
-
     
     public void OnRollDiceClicked()
     {
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
+        
+        var currentPlayerCard = GetUnassignedPlayerCardForPlayer(GameManager.Instance.CurrentPlayer);
+        currentPlayerCard.SetRolledDice(GameUIManager.Instance._diceRoll);
+        
+        GameManager.Instance.EndTurn();
+    }
+    
+    public void OnPlayerTurnStarted(Player currentPlayer)
+    {
+        if (AIManager.Instance.IsAIPlayer(currentPlayer))
+        {
+            var aiPlayer = AIManager.Instance.GetAIPlayer(currentPlayer);
+            StartCoroutine(AITurnCoroutine(aiPlayer));
+            
+            EnableCanvasGroup(false);
+        }
+        else
+        {
+            var playerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
+            if (playerCard && playerCard.diceRoll == 0)
+            {
+                EnableCanvasGroup(true);
+            }
+        }
+        // Optionally, highlight current player's UI card
+    }
+    
+    private IEnumerator AITurnCoroutine(Player aiPlayer)
+    {
+            
+        // Wait a short delay to simulate thinking
+        yield return new WaitForSeconds(1f);
+
+        var playerCard = GetUnassignedPlayerCardForPlayer(aiPlayer);
+        if (playerCard && playerCard.diceRoll == 0)
+        {
+            OnRollDiceClicked();
+        }
+        
     }
     
     public void SelectActorCard(ActorDisplayCard actorCard)
@@ -159,14 +216,22 @@ public class SetupPhaseUIManager : MonoBehaviour
             return;
         }
         
+        if (player != GameManager.Instance.CurrentPlayer)
+        {
+            Debug.LogWarning("It's not this player's turn.");
+            return;
+        }
+        
         ActorCard actorToAssign = selectedActorCard.GetActorCard();
         
         if (player)
         {
             player.assignedActor = actorToAssign;
+            // unassignedPlayers.Remove(player);
             Debug.Log($"Assigned actor {actorToAssign.cardName} to player {player.playerID}");
             
-            playerCard.gameObject.SetActive(false);
+            // playerCard.gameObject.SetActive(false);
+            Destroy(playerCard);
             
             assignedActorCardCount++;
             
@@ -177,6 +242,8 @@ public class SetupPhaseUIManager : MonoBehaviour
         
             // Clear selection
             selectedActorCard = null;
+            
+            GameManager.Instance.EndTurn();
         }
         else
         {
@@ -184,10 +251,23 @@ public class SetupPhaseUIManager : MonoBehaviour
         }
     }
 
+    public UnassignedPlayerDisplayCard GetUnassignedPlayerCardForPlayer(Player player)
+    {
+        foreach (var card in unassignedPlayerCards)
+        {
+            if (card.player == player)
+            {
+                return card;
+            }
+        }
+        return null;
+    }
+    
     private void RemoveAssignedActorCard(ActorDisplayCard actorCard)
     {
         // Disable or destroy the actor card UI so it can't be assigned again
-        actorCard.gameObject.SetActive(false);
+        // actorCard.gameObject.SetActive(false);
+        Destroy(actorCard);
         
     }
 }

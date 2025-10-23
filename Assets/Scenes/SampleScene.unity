@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &104391213 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6219165856140682981, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_PrefabInstance: {fileID: 2553868797784039014}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &172211629
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,8 +167,8 @@ MonoBehaviour:
     instScore: 0
   decisionDelayMin: 0.5
   decisionDelayMax: 2
-  turnsPlayed: 0
   failedAttempts: 0
+  rolledDice: 0
 --- !u!4 &172211631
 Transform:
   m_ObjectHideFlags: 0
@@ -222,8 +227,8 @@ MonoBehaviour:
     instScore: 0
   decisionDelayMin: 0.5
   decisionDelayMax: 2
-  turnsPlayed: 0
   failedAttempts: 0
+  rolledDice: 0
 --- !u!4 &210027821
 Transform:
   m_ObjectHideFlags: 0
@@ -297,8 +302,8 @@ MonoBehaviour:
     instScore: 0
   decisionDelayMin: 0.5
   decisionDelayMax: 2
-  turnsPlayed: 0
   failedAttempts: 0
+  rolledDice: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,8 +620,8 @@ MonoBehaviour:
     instScore: 0
   decisionDelayMin: 0.5
   decisionDelayMax: 2
-  turnsPlayed: 0
   failedAttempts: 0
+  rolledDice: 0
 --- !u!4 &920864601
 Transform:
   m_ObjectHideFlags: 0
@@ -675,8 +680,8 @@ MonoBehaviour:
     instScore: 0
   decisionDelayMin: 0.5
   decisionDelayMax: 2
-  turnsPlayed: 0
   failedAttempts: 0
+  rolledDice: 0
 --- !u!4 &1473444821
 Transform:
   m_ObjectHideFlags: 0
@@ -799,6 +804,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1600293382}
   - component: {fileID: 1600293383}
+  - component: {fileID: 1600293384}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -845,6 +851,21 @@ MonoBehaviour:
   currentPhase: 0
   secededStatesCount: 0
   totalEVsInGame: 549
+--- !u!114 &1600293384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600293380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7889d5fe2871d8458e7ec12647b5e09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIManager
+  numberOfAIPlayers: 5
+  mixPersonalities: 0
+  aiPlayerPrefab: {fileID: 0}
 --- !u!1 &1628572269
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,7 +1026,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6219165856140682981, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2553868797784039025}
   m_SourcePrefab: {fileID: 100100000, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
 --- !u!1 &2553868797784039015 stripped
 GameObject:
@@ -1039,6 +1063,18 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7075911402009855571, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
   m_PrefabInstance: {fileID: 2553868797784039014}
   m_PrefabAsset: {fileID: 0}
+--- !u!225 &2553868797784039025
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104391213}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &4359298127492457271 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2082190262839266344, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}

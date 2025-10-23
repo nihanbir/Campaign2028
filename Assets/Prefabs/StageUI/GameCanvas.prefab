@@ -697,10 +697,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: SetupPanel
       objectReference: {fileID: 0}
-    - target: {fileID: 9010180728352839122, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.7079468
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
