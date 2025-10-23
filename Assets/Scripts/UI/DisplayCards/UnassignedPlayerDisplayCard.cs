@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
@@ -27,6 +25,7 @@ public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
     {
         diceImage.gameObject.SetActive(true);
         this.diceRoll = diceRoll;
+        Debug.Log(diceRoll);
         GameUIManager.Instance.SetDiceSprite(diceImage);
     }
     
