@@ -80,8 +80,12 @@ public class GameManager : MonoBehaviour
         Player current = CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started.");
 
-        // Notify UI manager to enable interaction for current player
-        SetupPhaseUIManager.Instance.OnPlayerTurnStarted(current);
+        if (currentPhase == GamePhase.Setup)
+        {
+            // Notify UI manager to enable interaction for current player
+            SetupPhaseUIManager.Instance.OnPlayerTurnStarted(current);
+        }
+        
     }
 
     public void EndTurn()
