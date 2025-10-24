@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class DisplayCard : MonoBehaviour
     
     public Player owningPlayer;
     public Image diceImage;
+    public TextMeshProUGUI playerID;
     
     void Start()
     {
@@ -26,6 +28,12 @@ public class DisplayCard : MonoBehaviour
         diceImage.gameObject.SetActive(true);
         Debug.Log(diceRoll);
         GameUIManager.Instance.SetDiceSprite(diceImage);
+    }
+    
+    public void SetOwnerPlayer(Player player)
+    {
+        owningPlayer = player;
+        playerID.text = "Player " + player.playerID;
     }
 }
 

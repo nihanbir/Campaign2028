@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     public void SetDisplayCard(DisplayCard newDisplayCard)
     {
         displayCard = newDisplayCard;
+        displayCard.SetOwnerPlayer(this);
     }
     
 }

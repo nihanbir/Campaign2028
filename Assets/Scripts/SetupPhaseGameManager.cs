@@ -168,9 +168,20 @@ public class SetupPhaseGameManager : MonoBehaviour
                 break;
             case SetupStage.AssignActor:
                 Debug.Log("Stage changed to AssignActor: Player selects an actor.");
-                currentPlayerIndex = players.IndexOf(playerToSelect);
+                // currentPlayerIndex = players.IndexOf(playerToSelect);
+
+                AssignMeAsTheCurrentPlayer();
+                
                 StartTurn();
                 break;
+        }
+    }
+
+    private void AssignMeAsTheCurrentPlayer()
+    {
+        foreach (var player in players.Where(player => player.playerID == 0))
+        {
+            currentPlayerIndex = players.IndexOf(player);
         }
     }
 }

@@ -49,7 +49,8 @@ public class SetupPhaseUIManager : MonoBehaviour
         CreateUnassignedPlayerUI();
         actorUIParent.gameObject.SetActive(false);
         
-        SetupPhaseGameManager.Instance.StartTurn();
+        // SetupPhaseGameManager.Instance.StartTurn();
+        SetupPhaseGameManager.Instance.currentStage = SetupStage.AssignActor;
     }
 
     private void EnableCanvasGroup(bool enable)
@@ -113,9 +114,8 @@ public class SetupPhaseUIManager : MonoBehaviour
             UnassignedPlayerDisplayCard displayCard = uiInstance.GetComponent<UnassignedPlayerDisplayCard>();
             if (displayCard)
             {
-                displayCard.SetUnassignedPlayerCard(player);
-                unassignedPlayerCards.Add(displayCard);
                 player.SetDisplayCard(displayCard);
+                unassignedPlayerCards.Add(displayCard);
             }
             else
             {
@@ -201,21 +201,21 @@ public class SetupPhaseUIManager : MonoBehaviour
     public void SelectActorCard(ActorDisplayCard actorCard)
     {
         selectedActorCard = actorCard;
-        Debug.Log($"Selected actor: {actorCard.GetActorCard().cardName}");
+        Debug.Log($"Selected actor: {selectedActorCard.GetActorCard().cardName}");
         // Optionally update UI to highlight selected actor card
     }
     
     public void AssignSelectedActorToPlayer(Player player, UnassignedPlayerDisplayCard playerCard)
     {
-        if (selectedActorCard)
+        if (!selectedActorCard)
         {
             Debug.LogWarning("No actor card selected to assign.");
             return;
         }
         
-        if (player != SetupPhaseGameManager.Instance.CurrentPlayer)
+        if (player == SetupPhaseGameManager.Instance.CurrentPlayer)
         {
-            Debug.LogWarning("It's not this player's turn.");
+            Debug.LogWarning("You can't assign a player to yourself");
             return;
         }
         
