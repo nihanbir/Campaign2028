@@ -22,9 +22,22 @@ public class SetupPhaseGameManager : MonoBehaviour
     private Dictionary<Player, int> rolledPlayers = new Dictionary<Player, int>();
     private Player playerToSelect;
 
-    public SetupStage currentStage = SetupStage.Roll;
+    private SetupStage _currentStage = SetupStage.Roll;
+    public SetupStage currentStage
+    {
+        get => _currentStage;
+        set
+        {
+            if (_currentStage != value)
+            {
+                _currentStage = value;
+                OnSetupStageChanged?.Invoke(_currentStage);
+            }
+        }
+    }
     
-    public GamePhase currentPhase = GamePhase.Setup;
+    public delegate void SetupStageChangedHandler(SetupStage newStage);
+    public event SetupStageChangedHandler OnSetupStageChanged;
     
     void Awake()
     {
@@ -37,9 +50,9 @@ public class SetupPhaseGameManager : MonoBehaviour
     {
         InitializeGame();
         
+        OnSetupStageChanged += HandleSetupStageChanged;
         // Initially all players roll
         playersToTakeTurn = new List<Player>(players);
-        
         StartTurn();
     }
 
@@ -56,8 +69,7 @@ public class SetupPhaseGameManager : MonoBehaviour
             return;
         }
 
-        //TODO:Have this in a general game manager consistent between scenes or phases
-        currentPhase = GamePhase.Setup;
+       
     }
     
     public void StartTurn()
@@ -78,15 +90,14 @@ public class SetupPhaseGameManager : MonoBehaviour
     {
         if (currentStage == SetupStage.Reroll)
         {
+            Debug.Log($"Player {CurrentPlayer.playerID} re-roll turn ended.");
             currentPlayerIndex = players.IndexOf(playersToTakeTurn[0]);
         }
         else
         {
             Debug.Log($"Player {CurrentPlayer.playerID} turn ended.");
-
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
         }
-
         StartTurn();
     }
 
@@ -97,22 +108,19 @@ public class SetupPhaseGameManager : MonoBehaviour
         
         if (playersToTakeTurn.Count == 0)
         {
-            canAssignActor = IsHighestRollUnique();
-            if (!canAssignActor)
-            {
-                EndTurn();
-                currentPlayerIndex = 0;
-            }
+            IsHighestRollUnique();
         }
         else
         {
             EndTurn();
         }
+        
     }
     
-    private bool IsHighestRollUnique()
+    private void IsHighestRollUnique()
     {
         playersToTakeTurn.Clear();
+        
         // Group by dice roll value
         var rollGroups = rolledPlayers
             .GroupBy(pair => pair.Value)
@@ -128,10 +136,11 @@ public class SetupPhaseGameManager : MonoBehaviour
         {
             // Highest roll is unique
             playerToSelect = highestRollPlayers[0].Key;
-            currentStage = SetupStage.AssignActor;
             
             Debug.Log($"Highest roll {highestRoll} is unique. Player {playerToSelect.playerID} will select.");
-            return true;
+            currentStage = SetupStage.AssignActor;
+            
+            return;
         }
        
         // Highest roll is tied, all players with highest roll must reroll
@@ -140,15 +149,34 @@ public class SetupPhaseGameManager : MonoBehaviour
             if (!playersToTakeTurn.Contains(pair.Key))
                 playersToTakeTurn.Add(pair.Key);
             
-            if (rolledPlayers.Contains(pair))
-                rolledPlayers.Remove(pair.Key);
+            rolledPlayers.Clear();
         }
-
-        currentStage = SetupStage.Reroll;
+        
         Debug.Log($"Highest roll {highestRoll} is tied. Players tied: {string.Join(", ", highestRollPlayers.Select(p => p.Key.playerID))} will reroll.");
-        return false;
+        currentStage = SetupStage.Reroll;
+        EndTurn();
+        
+        return;
     }
-
+    private void HandleSetupStageChanged(SetupStage newStage)
+    {
+        switch (newStage)
+        {
+            case SetupStage.Roll:
+                Debug.Log("Stage changed to Roll: All players roll dice.");
+                
+                break;
+            case SetupStage.Reroll:
+                Debug.Log("Stage changed to Reroll: Players tied reroll dice.");
+                
+                
+                break;
+            case SetupStage.AssignActor:
+                Debug.Log("Stage changed to AssignActor: Player selects an actor.");
+                // Do something specific for AssignActor stage
+                break;
+        }
+    }
 }
 
 public enum SetupStage

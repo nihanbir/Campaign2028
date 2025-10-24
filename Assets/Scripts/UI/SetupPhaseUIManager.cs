@@ -167,16 +167,18 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
-        if (SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer))
+        var playerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
+        if (playerCard)
         {
-            EnableCanvasGroup(false);
-        }
-        else
-        {
-            var playerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
-            if (playerCard && playerCard.diceRoll == 0)
+            if (SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer))
+            {
+                EnableCanvasGroup(false);
+                Debug.Log("Disable canvas");
+            }
+            else
             {
                 EnableCanvasGroup(true);
+                Debug.Log("Enable canvas");
             }
         }
         // Optionally, highlight current player's UI card
