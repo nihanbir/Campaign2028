@@ -453,13 +453,6 @@ MonoBehaviour:
   actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   actorUIParent: {fileID: 1522997684}
   spacingBetweenActorCards: 200
-  assignedActorUIParent: {fileID: 907622769}
-  spacingBetweenAssignedCards: 150
---- !u!224 &907622769 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &920864599
 GameObject:
   m_ObjectHideFlags: 0

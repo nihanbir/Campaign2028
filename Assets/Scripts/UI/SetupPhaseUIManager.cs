@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,10 +21,6 @@ public class SetupPhaseUIManager : MonoBehaviour
     public GameObject actorDisplayPrefab; // Assign prefab in inspector
     public Transform actorUIParent; // Assign a UI container (e.g., a panel) in inspector
     public float spacingBetweenActorCards = 300;
-    
-    [Header("Assigned Actor Card")]
-    public Transform assignedActorUIParent;
-    public float spacingBetweenAssignedCards = 100;
     
     private int assignedActorCardCount;
     private ActorDisplayCard selectedActorCard;
@@ -68,7 +62,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         int count = SetupPhaseGameManager.Instance.actorDeck.Count;
         
         // Calculate total width of all cards including spacing
-        float totalWidth = (count - 1) * spacingBetweenActorCards;
+        float totalWidth = 5 * spacingBetweenActorCards;
 
         foreach (var card in SetupPhaseGameManager.Instance.actorDeck)
         {
@@ -131,32 +125,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             }
 
             index++;
-        }
-    }
-    
-    void UpdateAssignedActorUI(Player player)
-    {
-        GameObject uiInstance = Instantiate(actorDisplayPrefab, assignedActorUIParent);
-        ActorDisplayCard displayCard = uiInstance.GetComponent<ActorDisplayCard>();
-        if (displayCard)
-        {
-            displayCard.SetActor(player.assignedActor);
-            
-            int count = SetupPhaseGameManager.Instance.players.Count;
-            // Calculate total width of all cards including spacing
-            float totalWidth = (count - 1) * spacingBetweenPlayerCards;
-            
-            RectTransform rt = uiInstance.GetComponent<RectTransform>();
-            if (rt)
-            {
-                float xPos = assignedActorCardCount * spacingBetweenAssignedCards - totalWidth / 2;
-
-                rt.anchoredPosition = new Vector2(xPos, 0);
-            }
-        }
-        else
-        {
-            Debug.LogError("PlayerActorDisplayPrefab missing ActorDisplayCard component.");
         }
     }
     
@@ -223,19 +191,22 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         if (player)
         {
+            var prevDisplayCard = player.displayCard;
+            
             player.assignedActor = actorToAssign;
-            // unassignedPlayers.Remove(player);
+            player.displayCard = selectedActorCard;
+            
             Debug.Log($"Assigned actor {actorToAssign.cardName} to player {player.playerID}");
             
-            // playerCard.gameObject.SetActive(false);
-            Destroy(playerCard);
-            
-            assignedActorCardCount++;
-            
-            // Optionally remove or disable the assigned actor card so it can't be assigned again
             RemoveAssignedActorCard(selectedActorCard);
             
-            UpdateAssignedActorUI(player);
+            // Optionally remove or disable the assigned actor card so it can't be assigned again
+            UpdateAssignedActorUI(player, prevDisplayCard.gameObject.GetComponent<RectTransform>());
+            
+            playerCard.gameObject.SetActive(false);
+            // Destroy(playerCard);
+            
+            assignedActorCardCount++;
         
             // Clear selection
             selectedActorCard = null;
@@ -248,12 +219,31 @@ public class SetupPhaseUIManager : MonoBehaviour
         }
     }
     
+    void UpdateAssignedActorUI(Player player, RectTransform location)
+    {
+        GameObject uiInstance = Instantiate(actorDisplayPrefab, playerUIParent);
+        ActorDisplayCard displayCard = uiInstance.GetComponent<ActorDisplayCard>();
+        if (displayCard)
+        {
+            displayCard.SetActor(player.assignedActor);
+            
+            RectTransform rt = uiInstance.GetComponent<RectTransform>();
+            if (rt)
+            {
+                rt.anchoredPosition = location.anchoredPosition;
+            }
+        }
+        else
+        {
+            Debug.LogError("PlayerActorDisplayPrefab missing ActorDisplayCard component.");
+        }
+    }
+    
     private void RemoveAssignedActorCard(ActorDisplayCard actorCard)
     {
         // Disable or destroy the actor card UI so it can't be assigned again
-        // actorCard.gameObject.SetActive(false);
-        Destroy(actorCard);
-        
+        actorCard.gameObject.SetActive(false);
+        // Destroy(actorCard);
     }
 
     public void UpdateUIForPlayer(Player player, bool hide)
