@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
 {
-    public Player player;
+    public Player owningPlayer;
     public TextMeshProUGUI playerID;
     public Image diceImage;
     public int diceRoll;
@@ -17,7 +17,7 @@ public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
     
     public void SetUnassignedPlayerCard(Player player)
     {
-        this.player = player;
+        owningPlayer = player;
         playerID.text = "Player " + player.playerID;
     }
 
@@ -31,9 +31,9 @@ public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        if(!player) return;
-        if (player == SetupPhaseGameManager.Instance.CurrentPlayer) return;
-        SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(player, this);
+        if(!owningPlayer) return;
+        if (owningPlayer == SetupPhaseGameManager.Instance.CurrentPlayer) return;
+        SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(owningPlayer, this);
     }
 
 }

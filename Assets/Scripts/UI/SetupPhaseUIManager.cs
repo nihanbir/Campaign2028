@@ -44,7 +44,9 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
 
+        CreateActorCardUI();
         CreateUnassignedPlayerUI();
+        actorUIParent.gameObject.SetActive(false);
     }
 
     private void EnableCanvasGroup(bool enable)
@@ -58,7 +60,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         int index = 0;
         
         int count = SetupPhaseGameManager.Instance.actorDeck.Count;
-        
         
         // Calculate total width of all cards including spacing
         float totalWidth = (count - 1) * spacingBetweenActorCards;
@@ -167,6 +168,17 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
+        if (SetupPhaseGameManager.Instance.currentStage == SetupStage.AssignActor)
+        {
+            actorUIParent.gameObject.SetActive(true);
+            rollDiceButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            actorUIParent.gameObject.SetActive(false);
+            rollDiceButton.gameObject.SetActive(true);
+        }
+        
         var playerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
         if (playerCard)
         {
@@ -238,7 +250,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     {
         foreach (var card in unassignedPlayerCards)
         {
-            if (card.player == player)
+            if (card.owningPlayer == player)
             {
                 return card;
             }
@@ -253,4 +265,11 @@ public class SetupPhaseUIManager : MonoBehaviour
         Destroy(actorCard);
         
     }
+
+    public void UpdateUIForPlayer(Player player, bool hide)
+    {
+        var displayCard = GetUnassignedPlayerCardForPlayer(player);
+        displayCard.diceImage.gameObject.SetActive(!hide);
+    }
+    
 }
