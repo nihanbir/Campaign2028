@@ -50,9 +50,10 @@ public class SetupPhaseGameManager : MonoBehaviour
         InitializeGame();
         
         OnSetupStageChanged += HandleSetupStageChanged;
+        
         // Initially all players roll
         playersToRoll = new List<Player>(players);
-        StartTurn();
+        
     }
 
     public void InitializeGame()

@@ -5,10 +5,7 @@ using UnityEngine.UI;
 
 public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
 {
-    public Player owningPlayer;
     public TextMeshProUGUI playerID;
-    public Image diceImage;
-    public int diceRoll;
 
     void Start()
     {
@@ -19,14 +16,6 @@ public class UnassignedPlayerDisplayCard : DisplayCard, IPointerClickHandler
     {
         owningPlayer = player;
         playerID.text = "Player " + player.playerID;
-    }
-
-    public void SetRolledDice(int diceRoll)
-    {
-        diceImage.gameObject.SetActive(true);
-        this.diceRoll = diceRoll;
-        Debug.Log(diceRoll);
-        GameUIManager.Instance.SetDiceSprite(diceImage);
     }
     
     public void OnPointerClick(PointerEventData eventData)

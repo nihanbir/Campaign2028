@@ -42,15 +42,20 @@ public class SetupPhaseUIManager : MonoBehaviour
     {
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
+        if (!canvasGroup) canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
         canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
 
         CreateActorCardUI();
         CreateUnassignedPlayerUI();
         actorUIParent.gameObject.SetActive(false);
+        
+        SetupPhaseGameManager.Instance.StartTurn();
     }
 
     private void EnableCanvasGroup(bool enable)
     {
+        if (!canvasGroup) canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
+        
         canvasGroup.interactable = enable;
         canvasGroup.blocksRaycasts = enable;
     }
@@ -110,6 +115,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             {
                 displayCard.SetUnassignedPlayerCard(player);
                 unassignedPlayerCards.Add(displayCard);
+                player.SetDisplayCard(displayCard);
             }
             else
             {
@@ -160,8 +166,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         
-        var currentPlayerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
-        currentPlayerCard.SetRolledDice(GameUIManager.Instance._diceRoll);
+        currentPlayer.displayCard.SetRolledDiceImage(GameUIManager.Instance._diceRoll);
         
         SetupPhaseGameManager.Instance.PlayerRolledDice();
     }
@@ -179,20 +184,17 @@ public class SetupPhaseUIManager : MonoBehaviour
             rollDiceButton.gameObject.SetActive(true);
         }
         
-        var playerCard = GetUnassignedPlayerCardForPlayer(currentPlayer);
-        if (playerCard)
+        if (SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer))
         {
-            if (SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer))
-            {
-                EnableCanvasGroup(false);
-                Debug.Log("Disable canvas");
-            }
-            else
-            {
-                EnableCanvasGroup(true);
-                Debug.Log("Enable canvas");
-            }
+            EnableCanvasGroup(false);
+            Debug.Log("Disable canvas");
         }
+        else
+        {
+            EnableCanvasGroup(true);
+            Debug.Log("Enable canvas");
+        }
+        
         // Optionally, highlight current player's UI card
     }
     
@@ -245,18 +247,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             Debug.LogError($"Player with ID {player.playerID} not found.");
         }
     }
-
-    public UnassignedPlayerDisplayCard GetUnassignedPlayerCardForPlayer(Player player)
-    {
-        foreach (var card in unassignedPlayerCards)
-        {
-            if (card.owningPlayer == player)
-            {
-                return card;
-            }
-        }
-        return null;
-    }
     
     private void RemoveAssignedActorCard(ActorDisplayCard actorCard)
     {
@@ -268,8 +258,26 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     public void UpdateUIForPlayer(Player player, bool hide)
     {
-        var displayCard = GetUnassignedPlayerCardForPlayer(player);
-        displayCard.diceImage.gameObject.SetActive(!hide);
+        player.displayCard.diceImage.gameObject.SetActive(!hide);
     }
     
+    private void HandleSetupStageChanged(SetupStage newStage)
+    {
+        switch (newStage)
+        {
+            case SetupStage.Roll:
+                Debug.Log("Stage changed to Roll: All players roll dice.");
+                
+                break;
+            case SetupStage.Reroll:
+                Debug.Log("Stage changed to Reroll: Players tied reroll dice.");
+                
+                
+                break;
+            case SetupStage.AssignActor:
+                Debug.Log("Stage changed to AssignActor: Player selects an actor.");
+                
+                break;
+        }
+    }
 }

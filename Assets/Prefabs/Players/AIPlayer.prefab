@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6437916321570752279
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5169212758310868269}
+  - component: {fileID: 3053123639070992165}
+  m_Layer: 0
+  m_Name: AIPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5169212758310868269
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6437916321570752279}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1612.9716, y: 719.75854, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3053123639070992165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6437916321570752279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
+  playerName: 
+  playerID: 1
+  assignedActor:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    team: 0
+    actorType: 0
+    evScore: 0
+    instScore: 0
+  displayCard: {fileID: 997089488867944163, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
+  decisionDelayMin: 0.5
+  decisionDelayMax: 2
+  failedAttempts: 0
+  rolledDice: 0

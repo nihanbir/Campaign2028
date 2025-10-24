@@ -75,8 +75,7 @@ public class SetupPhaseAIManager : MonoBehaviour
         // Wait a short delay to simulate thinking
         yield return new WaitForSeconds(1f);
         
-        var playerCard = SetupPhaseUIManager.Instance.GetUnassignedPlayerCardForPlayer(aiPlayer);
-        if (playerCard && SetupPhaseGameManager.Instance.currentStage == SetupStage.Roll 
+        if (SetupPhaseGameManager.Instance.currentStage == SetupStage.Roll 
                             || SetupPhaseGameManager.Instance.currentStage == SetupStage.Reroll)
         {
             yield return StartCoroutine(aiPlayer.RollDice());
