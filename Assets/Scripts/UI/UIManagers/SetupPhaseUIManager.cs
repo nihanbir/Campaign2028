@@ -216,6 +216,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             {
                 // move on to main game phase
                 Debug.Log("Main Game Phase");
+                return;
             }
             
             SetupPhaseGameManager.Instance.CurrentStage = SetupStage.Roll;
