@@ -11,7 +11,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     public Button rollDiceButton;
     
     [Header("Card Display")]
-    public GameObject cardDisplayPrefab; // Single unified prefab
+    public GameObject cardDisplayPrefab;
     public Transform playerUIParent;
     public Transform actorUIParent;
     public float spacingBetweenPlayerCards = 150f;
@@ -20,7 +20,6 @@ public class SetupPhaseUIManager : MonoBehaviour
     [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
     [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
     
-    private int assignedActorCardCount;
     private PlayerDisplayCard selectedActorCard;
     private CanvasGroup canvasGroup;
 
@@ -28,14 +27,6 @@ public class SetupPhaseUIManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-    }
-
-    private void EnableCanvasGroup(bool enable)
-    {
-        if (!canvasGroup) canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
-        
-        canvasGroup.interactable = enable;
-        canvasGroup.blocksRaycasts = enable;
     }
 
     #region Initialize Phase UI
@@ -49,8 +40,8 @@ public class SetupPhaseUIManager : MonoBehaviour
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
+        
         actorUIParent.gameObject.SetActive(false);
-       
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -64,7 +55,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         List<PlayerDisplayCard> targetList;
         int count;
         
-        // Determine what we're creating based on card type
         switch (cardType)
         {
             case CardDisplayType.UnassignedActor:
@@ -91,7 +81,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             {
                 displayCard.displayType = cardType;
                 
-                // Setup based on type
                 if (cardType == CardDisplayType.UnassignedActor)
                 {
                     displayCard.SetActor(SetupPhaseGameManager.Instance.actorDeck[i]);
@@ -103,7 +92,6 @@ public class SetupPhaseUIManager : MonoBehaviour
                 
                 targetList.Add(displayCard);
                 
-                // Position card
                 RectTransform rt = uiInstance.GetComponent<RectTransform>();
                 if (rt)
                 {
@@ -120,86 +108,112 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     #endregion
     
+    #region Dice Rolling UI
+
     public void OnRollDiceClicked()
     {
         var currentPlayer = SetupPhaseGameManager.Instance.CurrentPlayer;
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.playerDisplayCard.SetRolledDiceImage();
-        Debug.Log("Rolled: " + GameUIManager.Instance._diceRoll);
+        
         SetupPhaseGameManager.Instance.PlayerRolledDice();
     }
-    
+
+    public void UpdateUIForPlayer(Player player, bool hideDice)
+    {
+        if (player.playerDisplayCard)
+        {
+            player.playerDisplayCard.ShowDice(!hideDice);
+        }
+    }
+
+    #endregion
+
+    #region Turn State UI
+
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
         bool isAssignStage = SetupPhaseGameManager.Instance.CurrentStage == SetupStage.AssignActor;
         
+        // Show/hide appropriate UI elements
         actorUIParent.gameObject.SetActive(isAssignStage);
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
+        // Disable UI for AI players
         bool isAI = SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer);
         EnableCanvasGroup(!isAI);
         
         currentPlayer.playerDisplayCard.Highlight();
         
-        Debug.Log($"{(isAI ? "AI" : "Human")} Player {currentPlayer.playerID} turn started");
     }
 
     public void OnplayerTurnEnded(Player previousPlayer)
     {
         previousPlayer.playerDisplayCard.RemoveHighlight();
     }
-    
+
+    private void EnableCanvasGroup(bool enable)
+    {
+        if (!canvasGroup) canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
+        
+        canvasGroup.interactable = enable;
+        canvasGroup.blocksRaycasts = enable;
+    }
+
+    #endregion
+
+    #region Actor Assignment UI
+
     public void SelectActorCard(PlayerDisplayCard actorCard)
     {
+        // Deselect previous card if any
+        if (selectedActorCard != null)
+        {
+            // TODO: Remove visual highlight from previous selection
+        }
+
         selectedActorCard = actorCard;
         Debug.Log($"Selected actor: {selectedActorCard.GetActorCard().cardName}");
+        
         // TODO: Add visual highlight for selected card
     }
     
-    public void AssignSelectedActorToPlayer(Player player, PlayerDisplayCard playerCard)
+    public void AssignSelectedActorToPlayer(Player targetPlayer, PlayerDisplayCard playerCard)
     {
-        if (!selectedActorCard)
+        if (selectedActorCard == null)
         {
             Debug.LogWarning("No actor card selected to assign.");
             return;
         }
-        
-        if (player == SetupPhaseGameManager.Instance.CurrentPlayer)
-        {
-            Debug.LogWarning("Can't assign an actor to yourself!");
-            return;
-        }
-        
-        ActorCard actorToAssign = selectedActorCard.GetActorCard();
-        player.assignedActor = actorToAssign;
-        
-        Debug.Log($"Assigned {actorToAssign.cardName} to Player {player.playerID}");
-        
-        // Remove the unassigned actor card
-        RemoveCard(selectedActorCard, unassignedActorCards);
-        
-        // Convert player card to assigned actor display
-        playerCard.ConvertToAssignedActor(actorToAssign);
-        unassignedPlayerCards.Remove(playerCard);
-        
-        assignedActorCardCount++;
-        selectedActorCard = null;
 
-        // Check if only one player and one actor remain
-        if (unassignedPlayerCards.Count == 1 && unassignedActorCards.Count == 1)
+        ActorCard actorToAssign = selectedActorCard.GetActorCard();
+        
+        // Let the game manager handle the logic and validation
+        if (SetupPhaseGameManager.Instance.CanAssignActor(targetPlayer))
+        {
+            // Update UI before assignment
+            RemoveCard(selectedActorCard, unassignedActorCards);
+            playerCard.ConvertToAssignedActor(actorToAssign);
+            unassignedPlayerCards.Remove(playerCard);
+            
+            selectedActorCard = null;
+            
+            // Now let game manager handle the game logic
+            SetupPhaseGameManager.Instance.AssignActorToPlayer(targetPlayer, actorToAssign);
+            
+            // Check if we should auto-assign the last actor
+            CheckAndHandleAutoAssignment();
+        }
+    }
+
+    private void CheckAndHandleAutoAssignment()
+    {
+        // If only one player and one actor remain, auto-assign
+        if (unassignedActorCards.Count == 1)
         {
             AutoAssignLastActor();
-            return;
         }
-
-        if (assignedActorCardCount == SetupPhaseGameManager.Instance.players.Count)
-        {
-            OnAllActorsAssigned();
-            return;
-        }
-        
-        SetupPhaseGameManager.Instance.CurrentStage = SetupStage.Roll;
     }
 
     private void AutoAssignLastActor()
@@ -212,18 +226,16 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
         
-        lastPlayer.assignedActor = lastActor;
-        
-        // Remove the last actor card
+        // Update UI
         RemoveCard(lastActorCard, unassignedActorCards);
-        
-        // Convert last player card to assigned actor display
         lastPlayerCard.ConvertToAssignedActor(lastActor);
         unassignedPlayerCards.Remove(lastPlayerCard);
         
-        assignedActorCardCount++;
+        // Let game manager handle the assignment
+        lastPlayer.assignedActor = lastActor;
         
-        OnAllActorsAssigned();
+        // Game manager will handle phase transition
+        SetupPhaseGameManager.Instance.AssignActorToPlayer(lastPlayer, lastActor);
     }
 
     private void RemoveCard(PlayerDisplayCard card, List<PlayerDisplayCard> fromList)
@@ -232,22 +244,16 @@ public class SetupPhaseUIManager : MonoBehaviour
         Destroy(card.gameObject);
     }
 
-    public void UpdateUIForPlayer(Player player, bool hideDice)
+    #endregion
+
+    #region Cleanup
+
+    public void OnSetupPhaseComplete()
     {
-        if (player.playerDisplayCard)
-        {
-            player.playerDisplayCard.ShowDice(!hideDice);
-        }
+        Debug.Log("Setup phase UI cleanup");
+        setupGamephase.SetActive(false);
+        // Additional cleanup if needed
     }
 
-    private void OnAllActorsAssigned()
-    {
-        Debug.Log("All actors assigned! Moving to Main Game Phase...");
-        SetupPhaseGameManager.Instance.currentGamePhase = GamePhase.MainGame;
-        GameUIManager.Instance.UpdateGamePhase(GamePhase.MainGame);
-        
-        // Cleanup setup phase UI
-        setupGamephase.SetActive(false);
-        // TODO: Initialize main game phase
-    }
+    #endregion
 }
