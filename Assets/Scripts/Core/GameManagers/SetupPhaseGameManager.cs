@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -50,9 +49,10 @@ public class SetupPhaseGameManager : MonoBehaviour
 
     void Start()
     {
+        OnSetupStageChanged += HandleSetupStageChanged;
+        
         InitializeGame();
         
-        OnSetupStageChanged += HandleSetupStageChanged;
     }
 
     public void InitializeGame()
@@ -69,11 +69,14 @@ public class SetupPhaseGameManager : MonoBehaviour
         
         playersToRoll = new List<Player>(players);
        
+        SetupPhaseUIManager.Instance.InitializePhaseUI();
+        
+        StartTurn();
     }
     
     public void StartTurn()
     {
-        Debug.Log($"Player {CurrentPlayer.playerID} turn started.");
+        Debug.Log($"Player {CurrentPlayer.playerID} turn started.- Stage: {CurrentStage}");
 
         // Notify UI manager to enable interaction for current player   
         SetupPhaseUIManager.Instance.OnPlayerTurnStarted(CurrentPlayer);
