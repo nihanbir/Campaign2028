@@ -62,7 +62,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         int count = SetupPhaseGameManager.Instance.actorDeck.Count;
         
         // Calculate total width of all cards including spacing
-        float totalWidth = 5 * spacingBetweenActorCards;
+        float totalWidth = (count - 1) * spacingBetweenActorCards;
 
         foreach (var card in SetupPhaseGameManager.Instance.actorDeck)
         {
