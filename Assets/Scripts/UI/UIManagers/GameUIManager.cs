@@ -22,7 +22,7 @@ public class GameUIManager : MonoBehaviour
     {
         MainPhaseUIManager.Instance.mainGamePhase.SetActive(false);
         
-        UpdateGamePhase(GamePhase.Setup);
+        // UpdateGamePhase(GamePhase.Setup);
     }
     
     public void UpdateGamePhase(GamePhase phase)

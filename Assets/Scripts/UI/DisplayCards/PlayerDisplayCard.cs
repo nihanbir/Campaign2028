@@ -19,7 +19,13 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
     
+    [Header("Highlight Settings")]
+    public float highlightScale = 1.2f;
+    
     private ActorCard _assignedActor;
+    private Vector3 _originalScale;
+    private int _originalSiblingIndex;
+    private bool _isHighlighted = false;
 
     void Start()
     {
@@ -28,6 +34,8 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
             Debug.Log("GameManager or players not initialized.");
             return;
         }
+        
+        
         
         if (diceImage) diceImage.gameObject.SetActive(false);
         if (scorePanel) scorePanel.SetActive(false);
@@ -78,6 +86,35 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
             GameUIManager.Instance.SetDiceSprite(diceImage);
         }
     }
+
+    #region Highlight Methods
+    
+    public void Highlight()
+    {
+        _originalScale = transform.localScale;
+        _originalSiblingIndex = transform.GetSiblingIndex();
+        
+        if (_isHighlighted) return;
+        _isHighlighted = true;
+        
+        // Move to front
+        transform.SetAsLastSibling();
+        
+        transform.localScale = _originalScale * highlightScale;
+    }
+    
+    public void RemoveHighlight()
+    {
+        if (!_isHighlighted) return;
+        _isHighlighted = false;
+        
+        // Restore original sibling index
+        transform.SetSiblingIndex(_originalSiblingIndex);
+        
+        transform.localScale = _originalScale;
+    }
+    
+    #endregion
 
     public void OnPointerClick(PointerEventData eventData)
     {

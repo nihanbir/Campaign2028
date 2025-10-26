@@ -50,6 +50,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
         actorUIParent.gameObject.SetActive(false);
+       
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -139,7 +140,14 @@ public class SetupPhaseUIManager : MonoBehaviour
         bool isAI = SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer);
         EnableCanvasGroup(!isAI);
         
+        currentPlayer.playerDisplayCard.Highlight();
+        
         Debug.Log($"{(isAI ? "AI" : "Human")} Player {currentPlayer.playerID} turn started");
+    }
+
+    public void OnplayerTurnEnded(Player previousPlayer)
+    {
+        previousPlayer.playerDisplayCard.RemoveHighlight();
     }
     
     public void SelectActorCard(PlayerDisplayCard actorCard)

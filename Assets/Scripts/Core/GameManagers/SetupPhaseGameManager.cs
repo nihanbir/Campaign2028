@@ -90,6 +90,8 @@ public class SetupPhaseGameManager : MonoBehaviour
 
     public void EndTurn()
     {
+        SetupPhaseUIManager.Instance.OnplayerTurnEnded(CurrentPlayer);
+        
         if (CurrentStage == SetupStage.Reroll)
         {
             Debug.Log($"Player {CurrentPlayer.playerID} re-roll turn ended.");
