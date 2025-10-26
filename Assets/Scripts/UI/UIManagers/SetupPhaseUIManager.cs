@@ -189,34 +189,18 @@ public class SetupPhaseUIManager : MonoBehaviour
 
         ActorCard actorToAssign = selectedActorCard.GetActorCard();
         
+        // Update UI
+        RemoveCard(selectedActorCard, unassignedActorCards);
+        playerCard.ConvertToAssignedActor(actorToAssign);
+        unassignedPlayerCards.Remove(playerCard);
+        
+        selectedActorCard = null;
+        
         // Let the game manager handle the logic and validation
-        if (SetupPhaseGameManager.Instance.CanAssignActor(targetPlayer))
-        {
-            // Update UI before assignment
-            RemoveCard(selectedActorCard, unassignedActorCards);
-            playerCard.ConvertToAssignedActor(actorToAssign);
-            unassignedPlayerCards.Remove(playerCard);
-            
-            selectedActorCard = null;
-            
-            // Now let game manager handle the game logic
-            SetupPhaseGameManager.Instance.AssignActorToPlayer(targetPlayer, actorToAssign);
-            
-            // Check if we should auto-assign the last actor
-            CheckAndHandleAutoAssignment();
-        }
+        SetupPhaseGameManager.Instance.AssignActorToPlayer(targetPlayer, actorToAssign);
     }
 
-    private void CheckAndHandleAutoAssignment()
-    {
-        // If only one player and one actor remain, auto-assign
-        if (unassignedActorCards.Count == 1)
-        {
-            AutoAssignLastActor();
-        }
-    }
-
-    private void AutoAssignLastActor()
+    public void AutoAssignLastActor()
     {
         PlayerDisplayCard lastPlayerCard = unassignedPlayerCards[0];
         PlayerDisplayCard lastActorCard = unassignedActorCards[0];
@@ -226,16 +210,14 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
         
+        // Let game manager handle the assignment
+        lastPlayer.assignedActor = lastActor;
+        
         // Update UI
         RemoveCard(lastActorCard, unassignedActorCards);
         lastPlayerCard.ConvertToAssignedActor(lastActor);
         unassignedPlayerCards.Remove(lastPlayerCard);
         
-        // Let game manager handle the assignment
-        lastPlayer.assignedActor = lastActor;
-        
-        // Game manager will handle phase transition
-        SetupPhaseGameManager.Instance.AssignActorToPlayer(lastPlayer, lastActor);
     }
 
     private void RemoveCard(PlayerDisplayCard card, List<PlayerDisplayCard> fromList)

@@ -282,18 +282,13 @@ public class SetupPhaseGameManager : MonoBehaviour
 
         targetPlayer.assignedActor = actor;
         Debug.Log($"Assigned {actor.cardName} to Player {targetPlayer.playerID}");
-
-        int totalPlayers = players.Count;
-        
-        int assignedCount = players.Count(p => p.playerDisplayCard.displayType == CardDisplayType.AssignedActor);
         
         EndPlayerTurn();
         
-        Debug.Log($"Progress: {assignedCount}/{totalPlayers} actors assigned");
-
-        if (assignedCount == totalPlayers)
+        // Check if only one player remains without an actor
+        if (ShouldAutoAssignLastActor())
         {
-            OnAllActorsAssigned();
+            AutoAssignLastActor();
         }
         else
         {
@@ -301,12 +296,26 @@ public class SetupPhaseGameManager : MonoBehaviour
         }
     }
 
+    private bool ShouldAutoAssignLastActor()
+    {
+        Debug.Log("Remaining actor count is: " + SetupPhaseUIManager.Instance.unassignedActorCards.Count);
+        return SetupPhaseUIManager.Instance.unassignedActorCards.Count == 1;
+    }
+
+    private void AutoAssignLastActor()
+    {
+        // Notify UI to update visuals
+        SetupPhaseUIManager.Instance.AutoAssignLastActor();
+        
+        OnAllActorsAssigned();
+    }
+
     private void OnAllActorsAssigned()
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
-        currentGamePhase = GamePhase.MainGame;
-        GameUIManager.Instance.UpdateGamePhase(GamePhase.MainGame);
-        SetupPhaseUIManager.Instance.OnSetupPhaseComplete();
+        // currentGamePhase = GamePhase.MainGame;
+        // GameUIManager.Instance.UpdateGamePhase(GamePhase.MainGame);
+        // SetupPhaseUIManager.Instance.OnSetupPhaseComplete();
     }
 
     #endregion
