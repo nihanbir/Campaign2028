@@ -179,6 +179,13 @@ public class SetupPhaseUIManager : MonoBehaviour
         assignedActorCardCount++;
         selectedActorCard = null;
 
+        // Check if only one player and one actor remain
+        if (unassignedPlayerCards.Count == 1 && unassignedActorCards.Count == 1)
+        {
+            AutoAssignLastActor();
+            return;
+        }
+
         if (assignedActorCardCount == SetupPhaseGameManager.Instance.players.Count)
         {
             OnAllActorsAssigned();
@@ -187,6 +194,30 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         SetupPhaseGameManager.Instance.CurrentStage = SetupStage.Roll;
         SetupPhaseGameManager.Instance.EndTurn();
+    }
+
+    private void AutoAssignLastActor()
+    {
+        PlayerDisplayCard lastPlayerCard = unassignedPlayerCards[0];
+        PlayerDisplayCard lastActorCard = unassignedActorCards[0];
+        
+        Player lastPlayer = lastPlayerCard.owningPlayer;
+        ActorCard lastActor = lastActorCard.GetActorCard();
+        
+        Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
+        
+        lastPlayer.assignedActor = lastActor;
+        
+        // Remove the last actor card
+        RemoveCard(lastActorCard, unassignedActorCards);
+        
+        // Convert last player card to assigned actor display
+        lastPlayerCard.ConvertToAssignedActor(lastActor);
+        unassignedPlayerCards.Remove(lastPlayerCard);
+        
+        assignedActorCardCount++;
+        
+        OnAllActorsAssigned();
     }
 
     private void RemoveCard(PlayerDisplayCard card, List<PlayerDisplayCard> fromList)
