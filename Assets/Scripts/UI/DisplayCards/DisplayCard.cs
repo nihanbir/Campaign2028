@@ -8,7 +8,6 @@ public class DisplayCard : MonoBehaviour
     public Player owningPlayer;
     public Image diceImage;
     public TextMeshProUGUI playerID;
-    
     void Start()
     {
         if (SetupPhaseGameManager.Instance == null || SetupPhaseGameManager.Instance.players.Count == 0)
@@ -16,6 +15,8 @@ public class DisplayCard : MonoBehaviour
             Debug.Log("GameManager or players not initialized.");
             return;
         }
+        diceImage.gameObject.SetActive(false);
+        
     }
 
     public virtual void UpdateUI()
@@ -30,10 +31,9 @@ public class DisplayCard : MonoBehaviour
         GameUIManager.Instance.SetDiceSprite(diceImage);
     }
     
-    public void SetOwnerPlayer(Player player)
+    public virtual void SetOwnerPlayer(Player player)
     {
         owningPlayer = player;
-        playerID.text = "Player " + player.playerID;
     }
 }
 

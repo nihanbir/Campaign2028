@@ -22,6 +22,9 @@ public class SetupPhaseUIManager : MonoBehaviour
     public Transform actorUIParent; // Assign a UI container (e.g., a panel) in inspector
     public float spacingBetweenActorCards = 300;
     
+    [HideInInspector] public List<ActorDisplayCard> unassignedActorCards;
+    
+    
     private int assignedActorCardCount;
     private ActorDisplayCard selectedActorCard;
     private CanvasGroup canvasGroup;
@@ -43,8 +46,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         CreateUnassignedPlayerUI();
         actorUIParent.gameObject.SetActive(false);
         
-        // SetupPhaseGameManager.Instance.StartTurn();
-        SetupPhaseGameManager.Instance.currentStage = SetupStage.AssignActor;
+        SetupPhaseGameManager.Instance.StartTurn();
     }
 
     private void EnableCanvasGroup(bool enable)
@@ -71,7 +73,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             if (displayCard)
             {
                 displayCard.SetActor(card);
-                // unassignedActorCards.Add(displayCard);
+                unassignedActorCards.Add(displayCard);
             }
             else
             {
@@ -141,7 +143,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
-        if (SetupPhaseGameManager.Instance.currentStage == SetupStage.AssignActor)
+        if (SetupPhaseGameManager.Instance.CurrentStage == SetupStage.AssignActor)
         {
             actorUIParent.gameObject.SetActive(true);
             rollDiceButton.gameObject.SetActive(false);
@@ -194,7 +196,6 @@ public class SetupPhaseUIManager : MonoBehaviour
             var prevDisplayCard = player.displayCard;
             
             player.assignedActor = actorToAssign;
-            player.displayCard = selectedActorCard;
             
             Debug.Log($"Assigned actor {actorToAssign.cardName} to player {player.playerID}");
             
@@ -203,13 +204,21 @@ public class SetupPhaseUIManager : MonoBehaviour
             // Optionally remove or disable the assigned actor card so it can't be assigned again
             UpdateAssignedActorUI(player, prevDisplayCard.gameObject.GetComponent<RectTransform>());
             
-            playerCard.gameObject.SetActive(false);
-            // Destroy(playerCard);
+            unassignedPlayerCards.Remove(playerCard);
+            Destroy(playerCard.gameObject);
             
             assignedActorCardCount++;
         
             // Clear selection
             selectedActorCard = null;
+
+            if (assignedActorCardCount == SetupPhaseGameManager.Instance.players.Count)
+            {
+                // move on to main game phase
+                Debug.Log("Main Game Phase");
+            }
+            
+            SetupPhaseGameManager.Instance.CurrentStage = SetupStage.Roll;
             
             SetupPhaseGameManager.Instance.EndTurn();
         }
@@ -225,6 +234,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         ActorDisplayCard displayCard = uiInstance.GetComponent<ActorDisplayCard>();
         if (displayCard)
         {
+            player.SetDisplayCard(displayCard);
             displayCard.SetActor(player.assignedActor);
             
             RectTransform rt = uiInstance.GetComponent<RectTransform>();
@@ -242,8 +252,8 @@ public class SetupPhaseUIManager : MonoBehaviour
     private void RemoveAssignedActorCard(ActorDisplayCard actorCard)
     {
         // Disable or destroy the actor card UI so it can't be assigned again
-        actorCard.gameObject.SetActive(false);
-        // Destroy(actorCard);
+        unassignedActorCards.Remove(actorCard);
+        Destroy(actorCard.gameObject);
     }
 
     public void UpdateUIForPlayer(Player player, bool hide)

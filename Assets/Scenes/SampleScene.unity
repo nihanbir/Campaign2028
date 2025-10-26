@@ -453,6 +453,7 @@ MonoBehaviour:
   actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   actorUIParent: {fileID: 1522997684}
   spacingBetweenActorCards: 200
+  unassignedActorCards: []
 --- !u!1 &920864599
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,21 +764,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -1.3999023
-      objectReference: {fileID: 0}
-    - target: {fileID: 834698688540481426, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.6599121
-      objectReference: {fileID: 0}
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 5195964978856550199, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.6599121
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x

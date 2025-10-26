@@ -6,11 +6,12 @@ using UnityEngine.EventSystems;
 public class ActorDisplayCard : DisplayCard, IPointerClickHandler
 {
     private ActorCard _actor;
+    public GameObject scorePanel;
     public TextMeshProUGUI EVScoreText;
     public TextMeshProUGUI InstScoreText;
     public TextMeshProUGUI nameText;
     public Image image;
-
+    
     public void SetActor(ActorCard actor)
     {
         _actor = actor;
@@ -30,10 +31,17 @@ public class ActorDisplayCard : DisplayCard, IPointerClickHandler
 
         EVScoreText.text = _actor.evScore.ToString();
         InstScoreText.text = _actor.instScore.ToString();
+
+        if (SetupPhaseGameManager.Instance.currentGamePhase == GamePhase.Setup)
+        {
+            scorePanel.gameObject.SetActive(false);
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (owningPlayer) return;
+        
         // Notify the SetupPhaseUIManager that this actor card was selected
         SetupPhaseUIManager.Instance.SelectActorCard(this);
     }

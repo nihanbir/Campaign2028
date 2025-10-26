@@ -21,8 +21,11 @@ public class SetupPhaseGameManager : MonoBehaviour
     private Dictionary<Player, int> _rolledPlayers = new Dictionary<Player, int>();
     private Player playerToSelect;
 
+    //TODO: Move this to a general game manager
+    [HideInInspector] public GamePhase currentGamePhase = GamePhase.Setup;
+    
     private SetupStage _currentStage = SetupStage.Roll;
-    public SetupStage currentStage
+    public SetupStage CurrentStage
     {
         get => _currentStage;
         set
@@ -50,10 +53,6 @@ public class SetupPhaseGameManager : MonoBehaviour
         InitializeGame();
         
         OnSetupStageChanged += HandleSetupStageChanged;
-        
-        // Initially all players roll
-        playersToRoll = new List<Player>(players);
-        
     }
 
     public void InitializeGame()
@@ -67,6 +66,9 @@ public class SetupPhaseGameManager : MonoBehaviour
         {
             Debug.LogError("GameDeckSO not assigned! Please assign in inspector.");
         }
+        
+        playersToRoll = new List<Player>(players);
+       
     }
     
     public void StartTurn()
@@ -85,15 +87,19 @@ public class SetupPhaseGameManager : MonoBehaviour
 
     public void EndTurn()
     {
-        if (currentStage == SetupStage.Reroll)
+        if (CurrentStage == SetupStage.Reroll)
         {
             Debug.Log($"Player {CurrentPlayer.playerID} re-roll turn ended.");
             currentPlayerIndex = players.IndexOf(playersToRoll[0]);
         }
-        else
+        else if (CurrentStage == SetupStage.Roll)
         {
             Debug.Log($"Player {CurrentPlayer.playerID} turn ended.");
             currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+        }
+        else if (CurrentStage == SetupStage.AssignActor)
+        {
+            currentPlayerIndex = players.IndexOf(playerToSelect);
         }
         StartTurn();
     }
@@ -138,7 +144,8 @@ public class SetupPhaseGameManager : MonoBehaviour
             
             Debug.Log($"Highest roll {highestRoll} is unique. Player {playerToSelect.playerID} will select.");
             _rolledPlayers.Clear();
-            currentStage = SetupStage.AssignActor;
+            CurrentStage = SetupStage.AssignActor;
+            EndTurn();
             return;
         }
        
@@ -151,7 +158,7 @@ public class SetupPhaseGameManager : MonoBehaviour
         }
         _rolledPlayers.Clear();
         Debug.Log($"Highest roll {highestRoll} is tied. Players tied: {string.Join(", ", highestRollPlayers.Select(p => p.Key.playerID))} will reroll.");
-        currentStage = SetupStage.Reroll;
+        CurrentStage = SetupStage.Reroll;
         EndTurn();
     }
     private void HandleSetupStageChanged(SetupStage newStage)
@@ -160,6 +167,7 @@ public class SetupPhaseGameManager : MonoBehaviour
         {
             case SetupStage.Roll:
                 Debug.Log("Stage changed to Roll: All players roll dice.");
+                playersToRoll = new List<Player>(players);
                 
                 break;
             case SetupStage.Reroll:
@@ -168,11 +176,7 @@ public class SetupPhaseGameManager : MonoBehaviour
                 break;
             case SetupStage.AssignActor:
                 Debug.Log("Stage changed to AssignActor: Player selects an actor.");
-                // currentPlayerIndex = players.IndexOf(playerToSelect);
-
-                AssignMeAsTheCurrentPlayer();
-                
-                StartTurn();
+               
                 break;
         }
     }
