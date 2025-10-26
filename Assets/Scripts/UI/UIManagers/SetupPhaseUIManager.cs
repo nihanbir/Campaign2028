@@ -126,7 +126,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.playerDisplayCard.SetRolledDiceImage();
-        
+        Debug.Log("Rolled: " + GameUIManager.Instance._diceRoll);
         SetupPhaseGameManager.Instance.PlayerRolledDice();
     }
     
@@ -200,7 +200,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         }
         
         SetupPhaseGameManager.Instance.CurrentStage = SetupStage.Roll;
-        SetupPhaseGameManager.Instance.EndTurn();
     }
 
     private void AutoAssignLastActor()

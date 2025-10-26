@@ -88,25 +88,24 @@ public class SetupPhaseGameManager : MonoBehaviour
         }
     }
 
-    public void EndTurn()
+    public void EndTurn(bool startTurn = true)
     {
         SetupPhaseUIManager.Instance.OnplayerTurnEnded(CurrentPlayer);
-        
-        if (CurrentStage == SetupStage.Reroll)
+        Debug.Log($"Player {CurrentPlayer.playerID} turn ended.");
+        if (startTurn)
         {
-            Debug.Log($"Player {CurrentPlayer.playerID} re-roll turn ended.");
-            currentPlayerIndex = players.IndexOf(playersToRoll[0]);
+            switch (CurrentStage)
+            {
+                case SetupStage.Roll:
+                    currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+                    break;
+                
+                case SetupStage.Reroll:
+                    currentPlayerIndex = players.IndexOf(playersToRoll[0]);
+                    break;
+            }
+             StartTurn();
         }
-        else if (CurrentStage == SetupStage.Roll)
-        {
-            Debug.Log($"Player {CurrentPlayer.playerID} turn ended.");
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
-        }
-        else if (CurrentStage == SetupStage.AssignActor)
-        {
-            currentPlayerIndex = players.IndexOf(playerToSelect);
-        }
-        StartTurn();
     }
 
     public void PlayerRolledDice()
@@ -147,10 +146,9 @@ public class SetupPhaseGameManager : MonoBehaviour
             // Highest roll is unique
             playerToSelect = highestRollPlayers[0].Key;
             
-            Debug.Log($"Highest roll {highestRoll} is unique. Player {playerToSelect.playerID} will select.");
             _rolledPlayers.Clear();
             CurrentStage = SetupStage.AssignActor;
-            EndTurn();
+            Debug.Log($"Highest roll {highestRoll} is unique. Player {playerToSelect.playerID} will select.");
             return;
         }
        
@@ -162,26 +160,41 @@ public class SetupPhaseGameManager : MonoBehaviour
             
         }
         _rolledPlayers.Clear();
+
+        if (CurrentStage == SetupStage.Reroll)
+        {
+            EndTurn();
+        }
+        else
+        {
+            CurrentStage = SetupStage.Reroll;
+        }
         Debug.Log($"Highest roll {highestRoll} is tied. Players tied: {string.Join(", ", highestRollPlayers.Select(p => p.Key.playerID))} will reroll.");
-        CurrentStage = SetupStage.Reroll;
-        EndTurn();
     }
     private void HandleSetupStageChanged(SetupStage newStage)
     {
         switch (newStage)
         {
             case SetupStage.Roll:
+                EndTurn(false);
                 Debug.Log("Stage changed to Roll: All players roll dice.");
-                playersToRoll = new List<Player>(players);
-                
+                playersToRoll.AddRange(players);
+                currentPlayerIndex = 0;
+                StartTurn();
                 break;
+            
             case SetupStage.Reroll:
+                EndTurn(false);
                 Debug.Log("Stage changed to Reroll: Players tied reroll dice.");
-                
+                currentPlayerIndex = players.IndexOf(playersToRoll[0]);
+                StartTurn();
                 break;
+            
             case SetupStage.AssignActor:
+                EndTurn(false);
                 Debug.Log("Stage changed to AssignActor: Player selects an actor.");
-               
+                currentPlayerIndex = players.IndexOf(playerToSelect);
+                StartTurn();
                 break;
         }
     }
