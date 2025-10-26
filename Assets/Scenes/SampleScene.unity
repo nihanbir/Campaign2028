@@ -160,11 +160,10 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  displayCard: {fileID: 0}
+  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
   failedAttempts: 0
-  rolledDice: 0
 --- !u!4 &172211631
 Transform:
   m_ObjectHideFlags: 0
@@ -221,11 +220,10 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  displayCard: {fileID: 0}
+  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
   failedAttempts: 0
-  rolledDice: 0
 --- !u!4 &210027821
 Transform:
   m_ObjectHideFlags: 0
@@ -446,13 +444,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
   setupGamephase: {fileID: 2553868797784039015}
   rollDiceButton: {fileID: 2553868797784039017}
-  playerDisplayPrefab: {fileID: 3225722543939314804, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
+  cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 2553868797784039018}
-  spacingBetweenPlayerCards: 150
-  unassignedPlayerCards: []
-  actorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   actorUIParent: {fileID: 1522997684}
+  spacingBetweenPlayerCards: 150
   spacingBetweenActorCards: 200
+  unassignedPlayerCards: []
   unassignedActorCards: []
 --- !u!1 &920864599
 GameObject:
@@ -495,11 +492,10 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  displayCard: {fileID: 0}
+  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
   failedAttempts: 0
-  rolledDice: 0
 --- !u!4 &920864601
 Transform:
   m_ObjectHideFlags: 0
@@ -556,11 +552,10 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  displayCard: {fileID: 0}
+  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
   failedAttempts: 0
-  rolledDice: 0
 --- !u!4 &1473444821
 Transform:
   m_ObjectHideFlags: 0
@@ -724,6 +719,7 @@ MonoBehaviour:
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0
+  currentGamePhase: 0
 --- !u!114 &1600293384
 MonoBehaviour:
   m_ObjectHideFlags: 0

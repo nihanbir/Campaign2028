@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -431,7 +431,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
+  m_Sprite: {fileID: -855830296725018992, guid: 5d533f1492cf5774b85cb8cea196f4bd, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -588,7 +588,7 @@ GameObject:
   - component: {fileID: 837206523995134153}
   - component: {fileID: 8519013824811425862}
   - component: {fileID: 6464600337155136750}
-  - component: {fileID: 3260999666718859401}
+  - component: {fileID: 1458814536757953483}
   m_Layer: 5
   m_Name: ActorCard
   m_TagString: Untagged
@@ -657,7 +657,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3260999666718859401
+--- !u!114 &1458814536757953483
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -666,17 +666,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 4549318587885212283}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa304e242acb4ebba3743d4442784108, type: 3}
+  m_Script: {fileID: 11500000, guid: 15fd040f81b4410997a9148e8e3ff700, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActorDisplayCard
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDisplayCard
+  displayType: 0
   owningPlayer: {fileID: 0}
   diceImage: {fileID: 984289220250231948}
-  playerID: {fileID: 0}
+  actorCardElements: {fileID: 905036470361953945}
   scorePanel: {fileID: 905036470361953945}
-  EVScoreText: {fileID: 745340592477653207}
-  InstScoreText: {fileID: 7295231253132639161}
   nameText: {fileID: 6299975752636668638}
-  image: {fileID: 8504294734625609448}
+  artworkImage: {fileID: 8504294734625609448}
+  evScoreText: {fileID: 745340592477653207}
+  instScoreText: {fileID: 7295231253132639161}
 --- !u!1 &4920630220979605414
 GameObject:
   m_ObjectHideFlags: 0

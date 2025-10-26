@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-// Base AI player class
 public class AIPlayer : Player
 {
     [Header("AI Settings")]
@@ -13,46 +12,64 @@ public class AIPlayer : Player
     [Header("AI Stats")]
     public int failedAttempts = 0;
 
-    [Header("SetupPhase")] 
-    public bool rolledDice;
-    
-    // Main AI turn logic
     public virtual IEnumerator RollDice()
     {
-        
-        yield return new WaitForSeconds(0.5f);
-        
+        yield return new WaitForSeconds(Random.Range(decisionDelayMin, decisionDelayMax));
         SetupPhaseUIManager.Instance.OnRollDiceClicked();
     }
     
     public virtual IEnumerator AssignActorToAnotherPlayer()
     {
+        yield return new WaitForSeconds(Random.Range(decisionDelayMin, decisionDelayMax));
         
-        yield return new WaitForSeconds(0.5f);
-        
-        var unassignedPlayers = new List<UnassignedPlayerDisplayCard>();
-        Debug.Log("Actual unassigned players count: " + SetupPhaseUIManager.Instance.unassignedPlayerCards.Count);
+        // Get all unassigned players except this AI
+        var eligiblePlayers = SetupPhaseUIManager.Instance.unassignedPlayerCards
+            .Where(card => card.owningPlayer != this)
+            .ToList();
             
-        foreach (var playerDisplayCardCard in SetupPhaseUIManager.Instance.unassignedPlayerCards)
+        if (eligiblePlayers.Count == 0)
         {
-            if (playerDisplayCardCard.owningPlayer != this)
-            {
-                unassignedPlayers.Add(playerDisplayCardCard);
-            }
+            Debug.LogWarning($"AI Player {playerID}: No eligible players to assign actor to!");
+            failedAttempts++;
+            yield break;
         }
-            
-        var actorCardIndex = Random.Range(0, SetupPhaseUIManager.Instance.unassignedActorCards.Count - 1);
-        var playerIndex = Random.Range(0, unassignedPlayers.Count - 1);
+        
+        var availableActors = SetupPhaseUIManager.Instance.unassignedActorCards;
+        if (availableActors.Count == 0)
+        {
+            Debug.LogWarning($"AI Player {playerID}: No available actors to assign!");
+            failedAttempts++;
+            yield break;
+        }
 
-        Debug.Log("Unassigned players count: " + unassignedPlayers.Count);
-        Debug.Log("Selected playerIndex: " + playerIndex);
-            
-            
-        var selectedActorCard = SetupPhaseUIManager.Instance.unassignedActorCards[actorCardIndex];
-        var selectedPlayer = unassignedPlayers[playerIndex];
+        // BUGFIX: Random.Range with integers is exclusive of max value
+        // So Random.Range(0, list.Count - 1) could never select the last item
+        int actorIndex = Random.Range(0, availableActors.Count);
+        int playerIndex = Random.Range(0, eligiblePlayers.Count);
 
-        SetupPhaseUIManager.Instance.SelectActorCard(selectedActorCard);
+        var selectedActor = availableActors[actorIndex];
+        var selectedPlayer = eligiblePlayers[playerIndex];
+
+        Debug.Log($"AI Player {playerID} assigning {selectedActor.GetActorCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
+
+        SetupPhaseUIManager.Instance.SelectActorCard(selectedActor);
         SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(selectedPlayer.owningPlayer, selectedPlayer);
     }
     
+    // Optional: More advanced AI decision making
+    protected virtual ActorCard ChooseActorStrategically(List<PlayerDisplayCard> availableActors)
+    {
+        // Base implementation: random choice
+        // Override this in derived classes for smarter AI
+        int index = Random.Range(0, availableActors.Count);
+        return availableActors[index].GetActorCard();
+    }
+    
+    protected virtual Player ChoosePlayerStrategically(List<PlayerDisplayCard> eligiblePlayers, ActorCard actorToAssign)
+    {
+        // Base implementation: random choice
+        // Override this in derived classes for smarter AI (e.g., give weak actors to strong opponents)
+        int index = Random.Range(0, eligiblePlayers.Count);
+        return eligiblePlayers[index].owningPlayer;
+    }
 }

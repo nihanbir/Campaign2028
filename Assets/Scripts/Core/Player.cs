@@ -7,13 +7,13 @@ public class Player : MonoBehaviour
     public int playerID;
     public ActorCard assignedActor;
     
-    public DisplayCard displayCard;
+    public PlayerDisplayCard playerDisplayCard;
     private SetupPhaseGameManager _setupPhaseGameManager;
 
-    public void SetDisplayCard(DisplayCard newDisplayCard)
+    public void SetDisplayCard(PlayerDisplayCard newPlayerDisplayCard)
     {
-        displayCard = newDisplayCard;
-        displayCard.SetOwnerPlayer(this);
+        playerDisplayCard = newPlayerDisplayCard;
+        playerDisplayCard.SetOwnerPlayer(this);
     }
     
 }
