@@ -98,10 +98,10 @@ public class SetupPhaseGameManager
 
         GameUIManager.Instance.setupUI.OnPlayerTurnStarted(current);
         
-        if (SetupPhaseAIManager.Instance.IsAIPlayer(current))
+        if (AIManager.Instance.IsAIPlayer(current))
         {
-            var aiPlayer = SetupPhaseAIManager.Instance.GetAIPlayer(current);
-            game.StartCoroutine(SetupPhaseAIManager.Instance.ExecuteAITurn(aiPlayer));
+            var aiPlayer = AIManager.Instance.GetAIPlayer(current);
+            game.StartCoroutine(AIManager.Instance.setupAI.ExecuteAITurn(aiPlayer));
         }
     }
 

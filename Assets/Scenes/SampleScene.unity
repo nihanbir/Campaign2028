@@ -708,7 +708,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1600293382}
   - component: {fileID: 1600293385}
-  - component: {fileID: 1600293384}
+  - component: {fileID: 1600293386}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -731,21 +731,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1600293384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1600293380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7889d5fe2871d8458e7ec12647b5e09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AIManager
-  numberOfAIPlayers: 5
-  mixPersonalities: 0
-  aiPlayerPrefab: {fileID: 0}
 --- !u!114 &1600293385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -767,6 +752,22 @@ MonoBehaviour:
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0
+--- !u!114 &1600293386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600293380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05ba8b78c9094af6bb70d6d414810f3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIManager
+  numberOfAIPlayers: 5
+  mixPersonalities: 1
+  aiPlayerPrefab: {fileID: 6437916321570752279, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
+  aiPlayers: []
 --- !u!1001 &2553868797784039014
 PrefabInstance:
   m_ObjectHideFlags: 0

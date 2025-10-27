@@ -138,7 +138,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
         // Disable UI for AI players
-        bool isAI = SetupPhaseAIManager.Instance.IsAIPlayer(currentPlayer);
+        bool isAI = AIManager.Instance.IsAIPlayer(currentPlayer);
         EnableCanvasGroup(!isAI);
         
         currentPlayer.playerDisplayCard.Highlight();
