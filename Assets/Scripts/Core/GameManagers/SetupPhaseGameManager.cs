@@ -91,7 +91,7 @@ public class SetupPhaseGameManager
 
     #region Turn Management
 
-    public void StartPlayerTurn()
+    private void StartPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
@@ -105,7 +105,7 @@ public class SetupPhaseGameManager
         }
     }
 
-    public void EndPlayerTurn()
+    private void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         GameUIManager.Instance.setupUI.OnplayerTurnEnded(current);
@@ -223,7 +223,7 @@ public class SetupPhaseGameManager
 
     #region Actor Assignment Logic
 
-    public bool CanAssignActor(Player targetPlayer)
+    private bool CanAssignActor(Player targetPlayer)
     {
         if (CurrentStage != SetupStage.AssignActor)
         {
