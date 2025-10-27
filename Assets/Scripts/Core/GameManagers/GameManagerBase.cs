@@ -37,16 +37,4 @@ public abstract class GameManagerBase : MonoBehaviour
         actorDeck = gameDeckData.GetActorDeck();
         allegianceDeck = gameDeckData.GetAllegianceDeck();
     }
-
-    public virtual void StartTurn()
-    {
-        Debug.Log($"Player {CurrentPlayer.playerID} starts turn.");
-    }
-
-    public virtual void EndTurn()
-    {
-        Debug.Log($"Player {CurrentPlayer.playerID} ends turn.");
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
-        StartTurn();
-    }
 }
