@@ -15,7 +15,7 @@ public class AIPlayer : Player
     public virtual IEnumerator RollDice()
     {
         yield return new WaitForSeconds(Random.Range(decisionDelayMin, decisionDelayMax));
-        SetupPhaseUIManager.Instance.OnRollDiceClicked();
+        GameUIManager.Instance.setupUI.OnRollDiceClicked();
     }
     
     public virtual IEnumerator AssignActorToAnotherPlayer()
@@ -23,7 +23,7 @@ public class AIPlayer : Player
         yield return new WaitForSeconds(Random.Range(decisionDelayMin, decisionDelayMax));
         
         // Get all unassigned players except this AI
-        var eligiblePlayers = SetupPhaseUIManager.Instance.unassignedPlayerCards
+        var eligiblePlayers = GameUIManager.Instance.setupUI.unassignedPlayerCards
             .Where(card => card.owningPlayer != this)
             .ToList();
             
@@ -34,7 +34,7 @@ public class AIPlayer : Player
             yield break;
         }
         
-        var availableActors = SetupPhaseUIManager.Instance.unassignedActorCards;
+        var availableActors = GameUIManager.Instance.setupUI.unassignedActorCards;
         if (availableActors.Count == 0)
         {
             Debug.LogWarning($"AI Player {playerID}: No available actors to assign!");
@@ -52,8 +52,8 @@ public class AIPlayer : Player
 
         Debug.Log($"AI Player {playerID} assigning {selectedActor.GetActorCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
 
-        SetupPhaseUIManager.Instance.SelectActorCard(selectedActor);
-        SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(selectedPlayer.owningPlayer, selectedPlayer);
+        GameUIManager.Instance.setupUI.SelectActorCard(selectedActor);
+        GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(selectedPlayer.owningPlayer, selectedPlayer);
     }
     
     // Optional: More advanced AI decision making

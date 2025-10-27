@@ -37,7 +37,7 @@ public class GameManager : GameManagerBase
     
     private void InitializePhases()
     {
-        // setupPhase = new SetupPhaseGameManager(this);
+        setupPhase = new SetupPhaseGameManager(this);
         // mainPhase = new MainPhaseGameManager(this);
     }
     
@@ -45,16 +45,16 @@ public class GameManager : GameManagerBase
     {
         Debug.Log($"=== Transitioning to {newPhase} stage ===");
         
+        GameUIManager.Instance.OnTransitionToPhase(newPhase);
+        
         switch (newPhase)
         {
             case GamePhase.Setup:
                 BeginSetupPhase();
-                // GameUIManager.Instance.OnTransitionToPhase(newPhase);
                 break;
             
             case GamePhase.MainGame:
                 BeginMainGamePhase();
-                GameUIManager.Instance.OnTransitionToPhase(newPhase);
                 break;
             
             case GamePhase.CivilWar:
@@ -63,13 +63,12 @@ public class GameManager : GameManagerBase
             case GamePhase.GameOver:
                 break;
         }
+        
     }
     
     private void BeginSetupPhase()
     {
         Debug.Log("Begin setup phase");
-        // SetupPhaseGameManager.Instance.gameObject.SetActive(true);
-        setupPhase = new SetupPhaseGameManager(this);
         setupPhase.InitializeSetupPhase();
     }
     
@@ -78,7 +77,6 @@ public class GameManager : GameManagerBase
         // SetupPhaseGameManager.Instance.gameObject.SetActive(false);
         // MainPhaseGameManager.Instance.gameObject.SetActive(true);
         
-
     }
 }
 

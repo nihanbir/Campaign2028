@@ -1,12 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SetupPhaseUIManager : MonoBehaviour
 {
-    public static SetupPhaseUIManager Instance;
-    
-    [Header("Setup Phase")]     
+   [Header("Setup Phase")]     
     public GameObject setupGamephase;
     public Button rollDiceButton;
     
@@ -23,22 +22,18 @@ public class SetupPhaseUIManager : MonoBehaviour
     private PlayerDisplayCard _selectedActorCard;
     private CanvasGroup _canvasGroup;
 
-    private void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
-
     #region Initialize Phase UI
 
     public void InitializePhaseUI()
     {
         
         Debug.Log("init setup ui");
+        rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
-        _canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
-        if (!_canvasGroup) _canvasGroup = setupGamephase.AddComponent<CanvasGroup>();
+        if (!_canvasGroup)
+            _canvasGroup = setupGamephase.GetComponent<CanvasGroup>() 
+                           ?? setupGamephase.AddComponent<CanvasGroup>();
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);

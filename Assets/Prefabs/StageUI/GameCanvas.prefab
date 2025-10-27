@@ -729,6 +729,9 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2085586330490423814, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1883302400061274757}
     - targetCorrespondingSourceObject: {fileID: 6007478419830241758, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3969368435654780828}
@@ -738,6 +741,43 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 590234058828219355, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
   m_PrefabInstance: {fileID: 364848394370195259}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1864857593311417661 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2085586330490423814, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+  m_PrefabInstance: {fileID: 364848394370195259}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1883302400061274757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864857593311417661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
+  setupGamephase: {fileID: 1864857593311417661}
+  rollDiceButton: {fileID: 4755368242826792193}
+  cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  playerUIParent: {fileID: 7075911402009855571}
+  actorUIParent: {fileID: 8654410005740784361}
+  spacingBetweenPlayerCards: 150
+  spacingBetweenActorCards: 300
+  unassignedPlayerCards: []
+  unassignedActorCards: []
+--- !u!114 &4755368242826792193 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4966983952646787642, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+  m_PrefabInstance: {fileID: 364848394370195259}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &6219165856140682981 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6007478419830241758, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
@@ -755,6 +795,16 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!224 &7075911402009855571 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 7431674135243233640, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+  m_PrefabInstance: {fileID: 364848394370195259}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &8654410005740784361 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 9010180728352839122, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+  m_PrefabInstance: {fileID: 364848394370195259}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6219796264034280716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -850,10 +900,46 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8066389155480619410}
   m_SourcePrefab: {fileID: 100100000, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+--- !u!114 &812377014457276422 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6707833643135122698, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+  m_PrefabInstance: {fileID: 6219796264034280716}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!224 &1498117499861947188 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4799507147203409464, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
   m_PrefabInstance: {fileID: 6219796264034280716}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7731661410587092815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+  m_PrefabInstance: {fileID: 6219796264034280716}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8066389155480619410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7731661410587092815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
+  mainGamePhase: {fileID: 7731661410587092815}
+  rollDiceButton: {fileID: 812377014457276422}
+  playerActorDisplayPrefab: {fileID: 0}
+  playerUIParent: {fileID: 0}
+  spacingBetweenActorCards: 300

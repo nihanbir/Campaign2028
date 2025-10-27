@@ -35,8 +35,6 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
             return;
         }
         
-        
-        
         if (diceImage) diceImage.gameObject.SetActive(false);
         if (scorePanel) scorePanel.SetActive(false);
     }
@@ -135,12 +133,12 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
     private void HandleActorCardClick()
     {
         if (owningPlayer != null) return; // Already assigned
-        SetupPhaseUIManager.Instance.SelectActorCard(this);
+        GameUIManager.Instance.setupUI.SelectActorCard(this);
     }
 
     private void HandlePlayerCardClick()
     {
-        SetupPhaseUIManager.Instance.AssignSelectedActorToPlayer(owningPlayer, this);
+        GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(owningPlayer, this);
     }
 
     public ActorCard GetActorCard()

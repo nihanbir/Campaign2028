@@ -5,78 +5,69 @@ using UnityEngine.UI;
 public class GameUIManager : MonoBehaviour
 {
     public static GameUIManager Instance;
-    
+
     [Header("Dice & Actions")]
-    public Sprite[] diceFaces; // 6 sprites for dice faces 1-6
-    public TextMeshProUGUI phaseText;
-    
-    [HideInInspector] public int _diceRoll;
+    [SerializeField] private Sprite[] diceFaces;
+    [SerializeField] private TextMeshProUGUI phaseText;
+
+    [Header("Phase UIs")]
+    [SerializeField] public SetupPhaseUIManager setupUI;
+    [SerializeField] public MainPhaseUIManager mainUI;
+    // Add others (CivilWarUI, GameOverUI) as needed
+
+    public int DiceRoll { get; private set; }
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        // Optionally, auto-find if not assigned
+        if (!setupUI) setupUI = FindObjectOfType<SetupPhaseUIManager>();
+        // if (!mainUI) mainUI = FindObjectOfType<MainPhaseUIManager>();
     }
 
-    private void Start()
+    public void OnTransitionToPhase(GamePhase phase)
     {
-        MainPhaseUIManager.Instance.mainGamePhase.SetActive(false);
-        
-        // UpdateGamePhase(GamePhase.Setup);
+        setupUI.gameObject.SetActive(false);
+        mainUI.gameObject.SetActive(false);
+
+        switch (phase)
+        {
+            case GamePhase.Setup:
+                phaseText.text = "Setup Phase";
+                setupUI.gameObject.SetActive(true);
+                setupUI.InitializePhaseUI();
+                break;
+
+            case GamePhase.MainGame:
+                phaseText.text = "Main Game";
+                // mainUI.gameObject.SetActive(true);
+                break;
+
+            case GamePhase.CivilWar:
+                phaseText.text = "⚔️ CIVIL WAR ⚔️";
+                phaseText.color = Color.red;
+                break;
+
+            case GamePhase.GameOver:
+                phaseText.text = "Game Over";
+                break;
+        }
     }
-    
-    public void OnTransitionToPhase(GamePhase newPhase)
-    {
-        switch (newPhase)
-         {
-             case GamePhase.Setup:
-                 phaseText.text = "Setup Phase";
-                 SetupPhaseUIManager.Instance.setupGamephase.SetActive(true);
-                 break;
-             case GamePhase.MainGame:
-                 phaseText.text = "Main Game";
-                 break;
-             case GamePhase.CivilWar:
-                 phaseText.text = "⚔️ CIVIL WAR ⚔️";
-                 phaseText.color = Color.red;
-                 break;
-             case GamePhase.GameOver:
-                 phaseText.text = "Game Over";
-                 break;
-         }
-    }
-    
+
     #region Dice & Actions
+
     public void OnRollDiceClicked(Button diceButton)
     {
-        _diceRoll = Random.Range(1, 7);
+        DiceRoll = Random.Range(1, 7);
         SetDiceSprite(diceButton.image);
     }
 
     public void SetDiceSprite(Image diceImage)
     {
-        switch (_diceRoll)
-        {
-            case 1:
-                diceImage.sprite = diceFaces[0];
-                return;
-            case 2:
-                diceImage.sprite = diceFaces[1];
-                return;
-            case 3:
-                diceImage.sprite = diceFaces[2];
-                return;
-            case 4:
-                diceImage.sprite = diceFaces[3];
-                return;
-            case 5:
-                diceImage.sprite = diceFaces[4];
-                return;
-            case 6:
-                diceImage.sprite = diceFaces[5];
-                return;
-        }
+        diceImage.sprite = diceFaces[DiceRoll - 1];
     }
 
-    #endregion Dice & Actions
+    #endregion
 }

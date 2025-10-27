@@ -34,15 +34,13 @@ public class SetupPhaseGameManager
 
     public void InitializeSetupPhase()
     {
-        Debug.Log("Init setup phase");
-        SetupPhaseUIManager.Instance.InitializePhaseUI();
+        Debug.Log("Begin Roll");
         BeginRollStage();
     }
 
     private void InitializeRollTracking()
     {
         playersToRoll.AddRange(game.players);
-        Debug.Log(playersToRoll.Count);
         rolledPlayers.Clear();
     }
 
@@ -98,7 +96,7 @@ public class SetupPhaseGameManager
         Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
 
-        SetupPhaseUIManager.Instance.OnPlayerTurnStarted(current);
+        GameUIManager.Instance.setupUI.OnPlayerTurnStarted(current);
         
         if (SetupPhaseAIManager.Instance.IsAIPlayer(current))
         {
@@ -110,7 +108,7 @@ public class SetupPhaseGameManager
     public void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
-        SetupPhaseUIManager.Instance.OnplayerTurnEnded(current);
+        GameUIManager.Instance.setupUI.OnplayerTurnEnded(current);
         Debug.Log($"Player {current.playerID} turn ended");
     }
 
@@ -138,7 +136,7 @@ public class SetupPhaseGameManager
 
     public void PlayerRolledDice()
     {
-        int roll = GameUIManager.Instance._diceRoll;
+        int roll = GameUIManager.Instance.DiceRoll;
         rolledPlayers.Add(game.CurrentPlayer, roll);
         playersToRoll.Remove(game.CurrentPlayer);
         
@@ -167,7 +165,7 @@ public class SetupPhaseGameManager
         // Show all dice results
         foreach (var rolledPlayer in rolledPlayers)
         {
-            SetupPhaseUIManager.Instance.UpdateUIForPlayer(rolledPlayer.Key, true);
+            GameUIManager.Instance.setupUI.UpdateUIForPlayer(rolledPlayer.Key, true);
         }
         
         int highestRoll = rolledPlayers.Values.Max();
@@ -267,14 +265,14 @@ public class SetupPhaseGameManager
 
     private bool ShouldAutoAssignLastActor()
     {
-        Debug.Log("Remaining actor count is: " + SetupPhaseUIManager.Instance.unassignedActorCards.Count);
-        return SetupPhaseUIManager.Instance.unassignedActorCards.Count == 1;
+        Debug.Log("Remaining actor count is: " + GameUIManager.Instance.setupUI.unassignedActorCards.Count);
+        return GameUIManager.Instance.setupUI.unassignedActorCards.Count == 1;
     }
 
     private void AutoAssignLastActor()
     {
         // Notify UI to update visuals
-        SetupPhaseUIManager.Instance.AutoAssignLastActor();
+        GameUIManager.Instance.setupUI.AutoAssignLastActor();
         
         OnAllActorsAssigned();
     }
@@ -283,8 +281,7 @@ public class SetupPhaseGameManager
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
         // currentGamePhase = GamePhase.MainGame;
-        // GameUIManager.Instance.UpdateGamePhase(GamePhase.MainGame);
-        // SetupPhaseUIManager.Instance.OnSetupPhaseComplete();
+       
     }
 
     #endregion

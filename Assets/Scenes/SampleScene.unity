@@ -239,6 +239,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &368763188 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1883302400061274757, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_PrefabInstance: {fileID: 2553868797784039014}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2553868797784039015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,7 +396,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 761285299}
-  - component: {fileID: 761285300}
+  - component: {fileID: 761285303}
   - component: {fileID: 761285301}
   - component: {fileID: 761285302}
   m_Layer: 0
@@ -410,27 +421,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &761285300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 761285298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4dab49408294e0c9f660ca4b83de649, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameUIManager
-  diceFaces:
-  - {fileID: 4379547202609923276, guid: 67e065fd331f65d449653f91b1d6628e, type: 3}
-  - {fileID: -8397132692876888525, guid: 6650cd30f16c22941867a9c86754008c, type: 3}
-  - {fileID: -3138510821884332752, guid: 8ec0afa63e20867478e1cca72419d323, type: 3}
-  - {fileID: -5874486030743072056, guid: 4c8ccfaf0bf4f91488bc256d107fe109, type: 3}
-  - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
-  - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
-  phaseText: {fileID: 4359298127492457271}
-  _diceRoll: 0
 --- !u!114 &761285301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -469,6 +459,28 @@ MonoBehaviour:
   playerActorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 9115442147052629572}
   spacingBetweenActorCards: 300
+--- !u!114 &761285303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761285298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21907267519945ba9e5b5f254d416bcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameUIManager
+  diceFaces:
+  - {fileID: 4379547202609923276, guid: 67e065fd331f65d449653f91b1d6628e, type: 3}
+  - {fileID: -8397132692876888525, guid: 6650cd30f16c22941867a9c86754008c, type: 3}
+  - {fileID: -3138510821884332752, guid: 8ec0afa63e20867478e1cca72419d323, type: 3}
+  - {fileID: -5874486030743072056, guid: 4c8ccfaf0bf4f91488bc256d107fe109, type: 3}
+  - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
+  - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
+  phaseText: {fileID: 4359298127492457271}
+  setupUI: {fileID: 368763188}
+  mainUI: {fileID: 7871011285792013931}
 --- !u!1 &920864599
 GameObject:
   m_ObjectHideFlags: 0
@@ -1022,6 +1034,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7731661410587092815, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
   m_PrefabInstance: {fileID: 2553868797784039014}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7871011285792013931 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8066389155480619410, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_PrefabInstance: {fileID: 2553868797784039014}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7871011285792013927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
 --- !u!224 &9115442147052629572 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6508734186844676860, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
