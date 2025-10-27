@@ -20,8 +20,8 @@ public class SetupPhaseUIManager : MonoBehaviour
     [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
     [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
     
-    private PlayerDisplayCard selectedActorCard;
-    private CanvasGroup canvasGroup;
+    private PlayerDisplayCard _selectedActorCard;
+    private CanvasGroup _canvasGroup;
 
     private void Awake()
     {
@@ -33,10 +33,12 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     public void InitializePhaseUI()
     {
+        
+        Debug.Log("init setup ui");
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
-        canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
-        if (!canvasGroup) canvasGroup = setupGamephase.AddComponent<CanvasGroup>();
+        _canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
+        if (!_canvasGroup) _canvasGroup = setupGamephase.AddComponent<CanvasGroup>();
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
@@ -46,7 +48,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
     {
-        if (!SetupPhaseGameManager.Instance)
+        if (!GameManager.Instance)
         {
             Debug.LogError("GameManager instance is not set");
             return;
@@ -59,11 +61,11 @@ public class SetupPhaseUIManager : MonoBehaviour
         {
             case CardDisplayType.UnassignedActor:
                 targetList = unassignedActorCards;
-                count = SetupPhaseGameManager.Instance.actorDeck.Count;
+                count = GameManager.Instance.actorDeck.Count;
                 break;
             case CardDisplayType.UnassignedPlayer:
                 targetList = unassignedPlayerCards;
-                count = SetupPhaseGameManager.Instance.players.Count;
+                count = GameManager.Instance.players.Count;
                 break;
             default:
                 Debug.LogError($"Invalid card type for creation: {cardType}");
@@ -83,11 +85,11 @@ public class SetupPhaseUIManager : MonoBehaviour
                 
                 if (cardType == CardDisplayType.UnassignedActor)
                 {
-                    displayCard.SetActor(SetupPhaseGameManager.Instance.actorDeck[i]);
+                    displayCard.SetActor(GameManager.Instance.actorDeck[i]);
                 }
                 else if (cardType == CardDisplayType.UnassignedPlayer)
                 {
-                    SetupPhaseGameManager.Instance.players[i].SetDisplayCard(displayCard);
+                    GameManager.Instance.players[i].SetDisplayCard(displayCard);
                 }
                 
                 targetList.Add(displayCard);
@@ -112,12 +114,12 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     public void OnRollDiceClicked()
     {
-        var currentPlayer = SetupPhaseGameManager.Instance.CurrentPlayer;
+        var currentPlayer = GameManager.Instance.CurrentPlayer;
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.playerDisplayCard.SetRolledDiceImage();
         
-        SetupPhaseGameManager.Instance.PlayerRolledDice();
+        GameManager.Instance.setupPhase.PlayerRolledDice();
     }
 
     public void UpdateUIForPlayer(Player player, bool hideDice)
@@ -134,7 +136,7 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     public void OnPlayerTurnStarted(Player currentPlayer)
     {
-        bool isAssignStage = SetupPhaseGameManager.Instance.CurrentStage == SetupStage.AssignActor;
+        bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         
         // Show/hide appropriate UI elements
         actorUIParent.gameObject.SetActive(isAssignStage);
@@ -155,10 +157,10 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     private void EnableCanvasGroup(bool enable)
     {
-        if (!canvasGroup) canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
+        if (!_canvasGroup) _canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
         
-        canvasGroup.interactable = enable;
-        canvasGroup.blocksRaycasts = enable;
+        _canvasGroup.interactable = enable;
+        _canvasGroup.blocksRaycasts = enable;
     }
 
     #endregion
@@ -168,36 +170,36 @@ public class SetupPhaseUIManager : MonoBehaviour
     public void SelectActorCard(PlayerDisplayCard actorCard)
     {
         // Deselect previous card if any
-        if (selectedActorCard != null)
+        if (_selectedActorCard != null)
         {
             // TODO: Remove visual highlight from previous selection
         }
 
-        selectedActorCard = actorCard;
-        Debug.Log($"Selected actor: {selectedActorCard.GetActorCard().cardName}");
+        _selectedActorCard = actorCard;
+        Debug.Log($"Selected actor: {_selectedActorCard.GetActorCard().cardName}");
         
         // TODO: Add visual highlight for selected card
     }
     
     public void AssignSelectedActorToPlayer(Player targetPlayer, PlayerDisplayCard playerCard)
     {
-        if (selectedActorCard == null)
+        if (_selectedActorCard == null)
         {
             Debug.LogWarning("No actor card selected to assign.");
             return;
         }
 
-        ActorCard actorToAssign = selectedActorCard.GetActorCard();
+        ActorCard actorToAssign = _selectedActorCard.GetActorCard();
         
         // Update UI
-        RemoveCard(selectedActorCard, unassignedActorCards);
+        RemoveCard(_selectedActorCard, unassignedActorCards);
         playerCard.ConvertToAssignedActor(actorToAssign);
         unassignedPlayerCards.Remove(playerCard);
         
-        selectedActorCard = null;
+        _selectedActorCard = null;
         
         // Let the game manager handle the logic and validation
-        SetupPhaseGameManager.Instance.AssignActorToPlayer(targetPlayer, actorToAssign);
+        GameManager.Instance.setupPhase.AssignActorToPlayer(targetPlayer, actorToAssign);
     }
 
     public void AutoAssignLastActor()

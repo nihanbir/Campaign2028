@@ -387,6 +387,7 @@ GameObject:
   - component: {fileID: 761285299}
   - component: {fileID: 761285300}
   - component: {fileID: 761285301}
+  - component: {fileID: 761285302}
   m_Layer: 0
   m_Name: GameUIManager
   m_TagString: Untagged
@@ -451,6 +452,23 @@ MonoBehaviour:
   spacingBetweenActorCards: 200
   unassignedPlayerCards: []
   unassignedActorCards: []
+--- !u!114 &761285302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 761285298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
+  mainGamePhase: {fileID: 7871011285792013927}
+  rollDiceButton: {fileID: 2553868797784039016}
+  playerActorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  playerUIParent: {fileID: 9115442147052629572}
+  spacingBetweenActorCards: 300
 --- !u!1 &920864599
 GameObject:
   m_ObjectHideFlags: 0
@@ -677,9 +695,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1600293382}
-  - component: {fileID: 1600293383}
-  - component: {fileID: 1600293384}
   - component: {fileID: 1600293385}
+  - component: {fileID: 1600293384}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -702,24 +719,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1600293383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1600293380}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0175323f823a73341ac994397d4a3fe6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  gameDeckData: {fileID: 11400000, guid: 965170f6ea635314486a120580c20f90, type: 2}
-  actorDeck: []
-  maxPlayers: 6
-  players: []
-  currentPlayerIndex: 0
-  currentGamePhase: 0
 --- !u!114 &1600293384
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -744,14 +743,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1600293380}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
+  m_Script: {fileID: 11500000, guid: 9131533544d54bd494c3794a4b3ab958, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
-  mainGamePhase: {fileID: 7871011285792013927}
-  rollDiceButton: {fileID: 2553868797784039016}
-  playerActorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
-  playerUIParent: {fileID: 9115442147052629572}
-  spacingBetweenActorCards: 300
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  gameDeckData: {fileID: 11400000, guid: 965170f6ea635314486a120580c20f90, type: 2}
+  stateDeck: []
+  institutionDeck: []
+  eventDeck: []
+  actorDeck: []
+  allegianceDeck: []
+  maxPlayers: 6
+  players: []
+  currentPlayerIndex: 0
 --- !u!1001 &2553868797784039014
 PrefabInstance:
   m_ObjectHideFlags: 0

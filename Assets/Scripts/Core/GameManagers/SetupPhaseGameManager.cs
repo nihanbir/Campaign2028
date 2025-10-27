@@ -2,29 +2,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SetupPhaseGameManager : MonoBehaviour
+public class SetupPhaseGameManager
 {
-    public static SetupPhaseGameManager Instance;
+    private readonly GameManager game;
     
-    [Header("Decks")] 
-    public GameDeckSO gameDeckData;
-    [HideInInspector] public List<ActorCard> actorDeck;
-    
-    [Header("Game State")] 
-    public int maxPlayers = 6;
-    public List<Player> players;
-    public int currentPlayerIndex = 0;
-    
-    public Player CurrentPlayer => players[currentPlayerIndex];
+    public SetupPhaseGameManager(GameManager gm)
+    {
+        game = gm;
+    }
     
     // Roll tracking
-    private List<Player> playersToRoll;
+    private List<Player> playersToRoll = new List<Player>();
     private Dictionary<Player, int> rolledPlayers = new Dictionary<Player, int>();
     
     // Actor assignment tracking
     private Player playerToSelect;
-
-    [HideInInspector] public GamePhase currentGamePhase = GamePhase.Setup;
     
     private SetupStage _currentStage = SetupStage.Roll;
     public SetupStage CurrentStage
@@ -39,41 +31,18 @@ public class SetupPhaseGameManager : MonoBehaviour
             }
         }
     }
-    
-    void Awake()
-    {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-        players = new List<Player>(FindObjectsOfType<Player>());
-    }
 
-    void Start()
+    public void InitializeSetupPhase()
     {
-        InitializeGame();
-    }
-
-    public void InitializeGame()
-    {
-        LoadDecks();
+        Debug.Log("Init setup phase");
         SetupPhaseUIManager.Instance.InitializePhaseUI();
         BeginRollStage();
     }
 
-    private void LoadDecks()
-    {
-        if (gameDeckData != null)
-        {
-            actorDeck = gameDeckData.GetActorDeck();
-        }
-        else
-        {
-            Debug.LogError("GameDeckSO not assigned! Please assign in inspector.");
-        }
-    }
-
     private void InitializeRollTracking()
     {
-        playersToRoll = new List<Player>(players);
+        playersToRoll.AddRange(game.players);
+        Debug.Log(playersToRoll.Count);
         rolledPlayers.Clear();
     }
 
@@ -103,20 +72,20 @@ public class SetupPhaseGameManager : MonoBehaviour
     {
         Debug.Log("All players will roll dice");
         InitializeRollTracking();
-        currentPlayerIndex = 0;
+        game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
 
     private void BeginRerollStage()
     {
         Debug.Log($"Players tied for highest roll will reroll: {GetPlayerIDList(playersToRoll)}");
-        currentPlayerIndex = players.IndexOf(playersToRoll[0]);
+        game.currentPlayerIndex = game.players.IndexOf(playersToRoll[0]);
         StartPlayerTurn();
     }
 
     private void BeginAssignActorStage()
     {
-        currentPlayerIndex = players.IndexOf(playerToSelect);
+        game.currentPlayerIndex = game.players.IndexOf(playerToSelect);
         StartPlayerTurn();
     }
 
@@ -126,7 +95,7 @@ public class SetupPhaseGameManager : MonoBehaviour
 
     public void StartPlayerTurn()
     {
-        Player current = CurrentPlayer;
+        Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
 
         SetupPhaseUIManager.Instance.OnPlayerTurnStarted(current);
@@ -134,13 +103,13 @@ public class SetupPhaseGameManager : MonoBehaviour
         if (SetupPhaseAIManager.Instance.IsAIPlayer(current))
         {
             var aiPlayer = SetupPhaseAIManager.Instance.GetAIPlayer(current);
-            StartCoroutine(SetupPhaseAIManager.Instance.ExecuteAITurn(aiPlayer));
+            game.StartCoroutine(SetupPhaseAIManager.Instance.ExecuteAITurn(aiPlayer));
         }
     }
 
     public void EndPlayerTurn()
     {
-        Player current = CurrentPlayer;
+        Player current = game.CurrentPlayer;
         SetupPhaseUIManager.Instance.OnplayerTurnEnded(current);
         Debug.Log($"Player {current.playerID} turn ended");
     }
@@ -150,13 +119,13 @@ public class SetupPhaseGameManager : MonoBehaviour
         switch (CurrentStage)
         {
             case SetupStage.Roll:
-                currentPlayerIndex = (currentPlayerIndex + 1) % players.Count;
+                game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.Count;
                 break;
             
             case SetupStage.Reroll:
-                int currentRerollIndex = playersToRoll.IndexOf(CurrentPlayer);
+                int currentRerollIndex = playersToRoll.IndexOf(game.CurrentPlayer);
                 int nextRerollIndex = (currentRerollIndex + 1) % playersToRoll.Count;
-                currentPlayerIndex = players.IndexOf(playersToRoll[nextRerollIndex]);
+                game.currentPlayerIndex = game.players.IndexOf(playersToRoll[nextRerollIndex]);
                 break;
         }
         
@@ -170,10 +139,10 @@ public class SetupPhaseGameManager : MonoBehaviour
     public void PlayerRolledDice()
     {
         int roll = GameUIManager.Instance._diceRoll;
-        rolledPlayers.Add(CurrentPlayer, roll);
-        playersToRoll.Remove(CurrentPlayer);
+        rolledPlayers.Add(game.CurrentPlayer, roll);
+        playersToRoll.Remove(game.CurrentPlayer);
         
-        Debug.Log($"Player {CurrentPlayer.playerID} rolled {roll}");
+        Debug.Log($"Player {game.CurrentPlayer.playerID} rolled {roll}");
         EndPlayerTurn();
         
         if (AllPlayersHaveRolled())
@@ -264,7 +233,7 @@ public class SetupPhaseGameManager : MonoBehaviour
             return false;
         }
 
-        if (targetPlayer == CurrentPlayer)
+        if (targetPlayer == game.CurrentPlayer)
         {
             Debug.LogWarning("Can't assign an actor to yourself!");
             return false;
@@ -337,10 +306,3 @@ public enum SetupStage
     AssignActor
 }
 
-public enum GamePhase
-{
-    Setup,
-    MainGame,
-    CivilWar,
-    GameOver
-}

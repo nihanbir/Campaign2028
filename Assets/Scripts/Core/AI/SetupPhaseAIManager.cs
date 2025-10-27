@@ -53,9 +53,9 @@ public class SetupPhaseAIManager : MonoBehaviour
         aiPlayers.Add(ai);
         
         // Register with game manager
-        if (SetupPhaseGameManager.Instance != null)
+        if (GameManager.Instance != null)
         {
-            SetupPhaseGameManager.Instance.players.Add(ai);
+            GameManager.Instance.players.Add(ai);
         }
     }
     
@@ -76,8 +76,8 @@ public class SetupPhaseAIManager : MonoBehaviour
         // Wait a short delay to simulate thinking
         yield return new WaitForSeconds(1f);
         
-        if (SetupPhaseGameManager.Instance.CurrentStage == SetupStage.Roll 
-                            || SetupPhaseGameManager.Instance.CurrentStage == SetupStage.Reroll)
+        if (GameManager.Instance.setupPhase.CurrentStage == SetupStage.Roll 
+                            || GameManager.Instance.setupPhase.CurrentStage == SetupStage.Reroll)
         {
             yield return StartCoroutine(aiPlayer.RollDice());
         }

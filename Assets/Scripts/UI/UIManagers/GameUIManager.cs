@@ -25,9 +25,9 @@ public class GameUIManager : MonoBehaviour
         // UpdateGamePhase(GamePhase.Setup);
     }
     
-    public void UpdateGamePhase(GamePhase phase)
+    public void OnTransitionToPhase(GamePhase newPhase)
     {
-        switch (phase)
+        switch (newPhase)
          {
              case GamePhase.Setup:
                  phaseText.text = "Setup Phase";

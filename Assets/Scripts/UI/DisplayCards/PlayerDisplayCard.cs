@@ -29,7 +29,7 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        if (SetupPhaseGameManager.Instance == null || SetupPhaseGameManager.Instance.players.Count == 0)
+        if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
         {
             Debug.Log("GameManager or players not initialized.");
             return;
