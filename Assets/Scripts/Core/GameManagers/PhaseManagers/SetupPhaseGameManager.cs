@@ -2,23 +2,21 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SetupPhaseGameManager
+public class SetupPhaseGameManager : BasePhaseGameManager
 {
-    private readonly GameManager game;
-    
-    public SetupPhaseGameManager(GameManager gm)
-    {
-        game = gm;
-    }
+    public SetupPhaseGameManager(GameManager gm) : base(gm) { }
     
     // Roll tracking
     private List<Player> playersToRoll = new List<Player>();
     private Dictionary<Player, int> rolledPlayers = new Dictionary<Player, int>();
     
     // Actor assignment tracking
-    private Player playerToSelect;
+    private Player _playerToSelect;
     
     private SetupStage _currentStage = SetupStage.Roll;
+
+    
+
     public SetupStage CurrentStage
     {
         get => _currentStage;
@@ -32,7 +30,7 @@ public class SetupPhaseGameManager
         }
     }
 
-    public void InitializeSetupPhase()
+    public override void InitializePhase()
     {
         Debug.Log("Begin Roll");
         BeginRollStage();
@@ -83,7 +81,7 @@ public class SetupPhaseGameManager
 
     private void BeginAssignActorStage()
     {
-        game.currentPlayerIndex = game.players.IndexOf(playerToSelect);
+        game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
         StartPlayerTurn();
     }
 
@@ -91,7 +89,7 @@ public class SetupPhaseGameManager
 
     #region Turn Management
 
-    private void StartPlayerTurn()
+    public override void StartPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
@@ -105,14 +103,14 @@ public class SetupPhaseGameManager
         }
     }
 
-    private void EndPlayerTurn()
+    public override void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         GameUIManager.Instance.setupUI.OnplayerTurnEnded(current);
         Debug.Log($"Player {current.playerID} turn ended");
     }
 
-    private void MoveToNextPlayer()
+    public override void MoveToNextPlayer()
     {
         switch (CurrentStage)
         {
@@ -134,7 +132,7 @@ public class SetupPhaseGameManager
 
     #region Dice Rolling Logic
 
-    public void PlayerRolledDice()
+    public override void PlayerRolledDice()
     {
         int roll = GameUIManager.Instance.DiceRoll;
         rolledPlayers.Add(game.CurrentPlayer, roll);
@@ -194,7 +192,7 @@ public class SetupPhaseGameManager
     private void HandleUniqueWinner(Player winner)
     {
         
-        playerToSelect = winner;
+        _playerToSelect = winner;
         rolledPlayers.Clear();
 
         CurrentStage = SetupStage.AssignActor;

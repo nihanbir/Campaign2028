@@ -24,7 +24,7 @@ public class GameUIManager : MonoBehaviour
 
         // Optionally, auto-find if not assigned
         if (!setupUI) setupUI = FindObjectOfType<SetupPhaseUIManager>();
-        // if (!mainUI) mainUI = FindObjectOfType<MainPhaseUIManager>();
+        if (!mainUI) mainUI = FindObjectOfType<MainPhaseUIManager>();
     }
 
     public void OnTransitionToPhase(GamePhase phase)
@@ -42,7 +42,7 @@ public class GameUIManager : MonoBehaviour
 
             case GamePhase.MainGame:
                 phaseText.text = "Main Game";
-                // mainUI.gameObject.SetActive(true);
+                mainUI.gameObject.SetActive(true);
                 break;
 
             case GamePhase.CivilWar:

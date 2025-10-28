@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class SetupPhaseUIManager : MonoBehaviour
 {
    [Header("Setup Phase")]     
-    public GameObject setupGamephase;
+    public GameObject setupGamePhase;
     public Button rollDiceButton;
     
     [Header("Card Display")]
@@ -32,8 +32,8 @@ public class SetupPhaseUIManager : MonoBehaviour
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
         if (!_canvasGroup)
-            _canvasGroup = setupGamephase.GetComponent<CanvasGroup>() 
-                           ?? setupGamephase.AddComponent<CanvasGroup>();
+            _canvasGroup = setupGamePhase.GetComponent<CanvasGroup>() 
+                           ?? setupGamePhase.AddComponent<CanvasGroup>();
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
@@ -152,7 +152,7 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     private void EnableCanvasGroup(bool enable)
     {
-        if (!_canvasGroup) _canvasGroup = setupGamephase.GetComponent<CanvasGroup>();
+        if (!_canvasGroup) _canvasGroup = setupGamePhase.GetComponent<CanvasGroup>();
         
         _canvasGroup.interactable = enable;
         _canvasGroup.blocksRaycasts = enable;
@@ -230,7 +230,7 @@ public class SetupPhaseUIManager : MonoBehaviour
     public void OnSetupPhaseComplete()
     {
         Debug.Log("Setup phase UI cleanup");
-        setupGamephase.SetActive(false);
+        setupGamePhase.SetActive(false);
         // Additional cleanup if needed
     }
 

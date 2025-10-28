@@ -5,7 +5,7 @@ public class GameManager : GameManagerBase
     public static GameManager Instance { get; private set; }
 
     [HideInInspector] public SetupPhaseGameManager setupPhase;
-    // private MainPhaseGameManager mainPhase;
+    [HideInInspector] public MainPhaseGameManager mainPhase;
     
     private GamePhase _currentPhase = GamePhase.CivilWar;
     public GamePhase CurrentPhase
@@ -38,7 +38,7 @@ public class GameManager : GameManagerBase
     private void InitializePhases()
     {
         setupPhase = new SetupPhaseGameManager(this);
-        // mainPhase = new MainPhaseGameManager(this);
+        mainPhase = new MainPhaseGameManager(this);
     }
     
     private void TransitionToPhase(GamePhase newPhase)
@@ -69,13 +69,11 @@ public class GameManager : GameManagerBase
     private void BeginSetupPhase()
     {
         Debug.Log("Begin setup phase");
-        setupPhase.InitializeSetupPhase();
+        setupPhase.InitializePhase();
     }
     
     private void BeginMainGamePhase()
     {
-        // SetupPhaseGameManager.Instance.gameObject.SetActive(false);
-        // MainPhaseGameManager.Instance.gameObject.SetActive(true);
         
     }
 }

@@ -758,13 +758,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
-  setupGamephase: {fileID: 1864857593311417661}
+  setupGamePhase: {fileID: 1864857593311417661}
   rollDiceButton: {fileID: 4755368242826792193}
   cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 7075911402009855571}
   actorUIParent: {fileID: 8654410005740784361}
   spacingBetweenPlayerCards: 150
-  spacingBetweenActorCards: 300
+  spacingBetweenActorCards: 200
   unassignedPlayerCards: []
   unassignedActorCards: []
 --- !u!114 &4755368242826792193 stripped
@@ -921,6 +921,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4799507147203409464, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
   m_PrefabInstance: {fileID: 6219796264034280716}
   m_PrefabAsset: {fileID: 0}
+--- !u!224 &6508734186844676860 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 865409099167287280, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+  m_PrefabInstance: {fileID: 6219796264034280716}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7731661410587092815 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
@@ -940,6 +945,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
   mainGamePhase: {fileID: 7731661410587092815}
   rollDiceButton: {fileID: 812377014457276422}
-  playerActorDisplayPrefab: {fileID: 0}
-  playerUIParent: {fileID: 0}
-  spacingBetweenActorCards: 300
+  playerActorDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  playerUIParent: {fileID: 6508734186844676860}
+  spacingBetweenActorCards: 200

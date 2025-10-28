@@ -14,6 +14,7 @@ public class AIManager : MonoBehaviour
 
     // Phase managers (plain C# classes)
     public SetupPhaseAIManager setupAI;
+    public MainPhaseAIManager mainAI;
 
     private void Awake()
     {
@@ -21,6 +22,7 @@ public class AIManager : MonoBehaviour
         else Destroy(gameObject);
 
         setupAI = new SetupPhaseAIManager(this);
+        mainAI = new MainPhaseAIManager(this);
     }
 
     public void CreateAIPlayers(int humanPlayerCount)
