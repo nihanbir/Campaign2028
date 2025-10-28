@@ -163,7 +163,6 @@ MonoBehaviour:
   playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0
   decisionDelayMax: 0
-  failedAttempts: 0
 --- !u!4 &172211631
 Transform:
   m_ObjectHideFlags: 0
@@ -223,7 +222,6 @@ MonoBehaviour:
   playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0
   decisionDelayMax: 0
-  failedAttempts: 0
 --- !u!4 &210027821
 Transform:
   m_ObjectHideFlags: 0
@@ -485,7 +483,6 @@ MonoBehaviour:
   playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0
   decisionDelayMax: 0
-  failedAttempts: 0
 --- !u!4 &920864601
 Transform:
   m_ObjectHideFlags: 0
@@ -545,7 +542,6 @@ MonoBehaviour:
   playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0
   decisionDelayMax: 0
-  failedAttempts: 0
 --- !u!4 &1473444821
 Transform:
   m_ObjectHideFlags: 0

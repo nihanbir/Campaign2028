@@ -314,6 +314,7 @@ GameObject:
   - component: {fileID: 4799507147203409464}
   - component: {fileID: 1873173497916125497}
   - component: {fileID: 2974073964415388581}
+  - component: {fileID: 3380235643682900504}
   m_Layer: 5
   m_Name: MainGamePanel
   m_TagString: Untagged
@@ -381,6 +382,25 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3380235643682900504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4403753703118668355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
+  mainGamePhase: {fileID: 4403753703118668355}
+  rollDiceButton: {fileID: 6707833643135122698}
+  eventCardPrefab: {fileID: 3247192074034216707, guid: d2173952cf69e2a4198a43dd007538f8, type: 3}
+  eventArea: {fileID: 3209180837638522148}
+  cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  playerUIParent: {fileID: 865409099167287280}
+  spacingBetweenPlayerCards: 150
 --- !u!1 &5937534768045356583
 GameObject:
   m_ObjectHideFlags: 0

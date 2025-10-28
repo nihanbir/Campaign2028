@@ -82,7 +82,7 @@ public class SetupPhaseUIManager : MonoBehaviour
                 {
                     displayCard.SetActor(GameManager.Instance.actorDeck[i]);
                 }
-                else if (cardType == CardDisplayType.UnassignedPlayer)
+                else
                 {
                     GameManager.Instance.players[i].SetDisplayCard(displayCard);
                 }

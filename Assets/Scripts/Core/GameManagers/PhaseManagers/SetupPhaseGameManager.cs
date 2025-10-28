@@ -14,9 +14,7 @@ public class SetupPhaseGameManager : BasePhaseGameManager
     private Player _playerToSelect;
     
     private SetupStage _currentStage = SetupStage.Roll;
-
     
-
     public SetupStage CurrentStage
     {
         get => _currentStage;
@@ -278,7 +276,7 @@ public class SetupPhaseGameManager : BasePhaseGameManager
     private void OnAllActorsAssigned()
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
-        // currentGamePhase = GamePhase.MainGame;
+        game.CurrentPhase = GamePhase.MainGame;
        
     }
 
@@ -292,6 +290,13 @@ public class SetupPhaseGameManager : BasePhaseGameManager
     }
 
     #endregion
+
+    public void ClearPhase()
+    {
+        playersToRoll.Clear();
+        _playerToSelect = null;
+        rolledPlayers.Clear();
+    }
 }
 
 public enum SetupStage

@@ -11,7 +11,7 @@ public class GameManager : GameManagerBase
     public GamePhase CurrentPhase
     {
         get => _currentPhase;
-        private set
+        set
         {
             if (_currentPhase != value)
             {
@@ -74,7 +74,8 @@ public class GameManager : GameManagerBase
     
     private void BeginMainGamePhase()
     {
-        
+        Debug.Log("Begin main phase");
+        mainPhase.InitializePhase();
     }
 }
 

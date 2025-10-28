@@ -3,11 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
+public class PlayerDisplayCard : BaseDisplayCard
 {
-    [Header("Card Type")]
-    public CardDisplayType displayType;
-    
     [Header("Common Elements")]
     public Player owningPlayer;
     public Image diceImage;
@@ -114,7 +111,7 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
     
     #endregion
 
-    public void OnPointerClick(PointerEventData eventData)
+    public override void OnPointerClick(PointerEventData eventData)
     {
         switch (displayType)
         {
@@ -157,11 +154,6 @@ public class PlayerDisplayCard : MonoBehaviour, IPointerClickHandler
     {
         if (diceImage) diceImage.gameObject.SetActive(show);
     }
-}
 
-public enum CardDisplayType
-{
-    UnassignedPlayer,
-    UnassignedActor,
-    AssignedActor
+    
 }
