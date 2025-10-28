@@ -160,6 +160,15 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
+  heldEvent:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    eventType: 0
+    mustPlayImmediately: 0
+    canSave: 0
   playerDisplayCard: {fileID: 0}
 --- !u!4 &223477446
 Transform:
@@ -639,11 +648,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8374226444098646973, guid: d2173952cf69e2a4198a43dd007538f8, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -298.98035
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8374226444098646973, guid: d2173952cf69e2a4198a43dd007538f8, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -77.32831
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8374226444098646973, guid: d2173952cf69e2a4198a43dd007538f8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

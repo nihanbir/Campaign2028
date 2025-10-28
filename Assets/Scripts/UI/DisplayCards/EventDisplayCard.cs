@@ -28,13 +28,13 @@ public class EventDisplayCard : BaseDisplayCard
         if (saveButton)
         {
             saveButton.onClick.AddListener(OnCardSaved);
-            saveButton.gameObject.SetActive(false);
+            // saveButton.gameObject.SetActive(false);
         }
-
+        
         if (playButton)
         {
             playButton.onClick.AddListener(OnCardPlayed);
-            playButton.gameObject.SetActive(false);
+            // playButton.gameObject.SetActive(false);
         }
     }
     
@@ -49,24 +49,24 @@ public class EventDisplayCard : BaseDisplayCard
     {
         cardStatus = CardStatus.Revealed;
         artworkImage.sprite = _eventCard.artwork;
-
-        playButton.gameObject.SetActive(true);
-        if (_eventCard.canSave)
-        {
-            saveButton.gameObject.SetActive(true);
-        }
-        
     }
     
-
     private void OnCardPlayed()
     {
-        
+        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, _eventCard);
     }
 
     private void OnCardSaved()
     {
+        GameManager.Instance.mainPhase.TrySaveEvent(GameManager.Instance.CurrentPlayer, _eventCard);
+    }
+
+    public void SetButtonsVisible(bool visible)
+    {
+        playButton.gameObject.SetActive(visible);
         
+        if (!_eventCard.canSave) return;
+        saveButton.gameObject.SetActive(visible);
     }
 }
 

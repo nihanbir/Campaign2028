@@ -26,7 +26,9 @@ public class MainPhaseUIManager : MonoBehaviour
     {
         if (rollDiceButton)
             rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        
+        InitializePlayersForTesting();
+        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
     }
 
     void RelocatePlayerCards(Transform parent, float spacing)
@@ -128,4 +130,56 @@ public class MainPhaseUIManager : MonoBehaviour
         Debug.Log($"[UI] Player {player.playerID} captured {card.cardName}");
         if (_currentTargetGO) Destroy(_currentTargetGO);
     }
+    
+    public void InitializePlayersForTesting()
+    {
+        Debug.Log("[MainPhaseUIManager] Initializing existing players with random actors for testing...");
+
+        var gm = GameManager.Instance;
+        var ui = GameUIManager.Instance;
+        
+        if (gm == null)
+        {
+            Debug.LogError("GameManager instance not found!");
+            return;
+        }
+
+        var players = gm.players;
+        if (players == null || players.Count == 0)
+        {
+            Debug.LogError("No players found in GameManager. Cannot initialize testing phase.");
+            return;
+        }
+
+        var allActors = new List<ActorCard>(gm.actorDeck);
+        if (allActors == null || allActors.Count == 0)
+        {
+            Debug.LogError("No actor cards found in GameManager!");
+            return;
+        }
+
+        // Assign random actors to players
+        for (int i = 0; i < players.Count; i++)
+        {
+            var player = players[i];
+            var actor = allActors[i % allActors.Count];
+
+            player.assignedActor = actor;
+
+            // Spawn player display card for this actor
+            var displayGo = Instantiate(ui.setupUI.cardDisplayPrefab, playerUIParent);
+            var displayCard = displayGo.GetComponent<PlayerDisplayCard>();
+
+            if (displayCard != null)
+            {
+                displayCard.SetActor(actor);
+                displayCard.displayType = CardDisplayType.AssignedActor;
+                player.playerDisplayCard = displayCard;
+            }
+        }
+
+        RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
+    }
+
 }

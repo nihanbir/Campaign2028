@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
     public string playerName;
     public int playerID;
     public ActorCard assignedActor;
+    public EventCard heldEvent;
     
     public PlayerDisplayCard playerDisplayCard;
     private SetupPhaseGameManager _setupPhaseGameManager;

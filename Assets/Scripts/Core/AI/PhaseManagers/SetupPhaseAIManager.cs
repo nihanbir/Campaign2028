@@ -28,14 +28,14 @@ public class SetupPhaseAIManager
             yield return aiManager.StartCoroutine(AssignActorToAnotherPlayer(aiPlayer));
         }
     }
-    
-    public virtual IEnumerator RollDice(AIPlayer aiPlayer)
+
+    private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         GameUIManager.Instance.setupUI.OnRollDiceClicked();
     }
-    
-    public virtual IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
+
+    private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         

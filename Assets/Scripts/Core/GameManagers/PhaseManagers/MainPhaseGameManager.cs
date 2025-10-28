@@ -6,7 +6,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
 {
     private Card _currentTargetCard;     
     private EventCard _currentEventCard;
-    private readonly Dictionary<Player, List<EventCard>> _heldEvents = new();
+    private readonly Dictionary<Player, EventCard> _heldEvents = new();
     public List<EventCard> availableEventCards = new();
 
     public MainPhaseGameManager(GameManager gm) : base(gm) { }
@@ -34,9 +34,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         GameUIManager.Instance.mainUI.OnPlayerTurnStarted(current);
 
-        if (!_heldEvents.ContainsKey(current))
-            _heldEvents[current] = new List<EventCard>();
-
         // // Step 1: Handle target card
         // if (_currentTargetCard == null)
         // {
@@ -54,16 +51,22 @@ public class MainPhaseGameManager : BasePhaseGameManager
         if (_currentEventCard != null)
         {
             GameUIManager.Instance.mainUI.SpawnEventCard(_currentEventCard);
-            HandleEventCard(current, _currentEventCard);
         }
 
-        // Step 3: AI vs Player handling
+        if (_currentEventCard == null)
+        {
+            Debug.Log("End of event cards");
+            return;
+        } 
+
         if (AIManager.Instance.IsAIPlayer(current))
         {
-            AIManager.Instance.mainAI.ExecuteAITurn(AIManager.Instance.GetAIPlayer(current), this);
+            var aiPlayer = AIManager.Instance.GetAIPlayer(current);
+            game.StartCoroutine(AIManager.Instance.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
         }
         else
         {
+            
             GameUIManager.Instance.mainUI.EnableDiceButton(true);
         }
     }
@@ -158,33 +161,26 @@ public class MainPhaseGameManager : BasePhaseGameManager
         return card;
     }
 
-    private void HandleEventCard(Player player, EventCard card)
-    {
-        if (card == null) return;
-
-        if (card.mustPlayImmediately)
-        {
-            ApplyEventEffect(player, card);
-        }
-        else if (card.canSave)
-        {
-            var saved = _heldEvents[player];
-            if (saved.Count == 0)
-            {
-                saved.Add(card);
-                Debug.Log($"Player {player.playerID} saved event {card.cardName}");
-            }
-            else
-            {
-                ApplyEventEffect(player, card);
-            }
-        }
-    }
-
-    private void ApplyEventEffect(Player player, EventCard card)
+    
+    //Called from display card buttons
+    public void ApplyEventEffect(Player player, EventCard card)
     {
         Debug.Log($"Applying event {card.cardName} for Player {player.playerID}");
         // TODO: Implement event effects (ExtraRoll, LoseTurn, etc.)
+        EndPlayerTurn();
+    }
+
+    public bool TrySaveEvent(Player player, EventCard card)
+    {
+        if (_heldEvents.TryAdd(player, card))
+        {
+            Debug.Log($"Player {player.playerID} saved event {card.cardName}");
+            EndPlayerTurn();
+            return true;
+        }
+
+        Debug.Log("Player already has a saved event");
+        return false;
     }
 }
 
