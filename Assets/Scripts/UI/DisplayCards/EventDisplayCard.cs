@@ -12,9 +12,7 @@ public class EventDisplayCard : BaseDisplayCard<EventCard>
     {
         base.SetCard(card);
         InitializeButtons();
-        RevealCard();
     }
-
 
     private void InitializeButtons()
     {
@@ -30,26 +28,24 @@ public class EventDisplayCard : BaseDisplayCard<EventCard>
             playButton.gameObject.SetActive(false);
         }
     }
-
-    private void RevealCard()
-    {
-        artworkImage.sprite = cardData.artwork;
-        SetButtonsVisible(true);
-    }
     
-    private void OnCardPlayed()
-    {
-        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, cardData);
-    }
-
     private void OnCardSaved()
     {
         GameManager.Instance.mainPhase.TrySaveEvent(GameManager.Instance.CurrentPlayer, cardData);
     }
-
+    private void OnCardPlayed()
+    {
+        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, cardData);
+    }
+    
     public void SetButtonsVisible(bool visible)
     {
         playButton.gameObject.SetActive(visible);
-        saveButton.gameObject.SetActive(cardData.canSave && visible);
+        playButton.interactable = visible;
+
+        var canSave = cardData.canSave && visible;
+        saveButton.gameObject.SetActive(canSave);
+        saveButton.interactable = canSave;
+        
     }
 }

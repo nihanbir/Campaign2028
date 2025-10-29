@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BaseDisplayCard<T> : MonoBehaviour where T : Card
+public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
 {
     [Header("Card Type")]
     public Image artworkImage;
@@ -23,6 +23,17 @@ public class BaseDisplayCard<T> : MonoBehaviour where T : Card
         cardData = card;
         artworkImage.sprite = cardData.artwork;
     }
+
+    public void SetCardBase(Card card)
+    {
+        // Safe cast
+        if (card is T typedCard)
+            SetCard(typedCard);
+        else
+            Debug.LogError($"Invalid card type {card.GetType().Name} passed to {GetType().Name}");
+    }
+
+    public Card GetCard() => cardData;
 }
 
 
