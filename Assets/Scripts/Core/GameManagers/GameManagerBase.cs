@@ -20,7 +20,7 @@ public abstract class GameManagerBase : MonoBehaviour
     
     protected virtual void Awake()
     {
-        players = new List<Player>(FindObjectsOfType<Player>());
+        players = new List<Player>(FindObjectsByType<Player>( FindObjectsInactive.Include, FindObjectsSortMode.None));
     }
 
     protected void LoadDecks()

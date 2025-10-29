@@ -7,7 +7,6 @@ public class AIManager : MonoBehaviour
 
     [Header("AI Configuration")]
     [SerializeField] private int numberOfAIPlayers = 5;
-    [SerializeField] private bool mixPersonalities = true;
     [SerializeField] private GameObject aiPlayerPrefab;
 
     [HideInInspector] public List<AIPlayer> aiPlayers = new List<AIPlayer>();
