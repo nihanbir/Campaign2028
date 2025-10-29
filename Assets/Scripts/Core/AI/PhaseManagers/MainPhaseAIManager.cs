@@ -18,7 +18,9 @@ public class MainPhaseAIManager
         // Debug.Log($"AI Player {aiPlayer.playerID} rolling dice for Main Phase");
 
         yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
-        // yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        yield return aiManager.StartCoroutine(RollDice(aiPlayer));
     }
     
     private IEnumerator RollDice(AIPlayer aiPlayer)

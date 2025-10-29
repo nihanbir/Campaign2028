@@ -161,7 +161,7 @@ public class SetupPhaseGameManager : BasePhaseGameManager
         // Show all dice results
         foreach (var rolledPlayer in rolledPlayers)
         {
-            GameUIManager.Instance.setupUI.UpdateUIForPlayer(rolledPlayer.Key, true);
+            rolledPlayer.Key.playerDisplayCard.ShowDice(false);
         }
         
         int highestRoll = rolledPlayers.Values.Max();

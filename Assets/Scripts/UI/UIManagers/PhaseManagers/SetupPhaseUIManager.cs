@@ -116,15 +116,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         
         GameManager.Instance.setupPhase.PlayerRolledDice();
     }
-
-    public void UpdateUIForPlayer(Player player, bool hideDice)
-    {
-        if (player.playerDisplayCard)
-        {
-            player.playerDisplayCard.ShowDice(!hideDice);
-        }
-    }
-
+    
     #endregion
 
     #region Turn State UI
