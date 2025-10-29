@@ -15,5 +15,7 @@ MonoBehaviour:
   eventName: Mardi Gras Float
   artwork: {fileID: 8852512794475590431, guid: c7c234a968ecbce4d9397fbb5516ac47, type: 3}
   eventType: 2
+  subType: 0
+  requiredInstitution: {fileID: 0}
   mustPlayImmediately: 0
   canSave: 1

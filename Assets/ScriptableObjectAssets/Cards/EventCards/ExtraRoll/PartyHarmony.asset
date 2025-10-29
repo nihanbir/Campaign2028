@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
   eventName: Party Harmony
   artwork: {fileID: -239839460140211939, guid: 95a5eb19abc44834d9902a6fe6eafbb6, type: 3}
-  backSide: {fileID: 0}
   eventType: 0
+  subType: 1
+  requiredInstitution: {fileID: 0}
   mustPlayImmediately: 1
   canSave: 0

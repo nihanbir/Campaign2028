@@ -15,5 +15,7 @@ MonoBehaviour:
   eventName: White House Control
   artwork: {fileID: 803176604597118380, guid: c5dfa920bd614124cbff1ca2d9230b92, type: 3}
   eventType: 0
+  subType: 2
+  requiredInstitution: {fileID: 11400000, guid: 5f71075cb3db11f4085e3db0bb5213da, type: 2}
   mustPlayImmediately: 1
   canSave: 0
