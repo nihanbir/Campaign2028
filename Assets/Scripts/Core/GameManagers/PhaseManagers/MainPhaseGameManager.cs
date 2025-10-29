@@ -106,8 +106,9 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         if (card == null) return;
         card.isCaptured = true;
+        
+        player.UpdatePlayerScore(card);
     
-        Debug.Log($"Player {player.playerID} captured {card.cardName}");
         GameUIManager.Instance.mainUI.OnCardCaptured(player, card);
         _currentTargetCard = null; // will draw a new one next round
     }

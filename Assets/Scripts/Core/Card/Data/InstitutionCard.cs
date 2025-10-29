@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class InstitutionCard : Card
 {
+    public override CardType CardType => CardType.Institution;
     public InstitutionType institutionType;
     public List<int> redSuccessRolls = new List<int>();
     public List<int> blueSuccessRolls = new List<int>();

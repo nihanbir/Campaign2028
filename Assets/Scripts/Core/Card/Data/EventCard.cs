@@ -3,6 +3,7 @@ using System;
 [Serializable]
 public class EventCard : Card
 {
+    public override CardType CardType => CardType.Event;
     public EventType eventType;
     public bool mustPlayImmediately;
     public bool canSave;

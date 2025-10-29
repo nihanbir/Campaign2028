@@ -7,6 +7,7 @@ using UnityEngine;
 [Serializable]
 public class ActorCard : Card
 {
+    public override CardType CardType => CardType.Actor;
     public ActorTeam team;
     public ActorType actorType;
     [HideInInspector] public int evScore;

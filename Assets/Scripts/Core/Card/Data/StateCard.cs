@@ -4,6 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class StateCard : Card
 {
+    public override CardType CardType => CardType.State;
     public int electoralVotes;
     public List<int> redSuccessRolls = new List<int>();
     public List<int> blueSuccessRolls = new List<int>();

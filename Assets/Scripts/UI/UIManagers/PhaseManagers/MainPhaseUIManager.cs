@@ -134,12 +134,6 @@ public class MainPhaseUIManager : MonoBehaviour
         display.SetCardBase(card);
     }
 
-    public void ShowExistingTarget(Card card)
-    {
-        if (_currentTargetGO)
-            _currentTargetGO.GetComponent<Image>().sprite = card.artwork;
-    }
-
     public void SpawnEventCard(EventCard card)
     {
         if (_currentEventGO) Destroy(_currentEventGO);
@@ -155,6 +149,7 @@ public class MainPhaseUIManager : MonoBehaviour
     public void OnCardCaptured(Player player, Card card)
     {
         Debug.Log($"[UI] Player {player.playerID} captured {card.cardName}");
+        player.playerDisplayCard.UpdateScore();
         if (_currentTargetGO) Destroy(_currentTargetGO);
     }
     

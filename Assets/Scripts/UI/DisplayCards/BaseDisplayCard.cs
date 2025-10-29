@@ -37,3 +37,5 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
 }
 
 
+
+

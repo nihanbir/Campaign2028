@@ -32,7 +32,10 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         }
         
         if (diceImage) diceImage.gameObject.SetActive(false);
-        if (scorePanel) scorePanel.SetActive(false);
+        if (GameManager.Instance.CurrentPhase != GamePhase.MainGame)
+        {
+            if (scorePanel) scorePanel.SetActive(false);
+        }
     }
 
     public override void SetCard(ActorCard card)
@@ -67,17 +70,16 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
     {
         if (cardData == null) return;
         
-        if (nameText) nameText.text = cardData.cardName;
-        if (artworkImage) artworkImage.sprite = cardData.artwork;
-        if (evScoreText) evScoreText.text = cardData.evScore.ToString();
-        if (instScoreText) instScoreText.text = cardData.instScore.ToString();
+        nameText.text = cardData.cardName;
+        artworkImage.sprite = cardData.artwork;
+        UpdateScore();
     }
 
     public void SetRolledDiceImage()
     {
         if (diceImage)
         {
-            diceImage.gameObject.SetActive(true);
+            ShowDice(true);
             GameUIManager.Instance.SetDiceSprite(diceImage);
         }
     }
@@ -153,6 +155,12 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
     public void ShowDice(bool show)
     {
         if (diceImage) diceImage.gameObject.SetActive(show);
+    }
+
+    public void UpdateScore()
+    {
+        evScoreText.text = cardData.evScore.ToString();
+        instScoreText.text = cardData.instScore.ToString();
     }
 }
 
