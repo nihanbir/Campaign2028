@@ -15,5 +15,6 @@ public enum EventType
     NeedTwo,
     Challenge,
     LoseTurn,
-    ChineseAgent
+    NoImpact,
+    DrawnCardStays
 }

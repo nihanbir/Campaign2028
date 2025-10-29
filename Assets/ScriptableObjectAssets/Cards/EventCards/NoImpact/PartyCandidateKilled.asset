@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
+  m_Name: PartyCandidateKilled
+  m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
+  eventName: Party Candidate Killed
+  artwork: {fileID: 2932829996740422768, guid: a226dca6b36c6c549901a8c3575aaf85, type: 3}
+  backSide: {fileID: 0}
+  eventType: 4
+  mustPlayImmediately: 1
+  canSave: 0
