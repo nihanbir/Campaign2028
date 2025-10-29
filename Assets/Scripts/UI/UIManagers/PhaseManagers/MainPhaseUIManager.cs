@@ -9,10 +9,10 @@ public class MainPhaseUIManager : MonoBehaviour
     public Button rollDiceButton;
     
     [Header("Cards")]
-    // public GameObject stateCardPrefab;
-    // public GameObject institutionCardPrefab;
+    public GameObject stateCardPrefab;
+    public GameObject institutionCardPrefab;
     public GameObject eventCardPrefab;
-    // public Transform tableArea;
+    public Transform tableArea;
     public Transform eventArea;
     
     [Header("Players")]
@@ -76,21 +76,24 @@ public class MainPhaseUIManager : MonoBehaviour
     
     public void OnPlayerTurnStarted(Player player)
     {
-        var shouldHideButtonsFromPlayer = !AIManager.Instance.IsAIPlayer(player);
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
         
-        EnableDiceButton(shouldHideButtonsFromPlayer);
-        _currentEventDisplayCard.SetButtonsVisible(shouldHideButtonsFromPlayer);
+        EnableDiceButton(!isAIPlayer);
+        _currentEventDisplayCard.SetButtonsVisible(!isAIPlayer);
+        
+        player.playerDisplayCard.Highlight();
     }
 
     public void OnPlayerTurnEnded(Player player)
     {
-        EnableDiceButton(false);
+        player.playerDisplayCard.ShowDice(false);
+        player.playerDisplayCard.RemoveHighlight();
     }
 
     public void EnableDiceButton(bool enable)
     {
-        if (rollDiceButton)
-            rollDiceButton.interactable = enable;
+        if (!rollDiceButton) return;
+        rollDiceButton.interactable = enable;
     }
 
     public void OnRollDiceClicked()
@@ -103,19 +106,39 @@ public class MainPhaseUIManager : MonoBehaviour
         GameManager.Instance.mainPhase.PlayerRolledDice();
     }
 
-    // public void SpawnTargetCard(Card card)
-    // {
-    //     if (_currentTargetGO) Destroy(_currentTargetGO);
-    //     GameObject prefab = card is InstitutionCard ? institutionCardPrefab : stateCardPrefab;
-    //     _currentTargetGO = Instantiate(prefab, tableArea);
-    //     _currentTargetGO.GetComponent<Image>().sprite = card.artwork;
-    // }
+    public void SpawnTargetCard(Card card)
+    {
+        if (_currentTargetGO) Destroy(_currentTargetGO);
+        GameObject prefab = card switch
+        {
+            InstitutionCard => institutionCardPrefab,
+            StateCard => stateCardPrefab,
+            _ => null
+        };
+        
+        if (prefab == null)
+        {
+            Debug.Log($"Unsupported card type: {card.GetType().Name}");
+            return;
+        }
+        
+        _currentTargetGO = Instantiate(prefab, tableArea);
 
-    // public void ShowExistingTarget(Card card)
-    // {
-    //     if (_currentTargetGO)
-    //         _currentTargetGO.GetComponent<Image>().sprite = card.artwork;
-    // }
+        var display = _currentTargetGO.GetComponent<IDisplayCard>();
+        if (display == null)
+        {
+            Debug.LogError($"Prefab {prefab.name} missing IDisplayCard component.");
+            return;
+        }
+
+        display.SetCardBase(card);
+    }
+
+    public void ShowExistingTarget(Card card)
+    {
+        if (_currentTargetGO)
+            _currentTargetGO.GetComponent<Image>().sprite = card.artwork;
+    }
 
     public void SpawnEventCard(EventCard card)
     {

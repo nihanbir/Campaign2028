@@ -8,6 +8,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private EventCard _currentEventCard;
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
     public List<EventCard> availableEventCards = new();
+    public List<Card> shuffledDeck = new();
 
     public MainPhaseGameManager(GameManager gm) : base(gm) { }
 
@@ -21,10 +22,12 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     private void ShuffleDecks()
     {
-        // game.stateDeck = game.stateDeck.OrderBy(_ => Random.value).ToList();
-        // game.institutionDeck = game.institutionDeck.OrderBy(_ => Random.value).ToList();
+        shuffledDeck.AddRange(game.stateDeck);
+        shuffledDeck.AddRange(game.institutionDeck);
+        shuffledDeck = shuffledDeck.OrderBy(_ => Random.value).ToList();
+        
         Debug.Log("shuffling");
-        availableEventCards = game.eventDeck.OrderBy(_ => Random.value).ToList();
+        availableEventCards.AddRange(game.eventDeck.OrderBy(_ => Random.value).ToList());
     }
     
     public override void StartPlayerTurn()
@@ -33,23 +36,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Debug.Log($"--- Player {current.playerID} turn started (Main Phase) ---");
         
         // // Step 1: Handle target card
-        // if (_currentTargetCard == null)
-        // {
-        //     Debug.Log("currentargetcard is null");
-        //     _currentTargetCard = DrawTargetCard();
-        //     GameUIManager.Instance.mainUI.SpawnTargetCard(_currentTargetCard);
-        // }
-        // else
-        // {
-        //     GameUIManager.Instance.mainUI.ShowExistingTarget(_currentTargetCard);
-        // }
+        if (_currentTargetCard == null)
+        {
+            _currentTargetCard = DrawTargetCard();
+        }
 
         // Step 2: Handle event card
         _currentEventCard = DrawEventCard();
-        if (_currentEventCard != null)
-        {
-            GameUIManager.Instance.mainUI.SpawnEventCard(_currentEventCard);
-        }
 
         if (_currentEventCard == null)
         {
@@ -85,63 +78,57 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Player current = game.CurrentPlayer;
 
         Debug.Log($"Player {current.playerID} rolled {roll}");
-        // EvaluateCapture(current, roll);
-        // EndPlayerTurn();
+        EvaluateCapture(current, roll);
     }
 
-    // private void EvaluateCapture(Player player, int roll)
-    // {
-    //     bool success = false;
-    //
-    //     if (_currentTargetCard is StateCard state)
-    //         success = state.IsSuccessfulRoll(roll, player.assignedActor.team);
-    //     else if (_currentTargetCard is InstitutionCard inst)
-    //         success = inst.IsSuccessfulRoll(roll, player.assignedActor.team);
-    //
-    //     if (success)
-    //     {
-    //         CaptureCard(player, _currentTargetCard);
-    //     }
-    //     else
-    //     {
-    //         Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
-    //     }
-    // }
+    private void EvaluateCapture(Player player, int roll)
+    {
+        bool success = _currentTargetCard switch
+        {
+            StateCard state => state.IsSuccessfulRoll(roll, player.assignedActor.team),
+            InstitutionCard inst => inst.IsSuccessfulRoll(roll, player.assignedActor.team),
+            _ => false
+        };
 
-    // private void CaptureCard(Player player, Card card)
-    // {
-    //     if (card == null) return;
-    //     card.isCaptured = true;
-    //
-    //     Debug.Log($"Player {player.playerID} captured {card.cardName}");
-    //     GameUIManager.Instance.mainUI.OnCardCaptured(player, card);
-    //     _currentTargetCard = null; // will draw a new one next round
-    // }
+        if (success)
+        {
+            CaptureCard(player, _currentTargetCard);
+        }
+        else
+        {
+            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
+        }
+        
+        EndPlayerTurn();
+    }
 
-    // -----------------------------------------------------------
-    // CARD DRAW LOGIC
-    // -----------------------------------------------------------
+    private void CaptureCard(Player player, Card card)
+    {
+        if (card == null) return;
+        card.isCaptured = true;
+    
+        Debug.Log($"Player {player.playerID} captured {card.cardName}");
+        GameUIManager.Instance.mainUI.OnCardCaptured(player, card);
+        _currentTargetCard = null; // will draw a new one next round
+    }
 
-    // private Card DrawTargetCard()
-    // {
-    //     bool drawInstitution = Random.value > 0.5f && game.institutionDeck.Count > 0;
-    //     Card card = drawInstitution
-    //         ? game.institutionDeck[0]
-    //         : game.stateDeck.FirstOrDefault();
-    //
-    //     if (card == null)
-    //     {
-    //         Debug.LogWarning("No target card drawn — decks empty!");
-    //         return null;
-    //     }
-    //
-    //     if (drawInstitution)
-    //         game.institutionDeck.RemoveAt(0);
-    //     else
-    //         game.stateDeck.RemoveAt(0);
-    //
-    //     return card;
-    // }
+    private Card DrawTargetCard()
+    {
+        Card card = shuffledDeck[0];
+        Debug.Log("Drawing target card");
+    
+        if (card == null)
+        {
+            Debug.LogWarning("No target card drawn — decks empty!");
+            return null;
+        }
+    
+        shuffledDeck.RemoveAt(0);
+        
+        GameUIManager.Instance.mainUI.SpawnTargetCard(card);
+    
+        return card;
+    }
 
     private EventCard DrawEventCard()
     {
@@ -150,8 +137,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         Debug.Log("Draw Event Card");
         var card = availableEventCards[0];
-        // availableEventCards.Remove(card);
         availableEventCards.RemoveAt(0);
+        
+        GameUIManager.Instance.mainUI.SpawnEventCard(card);
+        
         return card;
     }
 
@@ -161,7 +150,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         Debug.Log($"Applying event {card.cardName} for Player {player.playerID}");
         // TODO: Implement event effects (ExtraRoll, LoseTurn, etc.)
-        EndPlayerTurn();
     }
 
     public bool TrySaveEvent(Player player, EventCard card)
@@ -169,7 +157,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
         if (_heldEvents.TryAdd(player, card))
         {
             Debug.Log($"Player {player.playerID} saved event {card.cardName}");
-            EndPlayerTurn();
             return true;
         }
 
