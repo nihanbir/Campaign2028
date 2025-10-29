@@ -53,6 +53,7 @@ public class Player : MonoBehaviour
 
     public void AddExtraRoll()
     {
+        Debug.Log("added extra roll");
         _rollCount++;
     }
 
