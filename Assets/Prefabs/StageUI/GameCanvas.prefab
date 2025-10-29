@@ -904,6 +904,9 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 2189841147823705210}
+    - targetCorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8066389155480619410}
   m_SourcePrefab: {fileID: 100100000, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
 --- !u!114 &812377014457276422 stripped
@@ -922,6 +925,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4799507147203409464, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
   m_PrefabInstance: {fileID: 6219796264034280716}
   m_PrefabAsset: {fileID: 0}
+--- !u!224 &5995668172303153376 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 388932241967685100, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+  m_PrefabInstance: {fileID: 6219796264034280716}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &6508734186844676860 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 865409099167287280, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
@@ -932,6 +940,18 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
   m_PrefabInstance: {fileID: 6219796264034280716}
   m_PrefabAsset: {fileID: 0}
+--- !u!225 &2189841147823705210
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7731661410587092815}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &8066389155480619410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -946,9 +966,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
   mainGamePhase: {fileID: 7731661410587092815}
   rollDiceButton: {fileID: 812377014457276422}
+  stateCardPrefab: {fileID: 5834333741464580609, guid: 4f2a106012446084b9307b767b226251, type: 3}
+  institutionCardPrefab: {fileID: 5440763519769647416, guid: 9b42aa2c5e1cfd046a404255dc2641e6, type: 3}
   eventCardPrefab: {fileID: 3247192074034216707, guid: d2173952cf69e2a4198a43dd007538f8, type: 3}
+  tableArea: {fileID: 5995668172303153376}
   eventArea: {fileID: 8851943022607196200}
-  cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 6508734186844676860}
   spacingBetweenPlayerCards: 150
 --- !u!224 &8851943022607196200 stripped
