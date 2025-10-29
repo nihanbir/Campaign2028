@@ -1,7 +1,6 @@
 
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class EventDisplayCard : BaseDisplayCard
@@ -24,31 +23,35 @@ public class EventDisplayCard : BaseDisplayCard
             Debug.Log("GameManager or players not initialized.");
             return;
         }
-
-        if (saveButton)
-        {
-            saveButton.onClick.AddListener(OnCardSaved);
-            // saveButton.gameObject.SetActive(false);
-        }
-        
-        if (playButton)
-        {
-            playButton.onClick.AddListener(OnCardPlayed);
-            // playButton.gameObject.SetActive(false);
-        }
     }
     
     public void SetEventCard(EventCard eventCard)
     {
         _eventCard = eventCard;
-        cardStatus = CardStatus.Unrevealed;
+        InitializeButtons();
         RevealCard();
+    }
+
+    private void InitializeButtons()
+    {
+        if (saveButton)
+        {
+            saveButton.onClick.AddListener(OnCardSaved);
+            saveButton.gameObject.SetActive(false);
+        }
+        
+        if (playButton)
+        {
+            playButton.onClick.AddListener(OnCardPlayed);
+            playButton.gameObject.SetActive(false);
+        }
     }
 
     private void RevealCard()
     {
         cardStatus = CardStatus.Revealed;
         artworkImage.sprite = _eventCard.artwork;
+        SetButtonsVisible(true);
     }
     
     private void OnCardPlayed()
@@ -64,9 +67,7 @@ public class EventDisplayCard : BaseDisplayCard
     public void SetButtonsVisible(bool visible)
     {
         playButton.gameObject.SetActive(visible);
-        
-        if (!_eventCard.canSave) return;
-        saveButton.gameObject.SetActive(visible);
+        saveButton.gameObject.SetActive(_eventCard.canSave && visible);
     }
 }
 

@@ -160,9 +160,18 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
+  heldEvent:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    eventType: 0
+    mustPlayImmediately: 0
+    canSave: 0
   playerDisplayCard: {fileID: 0}
-  decisionDelayMin: 0
-  decisionDelayMax: 0
+  decisionDelayMin: 0.5
+  decisionDelayMax: 2
 --- !u!4 &172211631
 Transform:
   m_ObjectHideFlags: 0
@@ -219,9 +228,18 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
+  heldEvent:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    eventType: 0
+    mustPlayImmediately: 0
+    canSave: 0
   playerDisplayCard: {fileID: 0}
-  decisionDelayMin: 0
-  decisionDelayMax: 0
+  decisionDelayMin: 0.5
+  decisionDelayMax: 2
 --- !u!4 &210027821
 Transform:
   m_ObjectHideFlags: 0
@@ -480,9 +498,18 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
+  heldEvent:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    eventType: 0
+    mustPlayImmediately: 0
+    canSave: 0
   playerDisplayCard: {fileID: 0}
-  decisionDelayMin: 0
-  decisionDelayMax: 0
+  decisionDelayMin: 0.5
+  decisionDelayMax: 2
 --- !u!4 &920864601
 Transform:
   m_ObjectHideFlags: 0
@@ -539,9 +566,18 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
+  heldEvent:
+    cardName: 
+    artwork: {fileID: 0}
+    backSide: {fileID: 0}
+    isCaptured: 0
+    isRevealed: 0
+    eventType: 0
+    mustPlayImmediately: 0
+    canSave: 0
   playerDisplayCard: {fileID: 0}
-  decisionDelayMin: 0
-  decisionDelayMax: 0
+  decisionDelayMin: 0.5
+  decisionDelayMax: 2
 --- !u!4 &1473444821
 Transform:
   m_ObjectHideFlags: 0
@@ -892,14 +928,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3053123639070992165, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
-      propertyPath: decisionDelayMax
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3053123639070992165, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
-      propertyPath: decisionDelayMin
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5169212758310868269, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
       propertyPath: m_LocalPosition.x
       value: 1612.9716

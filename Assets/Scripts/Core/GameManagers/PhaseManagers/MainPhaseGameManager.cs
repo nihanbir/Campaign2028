@@ -31,9 +31,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn started (Main Phase) ---");
-
-        GameUIManager.Instance.mainUI.OnPlayerTurnStarted(current);
-
+        
         // // Step 1: Handle target card
         // if (_currentTargetCard == null)
         // {
@@ -59,30 +57,26 @@ public class MainPhaseGameManager : BasePhaseGameManager
             return;
         } 
 
+        GameUIManager.Instance.mainUI.OnPlayerTurnStarted(current);
+        
         if (AIManager.Instance.IsAIPlayer(current))
         {
             var aiPlayer = AIManager.Instance.GetAIPlayer(current);
             game.StartCoroutine(AIManager.Instance.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
         }
-        else
-        {
-            
-            GameUIManager.Instance.mainUI.EnableDiceButton(true);
-        }
     }
 
     public override void EndPlayerTurn()
     {
-        Player current = game.CurrentPlayer;
-        GameUIManager.Instance.mainUI.OnPlayerTurnEnded(current);
-
-        game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.Count;
-        StartPlayerTurn();
+        GameUIManager.Instance.mainUI.OnPlayerTurnEnded(game.CurrentPlayer);
+        
+        MoveToNextPlayer();
     }
 
     public override void MoveToNextPlayer()
     {
-        EndPlayerTurn();
+        game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.Count;
+        StartPlayerTurn();
     }
 
     public override void PlayerRolledDice()

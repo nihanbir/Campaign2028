@@ -21,6 +21,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
     private GameObject _currentTargetGO;
     private GameObject _currentEventGO;
+    private EventDisplayCard _currentEventDisplayCard;
     
     public void InitializePhaseUI()
     {
@@ -75,7 +76,10 @@ public class MainPhaseUIManager : MonoBehaviour
     
     public void OnPlayerTurnStarted(Player player)
     {
-        EnableDiceButton(!AIManager.Instance.IsAIPlayer(player));
+        var shouldHideButtonsFromPlayer = !AIManager.Instance.IsAIPlayer(player);
+        
+        EnableDiceButton(shouldHideButtonsFromPlayer);
+        _currentEventDisplayCard.SetButtonsVisible(shouldHideButtonsFromPlayer);
     }
 
     public void OnPlayerTurnEnded(Player player)
@@ -117,11 +121,11 @@ public class MainPhaseUIManager : MonoBehaviour
     {
         if (_currentEventGO) Destroy(_currentEventGO);
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
-        EventDisplayCard displayCard = _currentEventGO.GetComponent<EventDisplayCard>();
+        _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
 
-        if (displayCard)
+        if (_currentEventDisplayCard)
         {
-            displayCard.SetEventCard(card);
+            _currentEventDisplayCard.SetEventCard(card);
         }
     }
 
