@@ -8,7 +8,7 @@ public class EventCardSO : ScriptableObject
     public Sprite backSide;
     
     public EventType eventType;
-    public EventSubType eventSubType;
+    public EventSubType subType;
     
     [SerializeField]
     public InstitutionCardSO requiredInstitution;
@@ -23,10 +23,20 @@ public class EventCardSO : ScriptableObject
             cardName = eventName,
             artwork = artwork,
             eventType = eventType,
-            subType = eventSubType,
+            subType = subType,
             mustPlayImmediately = mustPlayImmediately,
             canSave = canSave,
-            requiredInstitution = requiredInstitution
+            requiredInstitution = requiredInstitution != null ? requiredInstitution.ToCard() : null
         };
     }
+    
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (subType == EventSubType.ExtraRoll_IfHasInstitution && requiredInstitution == null)
+        {
+            Debug.LogWarning($"Event '{eventName}' requires an institution but none is assigned.", this);
+        }
+    }
+#endif
 }

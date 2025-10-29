@@ -9,7 +9,7 @@ public class EventCard : Card
     public bool mustPlayImmediately;
     public bool canSave;
     
-    public InstitutionCardSO requiredInstitution;
+    public InstitutionCard requiredInstitution;
 }
 
 public enum EventType

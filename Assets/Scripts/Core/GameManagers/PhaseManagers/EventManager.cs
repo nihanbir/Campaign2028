@@ -31,7 +31,7 @@ public class EventManager
         var player = GameManager.Instance.CurrentPlayer;
         bool canApply = subType switch
         {
-            EventSubType.ExtraRoll_IfHasInstitution => player.HasInstitution(card.requiredInstitution.ToCard()),
+            EventSubType.ExtraRoll_IfHasInstitution => player.HasInstitution(card.requiredInstitution),
             EventSubType.ExtraRoll_Any => true,
             _ => false
         };
