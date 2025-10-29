@@ -80,7 +80,7 @@ public class SetupPhaseUIManager : MonoBehaviour
                 
                 if (cardType == CardDisplayType.UnassignedActor)
                 {
-                    displayCard.SetActor(GameManager.Instance.actorDeck[i]);
+                    displayCard.SetCard(GameManager.Instance.actorDeck[i]);
                 }
                 else
                 {

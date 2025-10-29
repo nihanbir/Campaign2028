@@ -125,7 +125,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
         if (_currentEventDisplayCard)
         {
-            _currentEventDisplayCard.SetEventCard(card);
+            _currentEventDisplayCard.SetCard(card);
         }
     }
 
@@ -176,7 +176,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
             if (displayCard != null)
             {
-                displayCard.SetActor(actor);
+                displayCard.SetCard(actor);
                 displayCard.displayType = CardDisplayType.AssignedActor;
                 player.playerDisplayCard = displayCard;
             }

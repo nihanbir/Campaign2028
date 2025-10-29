@@ -1,36 +1,20 @@
 
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class EventDisplayCard : BaseDisplayCard
+public class EventDisplayCard : BaseDisplayCard<EventCard>
 {
     [Header("Card")]
-    public CardStatus cardStatus = CardStatus.Unrevealed;
-    private EventCard _eventCard;
     public Button saveButton;
     public Button playButton;
     
-    [Header("Event Card Elements")]
-    public Image artworkImage;
-
-    public override void OnPointerClick(PointerEventData eventData) { }
-    
-    void Start()
+    public override void SetCard(EventCard card)
     {
-        if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
-        {
-            Debug.Log("GameManager or players not initialized.");
-            return;
-        }
-    }
-    
-    public void SetEventCard(EventCard eventCard)
-    {
-        _eventCard = eventCard;
+        base.SetCard(card);
         InitializeButtons();
         RevealCard();
     }
+
 
     private void InitializeButtons()
     {
@@ -49,30 +33,23 @@ public class EventDisplayCard : BaseDisplayCard
 
     private void RevealCard()
     {
-        cardStatus = CardStatus.Revealed;
-        artworkImage.sprite = _eventCard.artwork;
+        artworkImage.sprite = cardData.artwork;
         SetButtonsVisible(true);
     }
     
     private void OnCardPlayed()
     {
-        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, _eventCard);
+        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, cardData);
     }
 
     private void OnCardSaved()
     {
-        GameManager.Instance.mainPhase.TrySaveEvent(GameManager.Instance.CurrentPlayer, _eventCard);
+        GameManager.Instance.mainPhase.TrySaveEvent(GameManager.Instance.CurrentPlayer, cardData);
     }
 
     public void SetButtonsVisible(bool visible)
     {
         playButton.gameObject.SetActive(visible);
-        saveButton.gameObject.SetActive(_eventCard.canSave && visible);
+        saveButton.gameObject.SetActive(cardData.canSave && visible);
     }
-}
-
-public enum CardStatus
-{
-    Unrevealed,
-    Revealed,
 }

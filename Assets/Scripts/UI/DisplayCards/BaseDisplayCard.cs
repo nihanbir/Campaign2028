@@ -1,22 +1,28 @@
 
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class BaseDisplayCard : MonoBehaviour, IPointerClickHandler
+public class BaseDisplayCard<T> : MonoBehaviour where T : Card
 {
     [Header("Card Type")]
-    public CardDisplayType displayType;
-
-    public virtual void OnPointerClick(PointerEventData eventData)
+    public Image artworkImage;
+    protected T cardData;
+    
+    void Start()
     {
-        
+        if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
+        {
+            Debug.Log("GameManager or players not initialized.");
+            return;
+        }
+    }
+    
+    public virtual void SetCard(T card)
+    {
+        cardData = card;
+        artworkImage.sprite = cardData.artwork;
     }
 }
 
-public enum CardDisplayType
-{
-    UnassignedPlayer,
-    UnassignedActor,
-    AssignedActor,
-    Event,
-}
+

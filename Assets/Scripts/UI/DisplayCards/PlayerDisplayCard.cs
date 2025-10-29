@@ -3,23 +3,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class PlayerDisplayCard : BaseDisplayCard
+public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandler
 {
     [Header("Common Elements")]
     public Player owningPlayer;
     public Image diceImage;
+    public CardDisplayType displayType;
     
     [Header("Actor Card Elements")]
     public GameObject scorePanel;
     public TextMeshProUGUI nameText;
-    public Image artworkImage;
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
     
     [Header("Highlight Settings")]
     public float highlightScale = 1.2f;
     
-    private ActorCard _assignedActor;
     private Vector3 _originalScale;
     private int _originalSiblingIndex;
     private bool _isHighlighted = false;
@@ -36,11 +35,12 @@ public class PlayerDisplayCard : BaseDisplayCard
         if (scorePanel) scorePanel.SetActive(false);
     }
 
-    public void SetActor(ActorCard actor)
+    public override void SetCard(ActorCard card)
     {
-        _assignedActor = actor;
+        cardData = card;
         displayType = CardDisplayType.UnassignedActor;
         UpdateUI();
+        
     }
 
     public void SetOwnerPlayer(Player player)
@@ -57,7 +57,7 @@ public class PlayerDisplayCard : BaseDisplayCard
 
     public void UpdateUI()
     {
-        if (_assignedActor != null && displayType != CardDisplayType.UnassignedPlayer)
+        if (cardData != null && displayType != CardDisplayType.UnassignedPlayer)
         {
             UpdateActorUI();
         }
@@ -65,12 +65,12 @@ public class PlayerDisplayCard : BaseDisplayCard
 
     private void UpdateActorUI()
     {
-        if (_assignedActor == null) return;
+        if (cardData == null) return;
         
-        if (nameText) nameText.text = _assignedActor.cardName;
-        if (artworkImage) artworkImage.sprite = _assignedActor.artwork;
-        if (evScoreText) evScoreText.text = _assignedActor.evScore.ToString();
-        if (instScoreText) instScoreText.text = _assignedActor.instScore.ToString();
+        if (nameText) nameText.text = cardData.cardName;
+        if (artworkImage) artworkImage.sprite = cardData.artwork;
+        if (evScoreText) evScoreText.text = cardData.evScore.ToString();
+        if (instScoreText) instScoreText.text = cardData.instScore.ToString();
     }
 
     public void SetRolledDiceImage()
@@ -111,7 +111,7 @@ public class PlayerDisplayCard : BaseDisplayCard
     
     #endregion
 
-    public override void OnPointerClick(PointerEventData eventData)
+    public void OnPointerClick(PointerEventData eventData)
     {
         switch (displayType)
         {
@@ -140,12 +140,12 @@ public class PlayerDisplayCard : BaseDisplayCard
 
     public ActorCard GetActorCard()
     {
-        return _assignedActor;
+        return cardData;
     }
 
     public void ConvertToAssignedActor(ActorCard actor)
     {
-        _assignedActor = actor;
+        cardData = actor;
         displayType = CardDisplayType.AssignedActor;
         UpdateUI();
     }
@@ -154,6 +154,11 @@ public class PlayerDisplayCard : BaseDisplayCard
     {
         if (diceImage) diceImage.gameObject.SetActive(show);
     }
+}
 
-    
+public enum CardDisplayType
+{
+    UnassignedPlayer,
+    UnassignedActor,
+    AssignedActor,
 }
