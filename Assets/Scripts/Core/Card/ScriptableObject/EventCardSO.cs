@@ -5,7 +5,6 @@ public class EventCardSO : ScriptableObject
 {
     public string eventName;
     public Sprite artwork;
-    public Sprite backSide;
     
     public EventType eventType;
     public EventSubType subType;

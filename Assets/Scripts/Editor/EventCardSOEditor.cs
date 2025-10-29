@@ -8,30 +8,21 @@ public class EventCardSOEditor : Editor
     {
         serializedObject.Update();
 
-        var eventName = serializedObject.FindProperty("eventName");
-        var artwork = serializedObject.FindProperty("artwork");
-        var backSide = serializedObject.FindProperty("backSide");
-        var eventType = serializedObject.FindProperty("eventType");
-        var subType = serializedObject.FindProperty("subType");
-        var requiredInstitution = serializedObject.FindProperty("requiredInstitution");
-        var mustPlayImmediately = serializedObject.FindProperty("mustPlayImmediately");
-        var canSave = serializedObject.FindProperty("canSave");
+        // Draw all default fields automatically
+        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution");
 
-        EditorGUILayout.PropertyField(eventName);
-        EditorGUILayout.PropertyField(artwork);
-        EditorGUILayout.PropertyField(backSide);
-        EditorGUILayout.PropertyField(eventType);
-        EditorGUILayout.PropertyField(subType);
+        // Conditional field for requiredInstitution
+        SerializedProperty subTypeProp = serializedObject.FindProperty("subType");
+        SerializedProperty requiredInstitutionProp = serializedObject.FindProperty("requiredInstitution");
 
-        // 👇 Conditional display
-        EventSubType currentSubType = (EventSubType)subType.enumValueIndex;
-        if (currentSubType == EventSubType.ExtraRoll_IfHasInstitution)
+        if (subTypeProp != null && requiredInstitutionProp != null)
         {
-            EditorGUILayout.PropertyField(requiredInstitution, new GUIContent("Required Institution"));
+            EventSubType currentSubType = (EventSubType)subTypeProp.enumValueIndex;
+            if (currentSubType == EventSubType.ExtraRoll_IfHasInstitution)
+            {
+                EditorGUILayout.PropertyField(requiredInstitutionProp, new GUIContent("Required Institution"));
+            }
         }
-
-        EditorGUILayout.PropertyField(mustPlayImmediately);
-        EditorGUILayout.PropertyField(canSave);
 
         serializedObject.ApplyModifiedProperties();
     }
