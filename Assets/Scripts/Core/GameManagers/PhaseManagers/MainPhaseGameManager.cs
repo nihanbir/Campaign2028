@@ -9,12 +9,18 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
     public List<EventCard> availableEventCards = new();
     public List<Card> shuffledDeck = new();
+    
+    [HideInInspector] public EventManager eventManager;
+
+    private bool _eventActive;
 
     public MainPhaseGameManager(GameManager gm) : base(gm) { }
 
     public override void InitializePhase()
     {
         Debug.Log("=== MAIN PHASE START ===");
+        eventManager = new EventManager(this);
+
         ShuffleDecks();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
@@ -61,6 +67,8 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     public override void EndPlayerTurn()
     {
+        game.CurrentPlayer.ResetPlayerRollCount();
+        
         GameUIManager.Instance.mainUI.OnPlayerTurnEnded(game.CurrentPlayer);
         
         MoveToNextPlayer();
@@ -74,9 +82,15 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     public override void PlayerRolledDice()
     {
-        int roll = GameUIManager.Instance.DiceRoll;
         Player current = game.CurrentPlayer;
-
+        if (!current.CanRoll())
+        {
+            Debug.Log("Player already rolled");
+            return;
+        }
+        
+        int roll = GameUIManager.Instance.DiceRoll;
+        
         Debug.Log($"Player {current.playerID} rolled {roll}");
         EvaluateCapture(current, roll);
     }
@@ -105,10 +119,9 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private void CaptureCard(Player player, Card card)
     {
         if (card == null) return;
-        card.isCaptured = true;
         
-        player.UpdatePlayerScore(card);
-    
+        player.CaptureCard(card);
+        
         GameUIManager.Instance.mainUI.OnCardCaptured(player, card);
         _currentTargetCard = null; // will draw a new one next round
     }
@@ -145,19 +158,14 @@ public class MainPhaseGameManager : BasePhaseGameManager
         return card;
     }
 
-    
-    //Called from display card buttons
-    public void ApplyEventEffect(Player player, EventCard card)
+    public bool TrySaveEvent(EventCard card)
     {
-        Debug.Log($"Applying event {card.cardName} for Player {player.playerID}");
-        // TODO: Implement event effects (ExtraRoll, LoseTurn, etc.)
-    }
-
-    public bool TrySaveEvent(Player player, EventCard card)
-    {
-        if (_heldEvents.TryAdd(player, card))
+        if (_heldEvents.TryAdd(game.CurrentPlayer, card))
         {
-            Debug.Log($"Player {player.playerID} saved event {card.cardName}");
+            game.CurrentPlayer.heldEvent = card;
+            
+            Debug.Log($"Player {game.CurrentPlayer.playerID} saved event {card.cardName}");
+            GameUIManager.Instance.mainUI.OnCardSaved();
             return true;
         }
 

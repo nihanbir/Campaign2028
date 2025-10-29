@@ -78,7 +78,8 @@ public class MainPhaseUIManager : MonoBehaviour
     {
         var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
         
-        EnableDiceButton(!isAIPlayer);
+        EnableDiceButton(!isAIPlayer && player.CanRoll());
+        
         _currentEventDisplayCard.SetButtonsVisible(!isAIPlayer);
         
         player.playerDisplayCard.Highlight();
@@ -151,6 +152,11 @@ public class MainPhaseUIManager : MonoBehaviour
         Debug.Log($"[UI] Player {player.playerID} captured {card.cardName}");
         player.playerDisplayCard.UpdateScore();
         if (_currentTargetGO) Destroy(_currentTargetGO);
+    }
+
+    public void OnCardSaved()
+    {
+        if (_currentEventGO) Destroy(_currentEventGO);
     }
     
     public void InitializePlayersForTesting()

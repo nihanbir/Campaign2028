@@ -18,9 +18,12 @@ public class MainPhaseAIManager
         // Debug.Log($"AI Player {aiPlayer.playerID} rolling dice for Main Phase");
 
         yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
-        
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+
+        if (aiPlayer.CanRoll())
+        {
+            yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+            yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+        }
     }
     
     private IEnumerator RollDice(AIPlayer aiPlayer)
@@ -35,13 +38,13 @@ public class MainPhaseAIManager
         
         if (card.mustPlayImmediately)
         {
-            GameManager.Instance.mainPhase.ApplyEventEffect(aiPlayer, card);
+            GameManager.Instance.mainPhase.eventManager.ApplyEvent(card);
         }
         else if (card.canSave)
         {
-            if (!GameManager.Instance.mainPhase.TrySaveEvent(aiPlayer, card))
+            if (!GameManager.Instance.mainPhase.TrySaveEvent(card))
             {
-                GameManager.Instance.mainPhase.ApplyEventEffect(aiPlayer, card);
+                GameManager.Instance.mainPhase.eventManager.ApplyEvent(card);
             }
         }
     }

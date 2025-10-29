@@ -5,8 +5,11 @@ public class EventCard : Card
 {
     public override CardType CardType => CardType.Event;
     public EventType eventType;
+    public EventSubType subType;
     public bool mustPlayImmediately;
     public bool canSave;
+    
+    public InstitutionCardSO requiredInstitution;
 }
 
 public enum EventType
@@ -17,4 +20,12 @@ public enum EventType
     LoseTurn,
     NoImpact,
     DrawnCardStays
+}
+
+public enum EventSubType
+{
+    None,
+    ExtraRoll_Any,
+    ExtraRoll_IfHasInstitution,
+    
 }

@@ -31,11 +31,11 @@ public class EventDisplayCard : BaseDisplayCard<EventCard>
     
     private void OnCardSaved()
     {
-        GameManager.Instance.mainPhase.TrySaveEvent(GameManager.Instance.CurrentPlayer, cardData);
+        GameManager.Instance.mainPhase.TrySaveEvent(cardData);
     }
     private void OnCardPlayed()
     {
-        GameManager.Instance.mainPhase.ApplyEventEffect(GameManager.Instance.CurrentPlayer, cardData);
+        GameManager.Instance.mainPhase.eventManager.ApplyEvent(cardData);
     }
     
     public void SetButtonsVisible(bool visible)

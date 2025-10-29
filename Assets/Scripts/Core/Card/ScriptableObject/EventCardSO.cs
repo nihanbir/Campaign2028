@@ -8,6 +8,11 @@ public class EventCardSO : ScriptableObject
     public Sprite backSide;
     
     public EventType eventType;
+    public EventSubType eventSubType;
+    
+    [SerializeField]
+    public InstitutionCardSO requiredInstitution;
+    
     public bool mustPlayImmediately;
     public bool canSave;
     
@@ -18,8 +23,10 @@ public class EventCardSO : ScriptableObject
             cardName = eventName,
             artwork = artwork,
             eventType = eventType,
+            subType = eventSubType,
             mustPlayImmediately = mustPlayImmediately,
-            canSave = canSave
+            canSave = canSave,
+            requiredInstitution = requiredInstitution
         };
     }
 }
