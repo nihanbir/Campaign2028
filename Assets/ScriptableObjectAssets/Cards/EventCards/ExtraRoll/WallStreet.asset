@@ -19,3 +19,4 @@ MonoBehaviour:
   requiredInstitution: {fileID: 11400000, guid: e26b05352d6438e49af9822bb18c5ad6, type: 2}
   mustPlayImmediately: 0
   canSave: 1
+  canReturnToDeck: 1

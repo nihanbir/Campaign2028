@@ -112,7 +112,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         var currentPlayer = GameManager.Instance.CurrentPlayer;
         
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
-        currentPlayer.playerDisplayCard.SetRolledDiceImage();
+        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
         GameManager.Instance.setupPhase.PlayerRolledDice();
     }
@@ -133,13 +133,13 @@ public class SetupPhaseUIManager : MonoBehaviour
         bool isAI = AIManager.Instance.IsAIPlayer(currentPlayer);
         EnableCanvasGroup(!isAI);
         
-        currentPlayer.playerDisplayCard.Highlight();
+        currentPlayer.PlayerDisplayCard.Highlight();
         
     }
 
     public void OnplayerTurnEnded(Player previousPlayer)
     {
-        previousPlayer.playerDisplayCard.RemoveHighlight();
+        previousPlayer.PlayerDisplayCard.RemoveHighlight();
     }
 
     private void EnableCanvasGroup(bool enable)

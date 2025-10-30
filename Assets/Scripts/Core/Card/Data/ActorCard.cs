@@ -21,6 +21,16 @@ public class ActorCard : Card
         {5, 0}, // Commitment
         {6, 0}  // Weapons
     };
+
+    public void AddEV(int EVPoints)
+    {
+        evScore += EVPoints;
+    }
+
+    public void AddInstitution()
+    {
+        instScore++;
+    }
 }
 
 public enum ActorTeam

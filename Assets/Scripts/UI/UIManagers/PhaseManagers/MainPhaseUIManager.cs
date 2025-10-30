@@ -4,192 +4,215 @@ using UnityEngine.UI;
 
 public class MainPhaseUIManager : MonoBehaviour
 {
-    [Header("Setup Phase")]     
-    public GameObject mainGamePhase;
-    public Button rollDiceButton;
-    
+    [Header("Main Phase Elements")]     
+    [SerializeField] private GameObject mainGamePhase;
+    [SerializeField] private Button rollDiceButton;
+
     [Header("Cards")]
-    public GameObject stateCardPrefab;
-    public GameObject institutionCardPrefab;
-    public GameObject eventCardPrefab;
-    public Transform tableArea;
-    public Transform eventArea;
-    
+    [SerializeField] private GameObject stateCardPrefab;
+    [SerializeField] private GameObject institutionCardPrefab;
+    [SerializeField] private GameObject eventCardPrefab;
+    [SerializeField] private Transform tableArea;
+    [SerializeField] private Transform eventArea;
+
     [Header("Players")]
-    public Transform playerUIParent;
-    public float spacingBetweenPlayerCards = 150f;
+    [SerializeField] private Transform playerUIParent;
+    [SerializeField] private float spacingBetweenPlayerCards = 150f;
 
     private GameObject _currentTargetGO;
     private GameObject _currentEventGO;
     private EventDisplayCard _currentEventDisplayCard;
-    
-    public void InitializePhaseUI()
-    {
-        if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        
-        InitializePlayersForTesting();
-        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
-    }
 
-    void RelocatePlayerCards(Transform parent, float spacing)
+    private MainPhaseGameManager _mainPhase;
+
+    private void Start()
     {
-        if (!GameManager.Instance)
+        _mainPhase = GameManager.Instance?.mainPhase;
+
+        if (_mainPhase == null)
         {
-            Debug.LogError("GameManager instance is not set");
+            Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
 
-        var players = GameManager.Instance.players;
-        int count = players.Count;
-        float totalWidth = (count - 1) * spacing;
+        SubscribeToPhaseEvents();
 
-        for (int i = 0; i < count; i++)
+        if (rollDiceButton)
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+    }
+
+    private void SubscribeToPhaseEvents()
+    {
+        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured += OnCardCaptured;
+        _mainPhase.OnCardReturnedToDeck += _ => ClearEventCard();
+        _mainPhase.OnCardSaved += _ => ClearEventCard();
+    }
+
+    private void OnDestroy()
+    {
+        if (_mainPhase == null) return;
+
+        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured -= OnCardCaptured;
+        _mainPhase.OnCardReturnedToDeck -= _ => ClearEventCard();
+        _mainPhase.OnCardSaved -= _ => ClearEventCard();
+    }
+
+    public void InitializePhaseUI()
+    {
+        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        InitializePlayersForTesting();
+    }
+
+    // === Player Management ===
+    private void RelocatePlayerCards(Transform parent, float spacing)
+    {
+        var players = GameManager.Instance?.players;
+        if (players == null || players.Count == 0)
+        {
+            Debug.LogError("No players found for relocation.");
+            return;
+        }
+
+        float totalWidth = (players.Count - 1) * spacing;
+
+        for (int i = 0; i < players.Count; i++)
         {
             var player = players[i];
-            var displayCard = player.playerDisplayCard;
+            var displayCard = player.PlayerDisplayCard;
 
             if (displayCard == null)
             {
-                Debug.LogWarning($"Player {player.playerID} has no display card assigned from setup phase.");
+                Debug.LogWarning($"Player {player.playerID} has no display card assigned.");
                 continue;
             }
 
-            // Reparent to main phase UI parent
-            RectTransform rt = displayCard.GetComponent<RectTransform>();
             displayCard.transform.SetParent(parent, false);
 
-            if (rt)
+            if (displayCard.TryGetComponent(out RectTransform rt))
             {
                 float xPos = i * spacing - totalWidth / 2f;
                 rt.anchoredPosition = new Vector2(xPos, 0);
             }
 
-            // Ensure it's correctly tagged as assigned actor
             displayCard.displayType = CardDisplayType.AssignedActor;
-
-            // Reactivate if hidden
             displayCard.gameObject.SetActive(true);
         }
     }
 
-    
-    public void OnPlayerTurnStarted(Player player)
+    // === Turn Flow ===
+    private void OnPlayerTurnStarted(Player player)
     {
-        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
-        
-        EnableDiceButton(!isAIPlayer && player.CanRoll());
-        
-        _currentEventDisplayCard.SetButtonsVisible(!isAIPlayer);
-        
-        player.playerDisplayCard.Highlight();
+        bool isAI = AIManager.Instance.IsAIPlayer(player);
+        EnableDiceButton(!isAI && player.CanRoll());
+
+        if (_currentEventDisplayCard)
+            _currentEventDisplayCard.SetButtonsVisible(!isAI);
+
+        player.PlayerDisplayCard.Highlight();
     }
 
-    public void OnPlayerTurnEnded(Player player)
+    private void OnPlayerTurnEnded(Player player)
     {
-        player.playerDisplayCard.ShowDice(false);
-        player.playerDisplayCard.RemoveHighlight();
+        player.PlayerDisplayCard.ShowDice(false);
+        player.PlayerDisplayCard.RemoveHighlight();
+        EnableDiceButton(false);
     }
 
-    public void EnableDiceButton(bool enable)
+    private void EnableDiceButton(bool enable)
     {
-        if (!rollDiceButton) return;
-        rollDiceButton.interactable = enable;
+        if (rollDiceButton)
+            rollDiceButton.interactable = enable;
     }
 
     public void OnRollDiceClicked()
     {
         var currentPlayer = GameManager.Instance.CurrentPlayer;
-        
+
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
-        currentPlayer.playerDisplayCard.SetRolledDiceImage();
+        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
+
+        _mainPhase.PlayerRolledDice();
         
-        GameManager.Instance.mainPhase.PlayerRolledDice();
+        //TODO:Do this when extra roll added
+        // EnableDiceButton(currentPlayer.CanRoll());
     }
 
+    // === Card Spawning ===
     public void SpawnTargetCard(Card card)
     {
         if (_currentTargetGO) Destroy(_currentTargetGO);
+
         GameObject prefab = card switch
         {
             InstitutionCard => institutionCardPrefab,
             StateCard => stateCardPrefab,
             _ => null
         };
-        
+
         if (prefab == null)
         {
-            Debug.Log($"Unsupported card type: {card.GetType().Name}");
+            Debug.LogWarning($"Unsupported card type: {card.GetType().Name}");
             return;
         }
-        
+
         _currentTargetGO = Instantiate(prefab, tableArea);
-
-        var display = _currentTargetGO.GetComponent<IDisplayCard>();
-        if (display == null)
+        if (_currentTargetGO.TryGetComponent(out IDisplayCard display))
         {
-            Debug.LogError($"Prefab {prefab.name} missing IDisplayCard component.");
-            return;
+            display.SetCardBase(card);
         }
-
-        display.SetCardBase(card);
+        else
+        {
+            Debug.LogError($"{prefab.name} missing IDisplayCard component.");
+        }
     }
 
     public void SpawnEventCard(EventCard card)
     {
         if (_currentEventGO) Destroy(_currentEventGO);
+
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
-
-        if (_currentEventDisplayCard)
-        {
-            _currentEventDisplayCard.SetCard(card);
-        }
+        _currentEventDisplayCard?.SetCard(card);
     }
 
-    public void OnCardCaptured(Player player, Card card)
+    // === Card Feedback ===
+    private void OnCardCaptured(Player player, Card card)
     {
-        Debug.Log($"[UI] Player {player.playerID} captured {card.cardName}");
-        player.playerDisplayCard.UpdateScore();
+        player.PlayerDisplayCard.UpdateScore();
         if (_currentTargetGO) Destroy(_currentTargetGO);
     }
 
-    public void OnCardSaved()
+    private void ClearEventCard()
     {
         if (_currentEventGO) Destroy(_currentEventGO);
     }
-    
+
+    // === Testing Helper ===
     public void InitializePlayersForTesting()
     {
-        Debug.Log("[MainPhaseUIManager] Initializing existing players with random actors for testing...");
-
         var gm = GameManager.Instance;
         var ui = GameUIManager.Instance;
-        
-        if (gm == null)
-        {
-            Debug.LogError("GameManager instance not found!");
-            return;
-        }
 
-        var players = gm.players;
-        if (players == null || players.Count == 0)
+        if (gm == null || gm.players.Count == 0)
         {
-            Debug.LogError("No players found in GameManager. Cannot initialize testing phase.");
+            Debug.LogError("GameManager or players missing!");
             return;
         }
 
         var allActors = new List<ActorCard>(gm.actorDeck);
-        if (allActors == null || allActors.Count == 0)
+        if (allActors.Count == 0)
         {
             Debug.LogError("No actor cards found in GameManager!");
             return;
         }
 
-        // Assign random actors to players
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < gm.players.Count; i++)
         {
-            var player = players[i];
+            var player = gm.players[i];
             var actor = allActors[i % allActors.Count];
 
             player.assignedActor = actor;
@@ -202,12 +225,11 @@ public class MainPhaseUIManager : MonoBehaviour
             {
                 displayCard.SetCard(actor);
                 displayCard.displayType = CardDisplayType.AssignedActor;
-                player.playerDisplayCard = displayCard;
+                player.SetDisplayCard(displayCard);
             }
         }
 
         RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
     }
-
 }

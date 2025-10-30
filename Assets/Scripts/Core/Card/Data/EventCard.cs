@@ -8,6 +8,7 @@ public class EventCard : Card
     public EventSubType subType;
     public bool mustPlayImmediately;
     public bool canSave;
+    public bool canReturnToDeck;
     
     public InstitutionCard requiredInstitution;
 }

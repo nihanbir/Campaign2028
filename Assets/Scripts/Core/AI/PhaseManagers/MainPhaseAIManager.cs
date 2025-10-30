@@ -38,13 +38,13 @@ public class MainPhaseAIManager
         
         if (card.mustPlayImmediately)
         {
-            GameManager.Instance.mainPhase.eventManager.ApplyEvent(card);
+            GameManager.Instance.mainPhase.EventManager.ApplyEvent(card, aiPlayer);
         }
         else if (card.canSave)
         {
             if (!GameManager.Instance.mainPhase.TrySaveEvent(card))
             {
-                GameManager.Instance.mainPhase.eventManager.ApplyEvent(card);
+                GameManager.Instance.mainPhase.EventManager.ApplyEvent(card, aiPlayer);
             }
         }
     }

@@ -44,7 +44,7 @@ public class AIManager : MonoBehaviour
             : new GameObject($"AI_Player_{index}");
 
         var ai = aiObj.GetComponent<AIPlayer>() ?? aiObj.AddComponent<AIPlayer>();
-        ai.playerID = 100 + index;
+        // ai.PlayerID = 100 + index;
 
         aiPlayers.Add(ai);
 

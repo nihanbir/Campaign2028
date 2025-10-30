@@ -1,35 +1,33 @@
-
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EventManager
 {
-    protected readonly MainPhaseGameManager game;
-    
+    private readonly MainPhaseGameManager _game;
+    private readonly Dictionary<EventType, Action<EventCard, Player>> _handlers;
+
     public EventManager(MainPhaseGameManager gm)
     {
-        game = gm;
-    }
-    
-    public void ApplyEvent(EventCard card)
-    {
-        switch (card.eventType)
+        _game = gm;
+        _handlers = new()
         {
-            case EventType.ExtraRoll:
-                HandleExtraRoll(card.subType, card);
-                break;
-            
-            case EventType.NeedTwo:
-                // HandleNeedTwo(player, card.subType);
-                break;
-                
-            // Add other types as needed
-        }
+            { EventType.ExtraRoll, HandleExtraRoll },
+            { EventType.NeedTwo, HandleNeedTwo }
+        };
     }
 
-    private void HandleExtraRoll(EventSubType subType, EventCard card)
+    public void ApplyEvent(EventCard card, Player player)
     {
-        var player = GameManager.Instance.CurrentPlayer;
-        bool canApply = subType switch
+        if (_handlers.TryGetValue(card.eventType, out var handler))
+            handler(card, player);
+        else
+            Debug.LogWarning($"Unhandled event type: {card.eventType}");
+    }
+
+    private void HandleExtraRoll(EventCard card, Player player)
+    {
+        bool canApply = card.subType switch
         {
             EventSubType.ExtraRoll_IfHasInstitution => player.HasInstitution(card.requiredInstitution),
             EventSubType.ExtraRoll_Any => true,
@@ -37,13 +35,13 @@ public class EventManager
         };
 
         if (canApply)
-        {
-            Debug.Log($"{player.playerID} gets an extra roll!");
             player.AddExtraRoll();
-        }
         else
-        {
-            Debug.Log($"{player.playerID} cannot use this extra roll event.");
-        }
+            _game.ReturnCardToDeck(card);
+    }
+
+    private void HandleNeedTwo(EventCard card, Player player)
+    {
+        Debug.Log($"Event 'NeedTwo' not yet implemented for {player.playerID}");
     }
 }

@@ -1,70 +1,84 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Player : MonoBehaviour
 {
-    public string playerName;
+    // === Identity ===
+    public string PlayerName { get; private set; }
+
     public int playerID;
     public ActorCard assignedActor;
-    
-    private List<StateCard> _heldStates = new ();
-    private List<InstitutionCard> _heldInstitutions = new ();
 
-    public EventCard heldEvent;
-    
-    public PlayerDisplayCard playerDisplayCard;
-    private SetupPhaseGameManager _setupPhaseGameManager;
+    // === Cards ===
+    private readonly List<StateCard> _heldStates = new();
+    private readonly List<InstitutionCard> _heldInstitutions = new();
+    public EventCard HeldEvent { get; private set; }
 
-    private int _rollCount = 1;
+    // === Display ===
+    public PlayerDisplayCard PlayerDisplayCard { get; private set; }
 
-    public void SetDisplayCard(PlayerDisplayCard newPlayerDisplayCard)
+    // === Roll System ===
+    private int _remainingRolls = 1;
+
+    // === Setup ===
+    // public void Initialize(string name, int id, ActorCard actor)
+    // {
+    //     PlayerName = name;
+    //     playerID = id;
+    //     assignedActor = actor;
+    // }
+
+    public void SetDisplayCard(PlayerDisplayCard displayCard)
     {
-        playerDisplayCard = newPlayerDisplayCard;
-        playerDisplayCard.SetOwnerPlayer(this);
+        PlayerDisplayCard = displayCard;
+        PlayerDisplayCard.SetOwnerPlayer(this);
     }
 
+    // === Card Management ===
     public void CaptureCard(Card card)
     {
+        if (card == null) return;
+
         card.isCaptured = true;
-        
+
         switch (card)
         {
             case StateCard stateCard:
                 _heldStates.Add(stateCard);
-                assignedActor.evScore += stateCard.electoralVotes;
-                Debug.Log($"Player {playerID} gained {stateCard.electoralVotes} EV from {stateCard.cardName}");
-                Debug.Log($"Player {playerID} new EV score: {assignedActor.evScore}");
+                assignedActor.AddEV(stateCard.electoralVotes);
                 break;
 
             case InstitutionCard institutionCard:
                 _heldInstitutions.Add(institutionCard);
-                assignedActor.instScore++;
-                Debug.Log($"Player {playerID} captured an Institution: {institutionCard.cardName}");
-                Debug.Log($"Player {playerID} new Inst score: {assignedActor.instScore}");
+                assignedActor.AddInstitution();
                 break;
         }
+
+        Debug.Log($"Player {playerID} captured {card.cardName}");
     }
 
-    public bool HasInstitution(InstitutionCard institution)
+    public void SaveEvent(EventCard eventCard)
     {
-        return _heldInstitutions.Any(inst => inst == institution);
+        HeldEvent = eventCard;
     }
 
+    public bool HasInstitution(InstitutionCard target)
+    {
+        return _heldInstitutions.Contains(target);
+    }
+
+    // === Roll System ===
     public void AddExtraRoll()
     {
-        Debug.Log("added extra roll");
-        _rollCount++;
+        _remainingRolls++;
+        Debug.Log($"Player {playerID} gained an extra roll!");
     }
 
-    public bool CanRoll()
-    {
-        return _rollCount != 0;
-    }
+    public bool CanRoll() => _remainingRolls > 0;
 
-    public void ResetPlayerRollCount()
-    {
-        _rollCount = 1;
-    }
-    
+    public void RegisterRoll() => _remainingRolls = Mathf.Max(0, _remainingRolls - 1);
+
+    public void ResetRollCount() => _remainingRolls = 1;
 }

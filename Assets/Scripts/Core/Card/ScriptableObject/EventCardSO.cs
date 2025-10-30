@@ -14,6 +14,7 @@ public class EventCardSO : ScriptableObject
     
     public bool mustPlayImmediately;
     public bool canSave;
+    public bool canReturnToDeck;
     
     public EventCard ToCard()
     {
@@ -25,6 +26,7 @@ public class EventCardSO : ScriptableObject
             subType = subType,
             mustPlayImmediately = mustPlayImmediately,
             canSave = canSave,
+            canReturnToDeck = canReturnToDeck,
             requiredInstitution = requiredInstitution != null ? requiredInstitution.ToCard() : null
         };
     }

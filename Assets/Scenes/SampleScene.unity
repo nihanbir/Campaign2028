@@ -148,7 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
-  playerName: 
   playerID: 2
   assignedActor:
     cardName: 
@@ -160,16 +159,6 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  heldEvent:
-    cardName: 
-    artwork: {fileID: 0}
-    backSide: {fileID: 0}
-    isCaptured: 0
-    isRevealed: 0
-    eventType: 0
-    mustPlayImmediately: 0
-    canSave: 0
-  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
 --- !u!4 &172211631
@@ -216,7 +205,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
-  playerName: 
   playerID: 3
   assignedActor:
     cardName: 
@@ -228,16 +216,6 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  heldEvent:
-    cardName: 
-    artwork: {fileID: 0}
-    backSide: {fileID: 0}
-    isCaptured: 0
-    isRevealed: 0
-    eventType: 0
-    mustPlayImmediately: 0
-    canSave: 0
-  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
 --- !u!4 &210027821
@@ -565,7 +543,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
-  playerName: 
   playerID: 4
   assignedActor:
     cardName: 
@@ -577,16 +554,6 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  heldEvent:
-    cardName: 
-    artwork: {fileID: 0}
-    backSide: {fileID: 0}
-    isCaptured: 0
-    isRevealed: 0
-    eventType: 0
-    mustPlayImmediately: 0
-    canSave: 0
-  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
 --- !u!4 &920864601
@@ -633,7 +600,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
-  playerName: 
   playerID: 5
   assignedActor:
     cardName: 
@@ -645,16 +611,6 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  heldEvent:
-    cardName: 
-    artwork: {fileID: 0}
-    backSide: {fileID: 0}
-    isCaptured: 0
-    isRevealed: 0
-    eventType: 0
-    mustPlayImmediately: 0
-    canSave: 0
-  playerDisplayCard: {fileID: 0}
   decisionDelayMin: 0.5
   decisionDelayMax: 2
 --- !u!4 &1473444821

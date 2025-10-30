@@ -1,63 +1,67 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System;
 
 public class MainPhaseGameManager : BasePhaseGameManager
 {
-    private Card _currentTargetCard;     
+    private Card _currentTargetCard;
     private EventCard _currentEventCard;
-    private readonly Dictionary<Player, EventCard> _heldEvents = new();
-    public List<EventCard> availableEventCards = new();
-    public List<Card> shuffledDeck = new();
-    
-    [HideInInspector] public EventManager eventManager;
 
-    private bool _eventActive;
+    private readonly Dictionary<Player, EventCard> _heldEvents = new();
+    private readonly List<Card> _mainDeck = new();
+    private readonly List<EventCard> _eventDeck = new();
+
+    public EventManager EventManager { get; private set; }
+
+    // === Events for UI or external systems ===
+    public event Action<Player, Card> OnCardCaptured;
+    public event Action<Player> OnPlayerTurnStarted;
+    public event Action<Player> OnPlayerTurnEnded;
+    public event Action<Card> OnCardReturnedToDeck;
+    public event Action<EventCard> OnCardSaved;
 
     public MainPhaseGameManager(GameManager gm) : base(gm) { }
 
     public override void InitializePhase()
     {
         Debug.Log("=== MAIN PHASE START ===");
-        eventManager = new EventManager(this);
+        EventManager = new EventManager(this);
 
-        ShuffleDecks();
+        BuildAndShuffleDecks();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
 
-    private void ShuffleDecks()
+    private void BuildAndShuffleDecks()
     {
-        shuffledDeck.AddRange(game.stateDeck);
-        shuffledDeck.AddRange(game.institutionDeck);
-        shuffledDeck = shuffledDeck.OrderBy(_ => Random.value).ToList();
-        
-        Debug.Log("shuffling");
-        availableEventCards.AddRange(game.eventDeck.OrderBy(_ => Random.value).ToList());
+        _mainDeck.Clear();
+        _eventDeck.Clear();
+
+        _mainDeck.AddRange(game.stateDeck);
+        _mainDeck.AddRange(game.institutionDeck);
+        _mainDeck.ShuffleInPlace();
+
+        _eventDeck.AddRange(game.eventDeck.Shuffled());
     }
-    
+
     public override void StartPlayerTurn()
     {
-        Player current = game.CurrentPlayer;
-        Debug.Log($"--- Player {current.playerID} turn started (Main Phase) ---");
-        
-        // // Step 1: Handle target card
-        if (_currentTargetCard == null)
+        if (_eventDeck.Count == 0)
         {
-            _currentTargetCard = DrawTargetCard();
-        }
-
-        // Step 2: Handle event card
-        _currentEventCard = DrawEventCard();
-
-        if (_currentEventCard == null)
-        {
-            Debug.Log("End of event cards");
+            Debug.Log("No more event cards!");
             return;
-        } 
-
-        GameUIManager.Instance.mainUI.OnPlayerTurnStarted(current);
+        }
         
+        Player current = game.CurrentPlayer;
+        Debug.Log($"--- Player {current.playerID} turn started ---");
+
+        _currentTargetCard ??= DrawTargetCard();
+        
+        _currentEventCard ??= DrawEventCard();
+
+        OnPlayerTurnStarted?.Invoke(current);
+
         if (AIManager.Instance.IsAIPlayer(current))
         {
             var aiPlayer = AIManager.Instance.GetAIPlayer(current);
@@ -67,10 +71,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     public override void EndPlayerTurn()
     {
-        game.CurrentPlayer.ResetPlayerRollCount();
-        
-        GameUIManager.Instance.mainUI.OnPlayerTurnEnded(game.CurrentPlayer);
-        
+        Player current = game.CurrentPlayer;
+        current.ResetRollCount();
+        OnPlayerTurnEnded?.Invoke(current);
+
         MoveToNextPlayer();
     }
 
@@ -85,13 +89,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Player current = game.CurrentPlayer;
         if (!current.CanRoll())
         {
-            Debug.Log("Player already rolled");
+            Debug.Log("Player already rolled.");
             return;
         }
-        
+
+        current.RegisterRoll();
         int roll = GameUIManager.Instance.DiceRoll;
-        
-        Debug.Log($"Player {current.playerID} rolled {roll}");
+
         EvaluateCapture(current, roll);
     }
 
@@ -99,78 +103,95 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         bool success = _currentTargetCard switch
         {
-            StateCard state => state.IsSuccessfulRoll(roll, player.assignedActor.team),
-            InstitutionCard inst => inst.IsSuccessfulRoll(roll, player.assignedActor.team),
+            StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
+            InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
             _ => false
         };
 
         if (success)
         {
-            CaptureCard(player, _currentTargetCard);
+            player.CaptureCard(_currentTargetCard);
+            OnCardCaptured?.Invoke(player, _currentTargetCard);
+            _currentTargetCard = null;
+            EndPlayerTurn();
+        }
+        else if (player.CanRoll())
+        {
+            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
+            StartPlayerTurn();
         }
         else
         {
-            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
+            EndPlayerTurn();
         }
-        
-        EndPlayerTurn();
-    }
-
-    private void CaptureCard(Player player, Card card)
-    {
-        if (card == null) return;
-        
-        player.CaptureCard(card);
-        
-        GameUIManager.Instance.mainUI.OnCardCaptured(player, card);
-        _currentTargetCard = null; // will draw a new one next round
     }
 
     private Card DrawTargetCard()
     {
-        Card card = shuffledDeck[0];
-        Debug.Log("Drawing target card");
-    
-        if (card == null)
+        if (_mainDeck.Count == 0)
         {
-            Debug.LogWarning("No target card drawn — decks empty!");
+            Debug.LogWarning("Main deck empty!");
             return null;
         }
-    
-        shuffledDeck.RemoveAt(0);
-        
-        GameUIManager.Instance.mainUI.SpawnTargetCard(card);
-    
-        return card;
+
+        Card drawn = _mainDeck.PopFront();
+        GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);
+        return drawn;
     }
 
     private EventCard DrawEventCard()
     {
-        if (availableEventCards.Count == 0)
-            return null;
+        if (_eventDeck.Count == 0) return null;
 
-        Debug.Log("Draw Event Card");
-        var card = availableEventCards[0];
-        availableEventCards.RemoveAt(0);
-        
+        EventCard card = _eventDeck.PopFront();
         GameUIManager.Instance.mainUI.SpawnEventCard(card);
-        
         return card;
     }
 
     public bool TrySaveEvent(EventCard card)
     {
-        if (_heldEvents.TryAdd(game.CurrentPlayer, card))
-        {
-            game.CurrentPlayer.heldEvent = card;
-            
-            Debug.Log($"Player {game.CurrentPlayer.playerID} saved event {card.cardName}");
-            GameUIManager.Instance.mainUI.OnCardSaved();
-            return true;
-        }
+        var player = game.CurrentPlayer;
 
-        Debug.Log("Player already has a saved event");
-        return false;
+        if (_heldEvents.ContainsKey(player))
+            return false;
+
+        _heldEvents[player] = card;
+        player.SaveEvent(card);
+        OnCardSaved?.Invoke(card);
+
+        _currentEventCard = null;
+        return true;
+    }
+
+    public void ReturnCardToDeck(Card card)
+    {
+        if (card is not EventCard eventCard) return;
+
+        _eventDeck.Insert(UnityEngine.Random.Range(0, _eventDeck.Count + 1), eventCard);
+        OnCardReturnedToDeck?.Invoke(card);
+        _currentEventCard = null;
     }
 }
 
+// === Extensions for lists ===
+public static class ListExtensions
+{
+    public static void ShuffleInPlace<T>(this IList<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            int j = UnityEngine.Random.Range(i, list.Count);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
+
+    public static List<T> Shuffled<T>(this IEnumerable<T> source)
+        => source.OrderBy(_ => UnityEngine.Random.value).ToList();
+
+    public static T PopFront<T>(this IList<T> list)
+    {
+        T value = list[0];
+        list.RemoveAt(0);
+        return value;
+    }
+}
