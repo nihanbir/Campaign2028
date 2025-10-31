@@ -18,15 +18,16 @@ public class MainPhaseGameManager : BasePhaseGameManager
     public event Action<Player, Card> OnCardCaptured;
     public event Action<Player> OnPlayerTurnStarted;
     public event Action<Player> OnPlayerTurnEnded;
-    public event Action<Card> OnCardReturnedToDeck;
     public event Action<EventCard> OnCardSaved;
 
-    public MainPhaseGameManager(GameManager gm) : base(gm) { }
-
+    public MainPhaseGameManager(GameManager gm) : base(gm)
+    {
+        EventManager = new EventManager(this);
+    }
+    
     public override void InitializePhase()
     {
         Debug.Log("=== MAIN PHASE START ===");
-        EventManager = new EventManager(this);
 
         BuildAndShuffleDecks();
         game.currentPlayerIndex = 0;
@@ -55,13 +56,17 @@ public class MainPhaseGameManager : BasePhaseGameManager
         
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn started ---");
-
-        _currentTargetCard ??= DrawTargetCard();
         
-        _currentEventCard ??= DrawEventCard();
-
+        //This needs to be invoked before drawing a card to set _isPlayerAI correctly in UImanager
         OnPlayerTurnStarted?.Invoke(current);
 
+        _currentTargetCard ??= DrawTargetCard();
+
+        if (_currentEventCard == null)
+        {
+            DrawEventCard();
+        }
+        
         if (AIManager.Instance.IsAIPlayer(current))
         {
             var aiPlayer = AIManager.Instance.GetAIPlayer(current);
@@ -72,9 +77,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
     public override void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
+        Debug.Log($"--- Player {current.playerID} turn ended ---");
         current.ResetRollCount();
         OnPlayerTurnEnded?.Invoke(current);
-
+        _currentEventCard = null;
+        
         MoveToNextPlayer();
     }
 
@@ -94,13 +101,15 @@ public class MainPhaseGameManager : BasePhaseGameManager
         }
 
         current.RegisterRoll();
+        
         int roll = GameUIManager.Instance.DiceRoll;
-
+        Debug.Log($"Rolled: {roll}");
         EvaluateCapture(current, roll);
     }
 
     private void EvaluateCapture(Player player, int roll)
     {
+        Debug.Log("Evaluating capture");
         bool success = _currentTargetCard switch
         {
             StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
@@ -112,22 +121,26 @@ public class MainPhaseGameManager : BasePhaseGameManager
         {
             player.CaptureCard(_currentTargetCard);
             OnCardCaptured?.Invoke(player, _currentTargetCard);
+            Debug.Log($"Player captured {_currentTargetCard.cardName}");
             _currentTargetCard = null;
             EndPlayerTurn();
         }
         else if (player.CanRoll())
         {
-            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
-            StartPlayerTurn();
+            Debug.Log("Player can roll again");
+            //wait for player to roll again
+            //TODO: if ai player, gotta figure out how to make it roll again
         }
         else
         {
+            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
             EndPlayerTurn();
         }
     }
 
     private Card DrawTargetCard()
     {
+        Debug.Log("Draw target card");
         if (_mainDeck.Count == 0)
         {
             Debug.LogWarning("Main deck empty!");
@@ -135,15 +148,20 @@ public class MainPhaseGameManager : BasePhaseGameManager
         }
 
         Card drawn = _mainDeck.PopFront();
+        
+        //TODO: add event
         GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);
         return drawn;
     }
 
     private EventCard DrawEventCard()
     {
+        Debug.Log("Draw event card");
         if (_eventDeck.Count == 0) return null;
 
         EventCard card = _eventDeck.PopFront();
+        
+        //TODO: add event
         GameUIManager.Instance.mainUI.SpawnEventCard(card);
         return card;
     }
@@ -157,6 +175,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         _heldEvents[player] = card;
         player.SaveEvent(card);
+        Debug.Log($"Saved {card.cardName}");
         OnCardSaved?.Invoke(card);
 
         _currentEventCard = null;
@@ -168,8 +187,9 @@ public class MainPhaseGameManager : BasePhaseGameManager
         if (card is not EventCard eventCard) return;
 
         _eventDeck.Insert(UnityEngine.Random.Range(0, _eventDeck.Count + 1), eventCard);
-        OnCardReturnedToDeck?.Invoke(card);
-        _currentEventCard = null;
+        Debug.Log($"Returned to deck {card.cardName}");
+        
+        //No need to clear the card here because when the event card is played it's cleared already
     }
 }
 

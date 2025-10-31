@@ -19,35 +19,23 @@ public class MainPhaseUIManager : MonoBehaviour
     [SerializeField] private Transform playerUIParent;
     [SerializeField] private float spacingBetweenPlayerCards = 150f;
 
+    private bool _isPlayerAI = false;
+    
     private GameObject _currentTargetGO;
     private GameObject _currentEventGO;
     private EventDisplayCard _currentEventDisplayCard;
 
     private MainPhaseGameManager _mainPhase;
-
-    private void Start()
-    {
-        _mainPhase = GameManager.Instance?.mainPhase;
-
-        if (_mainPhase == null)
-        {
-            Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
-            return;
-        }
-
-        SubscribeToPhaseEvents();
-
-        if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-    }
+    private EventManager _eventManager;
 
     private void SubscribeToPhaseEvents()
     {
         _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
-        _mainPhase.OnCardReturnedToDeck += _ => ClearEventCard();
         _mainPhase.OnCardSaved += _ => ClearEventCard();
+        _eventManager.OnEventApplied += _ => ClearEventCard();
+        
     }
 
     private void OnDestroy()
@@ -57,17 +45,35 @@ public class MainPhaseUIManager : MonoBehaviour
         _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured -= OnCardCaptured;
-        _mainPhase.OnCardReturnedToDeck -= _ => ClearEventCard();
         _mainPhase.OnCardSaved -= _ => ClearEventCard();
+        _eventManager.OnEventApplied -= _ => ClearEventCard();
+        
     }
 
     public void InitializePhaseUI()
     {
+        _mainPhase = GameManager.Instance?.mainPhase;
+
+        if (_mainPhase == null)
+        {
+            Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
+            return;
+        }
+        
+        _eventManager = _mainPhase.EventManager;
+
+        SubscribeToPhaseEvents();
+
+        if (rollDiceButton)
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        
+        EnableDiceButton(false);
+        
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         InitializePlayersForTesting();
     }
 
-    // === Player Management ===
+#region Player Management
     private void RelocatePlayerCards(Transform parent, float spacing)
     {
         var players = GameManager.Instance?.players;
@@ -103,14 +109,13 @@ public class MainPhaseUIManager : MonoBehaviour
         }
     }
 
-    // === Turn Flow ===
+#endregion Player Management
+
+#region Turn Flow
     private void OnPlayerTurnStarted(Player player)
     {
-        bool isAI = AIManager.Instance.IsAIPlayer(player);
-        EnableDiceButton(!isAI && player.CanRoll());
-
-        if (_currentEventDisplayCard)
-            _currentEventDisplayCard.SetButtonsVisible(!isAI);
+        _isPlayerAI = AIManager.Instance.IsAIPlayer(player);
+        Debug.Log($"isplayer ai: {_isPlayerAI}");
 
         player.PlayerDisplayCard.Highlight();
     }
@@ -119,29 +124,34 @@ public class MainPhaseUIManager : MonoBehaviour
     {
         player.PlayerDisplayCard.ShowDice(false);
         player.PlayerDisplayCard.RemoveHighlight();
-        EnableDiceButton(false);
+        ClearEventCard();
     }
 
     private void EnableDiceButton(bool enable)
     {
-        if (rollDiceButton)
-            rollDiceButton.interactable = enable;
+        if (!rollDiceButton) return;
+        
+        enable = !_isPlayerAI && enable;
+        rollDiceButton.interactable = enable;
     }
 
     public void OnRollDiceClicked()
     {
         var currentPlayer = GameManager.Instance.CurrentPlayer;
-
+        
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
 
         _mainPhase.PlayerRolledDice();
         
         //TODO:Do this when extra roll added
-        // EnableDiceButton(currentPlayer.CanRoll());
+        
+        EnableDiceButton(currentPlayer.CanRoll());
     }
 
-    // === Card Spawning ===
+#endregion Turn Flow
+    
+#region Card Spawning
     public void SpawnTargetCard(Card card)
     {
         if (_currentTargetGO) Destroy(_currentTargetGO);
@@ -177,9 +187,15 @@ public class MainPhaseUIManager : MonoBehaviour
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
         _currentEventDisplayCard?.SetCard(card);
+        
+        if (_currentEventDisplayCard)
+            _currentEventDisplayCard.SetButtonsVisible(!_isPlayerAI);
     }
 
-    // === Card Feedback ===
+#endregion Card Spawning
+    
+#region Card Feedback
+
     private void OnCardCaptured(Player player, Card card)
     {
         player.PlayerDisplayCard.UpdateScore();
@@ -188,10 +204,24 @@ public class MainPhaseUIManager : MonoBehaviour
 
     private void ClearEventCard()
     {
-        if (_currentEventGO) Destroy(_currentEventGO);
-    }
+        if (!_currentEventGO) return;
+        
+        Debug.Log("Clearing event card");
 
-    // === Testing Helper ===
+        _currentEventDisplayCard = null;
+        
+        Destroy(_currentEventGO);
+        
+        if (GameManager.Instance.CurrentPlayer.CanRoll())
+        {
+            EnableDiceButton(true);
+        }
+    }
+    
+#endregion Card Feedback
+
+#region Testing Helper
+
     public void InitializePlayersForTesting()
     {
         var gm = GameManager.Instance;
@@ -232,4 +262,6 @@ public class MainPhaseUIManager : MonoBehaviour
         RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
     }
+#endregion Testing Helper
+    
 }

@@ -6,6 +6,7 @@ public class EventManager
 {
     private readonly MainPhaseGameManager _game;
     private readonly Dictionary<EventType, Action<EventCard, Player>> _handlers;
+    public event Action<EventCard> OnEventApplied;
 
     public EventManager(MainPhaseGameManager gm)
     {
@@ -13,14 +14,19 @@ public class EventManager
         _handlers = new()
         {
             { EventType.ExtraRoll, HandleExtraRoll },
-            { EventType.NeedTwo, HandleNeedTwo }
+            { EventType.NeedTwo, HandleNeedTwo },
+            { EventType.LoseTurn, HandleLoseTurn }
         };
     }
-
+    
     public void ApplyEvent(EventCard card, Player player)
     {
+        Debug.Log($"Applying event {card.cardName}");
         if (_handlers.TryGetValue(card.eventType, out var handler))
+        {
             handler(card, player);
+            OnEventApplied?.Invoke(card);
+        }
         else
             Debug.LogWarning($"Unhandled event type: {card.eventType}");
     }
@@ -43,5 +49,10 @@ public class EventManager
     private void HandleNeedTwo(EventCard card, Player player)
     {
         Debug.Log($"Event 'NeedTwo' not yet implemented for {player.playerID}");
+    }
+    
+    private void HandleLoseTurn(EventCard card, Player player)
+    {
+        _game.EndPlayerTurn();
     }
 }

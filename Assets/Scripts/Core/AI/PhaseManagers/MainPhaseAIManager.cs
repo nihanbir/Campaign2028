@@ -14,16 +14,11 @@ public class MainPhaseAIManager
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
-        // Think delay or future logic (use saved events, modifiers, etc.)
-        // Debug.Log($"AI Player {aiPlayer.playerID} rolling dice for Main Phase");
-
+        //TODO: Think delay or future logic (use saved events, modifiers, etc.)
+        //TODO: Have logic to make the ai roll after applying event card, if they didn't lose their turn
+        
         yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
-
-        if (aiPlayer.CanRoll())
-        {
-            yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-            yield return aiManager.StartCoroutine(RollDice(aiPlayer));
-        }
+        
     }
     
     private IEnumerator RollDice(AIPlayer aiPlayer)
@@ -47,5 +42,6 @@ public class MainPhaseAIManager
                 GameManager.Instance.mainPhase.EventManager.ApplyEvent(card, aiPlayer);
             }
         }
+        
     }
 }

@@ -22,14 +22,6 @@ public class Player : MonoBehaviour
     // === Roll System ===
     private int _remainingRolls = 1;
 
-    // === Setup ===
-    // public void Initialize(string name, int id, ActorCard actor)
-    // {
-    //     PlayerName = name;
-    //     playerID = id;
-    //     assignedActor = actor;
-    // }
-
     public void SetDisplayCard(PlayerDisplayCard displayCard)
     {
         PlayerDisplayCard = displayCard;
