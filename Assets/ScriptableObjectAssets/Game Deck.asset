@@ -47,24 +47,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e26b05352d6438e49af9822bb18c5ad6, type: 2}
   - {fileID: 11400000, guid: 5f71075cb3db11f4085e3db0bb5213da, type: 2}
   allEvents:
-  - {fileID: 11400000, guid: b77aac1173ef29144a4679bdee0c1d96, type: 2}
-  - {fileID: 11400000, guid: 60f79d8490fc36b4783ba6253896b7f2, type: 2}
-  - {fileID: 11400000, guid: ee04fbbff2e7a454faa0c923b8faa87c, type: 2}
   - {fileID: 11400000, guid: d240b6ef565638e45ac009ca4234b4c1, type: 2}
   - {fileID: 11400000, guid: 7191c933ffe824743a8f08427d9aad98, type: 2}
   - {fileID: 11400000, guid: 6f6aec6d5ea02e5429c119e6946fad3e, type: 2}
   - {fileID: 11400000, guid: a66229c14af7868429421b19d8dd4006, type: 2}
-  - {fileID: 11400000, guid: 26e5dd2739af5f84594d5b7b65a6ba16, type: 2}
-  - {fileID: 11400000, guid: 8601c51a908cf9847a3d8f3a9e7ea083, type: 2}
-  - {fileID: 11400000, guid: 2a97a49ecc54f9f4c9f71960c25d78d7, type: 2}
-  - {fileID: 11400000, guid: 80b3a3d3da7b2444098c5628de59428f, type: 2}
-  - {fileID: 11400000, guid: dab7374d742dd1f42bd82a6020ea92c9, type: 2}
-  - {fileID: 11400000, guid: 72b76a9e094c2714ba42e9fad54fcee3, type: 2}
-  - {fileID: 11400000, guid: 210912c9c196445468faa4a8bb571d1d, type: 2}
-  - {fileID: 11400000, guid: be6349aa0bf08a0438a394663f052797, type: 2}
   - {fileID: 11400000, guid: 6a5b7d094c9bae34c94f14333fef0d8e, type: 2}
-  - {fileID: 11400000, guid: 5a2eecdb8236fcc4b9d9efed0cbb2153, type: 2}
-  - {fileID: 11400000, guid: 0d3a1670d4dc40b48ba618985c3055ca, type: 2}
   allActors:
   - {fileID: 11400000, guid: fdac6c70c842e8543af72f4e3e6ef460, type: 2}
   - {fileID: 11400000, guid: 86e1335a556ac564abb41597dc2c1ed0, type: 2}
