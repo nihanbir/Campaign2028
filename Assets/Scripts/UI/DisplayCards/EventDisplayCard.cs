@@ -35,7 +35,7 @@ public class EventDisplayCard : BaseDisplayCard<EventCard>
     }
     private void OnCardPlayed()
     {
-        GameManager.Instance.mainPhase.EventManager.ApplyEvent(cardData, GameManager.Instance.CurrentPlayer);
+        GameManager.Instance.mainPhase.EventManager.ApplyEvent(GameManager.Instance.CurrentPlayer, cardData);
     }
     
     public void SetButtonsVisible(bool visible)

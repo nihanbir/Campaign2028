@@ -4,10 +4,22 @@ using UnityEngine;
 public class MainPhaseAIManager
 {
     private readonly AIManager aiManager;
+    private MainPhaseGameManager _mainPhase;
+    private EventManager _eventManager;
+
+    private AIPlayer _currentAIPlayer;
+    
 
     public MainPhaseAIManager(AIManager manager)
     {
         aiManager = manager;
+    }
+
+    public void InitializeAIManager()
+    {
+        _mainPhase = GameManager.Instance.mainPhase;
+        _eventManager = _mainPhase.EventManager;
+
     }
 
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer, EventCard card)
@@ -15,14 +27,25 @@ public class MainPhaseAIManager
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         //TODO: Think delay or future logic (use saved events, modifiers, etc.)
-        //TODO: Have logic to make the ai roll after applying event card, if they didn't lose their turn
+
+        if (card != null)
+        {
+            yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
+        }
         
-        yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
-        
+        if (GameManager.Instance.CurrentPlayer == aiPlayer)
+        {
+            yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+        }
+        else
+        {
+            Debug.Log("AI lost its turn");
+        }
     }
     
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
+        Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         GameUIManager.Instance.mainUI.OnRollDiceClicked();
     }
@@ -31,17 +54,35 @@ public class MainPhaseAIManager
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
+        Debug.Log("HANDLING EVENT CARD");
+        bool resolved = false;
+        void OnApplied(EventCard appliedCard)
+        {
+            if (appliedCard == card)
+                resolved = true;
+        }
+
+        _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
+        
         if (card.mustPlayImmediately)
         {
-            GameManager.Instance.mainPhase.EventManager.ApplyEvent(card, aiPlayer);
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
         }
         else if (card.canSave)
         {
-            if (!GameManager.Instance.mainPhase.TrySaveEvent(card))
+            if (!_mainPhase.TrySaveEvent(card))
             {
-                GameManager.Instance.mainPhase.EventManager.ApplyEvent(card, aiPlayer);
+                _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+            }
+            else
+            {
+                resolved = true;
             }
         }
         
+        // Wait until UI and game logic both finish
+        yield return new WaitUntil(() => resolved);
+
+        _eventManager.OnEventApplied -= OnApplied;
     }
 }

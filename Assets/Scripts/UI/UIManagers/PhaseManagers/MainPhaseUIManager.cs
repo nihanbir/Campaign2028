@@ -27,29 +27,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
     private MainPhaseGameManager _mainPhase;
     private EventManager _eventManager;
-
-    private void SubscribeToPhaseEvents()
-    {
-        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
-        _mainPhase.OnCardCaptured += OnCardCaptured;
-        _mainPhase.OnCardSaved += _ => ClearEventCard();
-        _eventManager.OnEventApplied += _ => ClearEventCard();
-        
-    }
-
-    private void OnDestroy()
-    {
-        if (_mainPhase == null) return;
-
-        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
-        _mainPhase.OnCardCaptured -= OnCardCaptured;
-        _mainPhase.OnCardSaved -= _ => ClearEventCard();
-        _eventManager.OnEventApplied -= _ => ClearEventCard();
-        
-    }
-
+    
     public void InitializePhaseUI()
     {
         _mainPhase = GameManager.Instance?.mainPhase;
@@ -71,6 +49,28 @@ public class MainPhaseUIManager : MonoBehaviour
         
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         InitializePlayersForTesting();
+    }
+    
+    private void SubscribeToPhaseEvents()
+    {
+        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured += OnCardCaptured;
+        _mainPhase.OnCardSaved += _ => OnEventSaved();
+        _eventManager.OnEventApplied += _ => OnEventApplied();
+        
+    }
+
+    private void OnDestroy()
+    {
+        if (_mainPhase == null) return;
+
+        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured -= OnCardCaptured;
+        _mainPhase.OnCardSaved -= _ => ClearEventCard();
+        _eventManager.OnEventApplied -= _ => OnEventApplied();
+        
     }
 
 #region Player Management
@@ -122,6 +122,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
     private void OnPlayerTurnEnded(Player player)
     {
+        EnableDiceButton(false);
         player.PlayerDisplayCard.ShowDice(false);
         player.PlayerDisplayCard.RemoveHighlight();
         ClearEventCard();
@@ -130,8 +131,11 @@ public class MainPhaseUIManager : MonoBehaviour
     private void EnableDiceButton(bool enable)
     {
         if (!rollDiceButton) return;
-        
-        enable = !_isPlayerAI && enable;
+        if (_isPlayerAI)
+        {
+            enable = false;
+        }
+        Debug.Log($"dice button visible: {enable}");
         rollDiceButton.interactable = enable;
     }
 
@@ -142,11 +146,11 @@ public class MainPhaseUIManager : MonoBehaviour
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
 
+        EnableDiceButton(currentPlayer.CanRoll());
         _mainPhase.PlayerRolledDice();
         
         //TODO:Do this when extra roll added
         
-        EnableDiceButton(currentPlayer.CanRoll());
     }
 
 #endregion Turn Flow
@@ -211,6 +215,23 @@ public class MainPhaseUIManager : MonoBehaviour
         _currentEventDisplayCard = null;
         
         Destroy(_currentEventGO);
+    }
+
+    private void OnEventApplied()
+    {
+        ClearEventCard();
+        
+        if (GameManager.Instance.CurrentPlayer.CanRoll())
+        {
+            EnableDiceButton(true);
+        }
+    }
+
+    private void OnEventSaved()
+    {
+        ClearEventCard();
+     
+        //TODO: UI work
         
         if (GameManager.Instance.CurrentPlayer.CanRoll())
         {

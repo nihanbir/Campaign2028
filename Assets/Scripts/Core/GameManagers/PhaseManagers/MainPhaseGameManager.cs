@@ -13,6 +13,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private readonly List<EventCard> _eventDeck = new();
 
     public EventManager EventManager { get; private set; }
+    private AIManager _aiManager;
 
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;
@@ -29,11 +30,15 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         Debug.Log("=== MAIN PHASE START ===");
 
+        _aiManager = AIManager.Instance;
+        _aiManager.mainAI.InitializeAIManager();
+        EventManager.OnEventApplied += _ =>ClearEventCard();
+        
         BuildAndShuffleDecks();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
-
+   
     private void BuildAndShuffleDecks()
     {
         _mainDeck.Clear();
@@ -62,15 +67,12 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         _currentTargetCard ??= DrawTargetCard();
 
-        if (_currentEventCard == null)
-        {
-            DrawEventCard();
-        }
+        _currentEventCard ??= DrawEventCard();
         
-        if (AIManager.Instance.IsAIPlayer(current))
+        if (_aiManager.IsAIPlayer(current))
         {
-            var aiPlayer = AIManager.Instance.GetAIPlayer(current);
-            game.StartCoroutine(AIManager.Instance.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+            var aiPlayer = _aiManager.GetAIPlayer(current);
+            game.StartCoroutine(_aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
         }
     }
 
@@ -80,7 +82,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Debug.Log($"--- Player {current.playerID} turn ended ---");
         current.ResetRollCount();
         OnPlayerTurnEnded?.Invoke(current);
-        _currentEventCard = null;
+        ClearEventCard();
         
         MoveToNextPlayer();
     }
@@ -127,9 +129,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
         }
         else if (player.CanRoll())
         {
-            Debug.Log("Player can roll again");
+            Debug.Log("-------- Player can roll again ----------");
             //wait for player to roll again
-            //TODO: if ai player, gotta figure out how to make it roll again
+            if (_aiManager.IsAIPlayer(player))
+            {
+                var aiPlayer = _aiManager.GetAIPlayer(player);
+                game.StartCoroutine(_aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+            }
         }
         else
         {
@@ -161,6 +167,8 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         EventCard card = _eventDeck.PopFront();
         
+        Debug.Log($"{card.cardName}");
+        
         //TODO: add event
         GameUIManager.Instance.mainUI.SpawnEventCard(card);
         return card;
@@ -177,8 +185,8 @@ public class MainPhaseGameManager : BasePhaseGameManager
         player.SaveEvent(card);
         Debug.Log($"Saved {card.cardName}");
         OnCardSaved?.Invoke(card);
-
-        _currentEventCard = null;
+        ClearEventCard();
+        
         return true;
     }
 
@@ -190,6 +198,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Debug.Log($"Returned to deck {card.cardName}");
         
         //No need to clear the card here because when the event card is played it's cleared already
+    }
+    
+    private void ClearEventCard()
+    {
+        _currentEventCard = null;
     }
 }
 
