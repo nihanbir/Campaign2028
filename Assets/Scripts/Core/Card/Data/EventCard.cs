@@ -8,11 +8,13 @@ public class EventCard : Card
     public EventSubType subType;
     public EventType blueTeam;
     public EventType redTeam;
+    public ActorTeam benefitingTeam;
     public bool mustPlayImmediately;
     public bool canSave;
     public bool canReturnToDeck;
     
     public InstitutionCard requiredInstitution;
+    
 }
 
 public enum EventType

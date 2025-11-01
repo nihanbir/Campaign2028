@@ -9,7 +9,7 @@ public class EventCardSOEditor : Editor
         serializedObject.Update();
 
         // Draw everything except the ones we control manually
-        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution", "blueTeam", "redTeam", "subType");
+        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution", "blueTeam", "redTeam", "subType", "benefitingTeam");
 
         // Grab relevant serialized properties
         SerializedProperty typeProp = serializedObject.FindProperty("eventType");
@@ -17,6 +17,8 @@ public class EventCardSOEditor : Editor
         SerializedProperty requiredInstitutionProp = serializedObject.FindProperty("requiredInstitution");
         SerializedProperty blueTeamProp = serializedObject.FindProperty("blueTeam");
         SerializedProperty redTeamProp = serializedObject.FindProperty("redTeam");
+        SerializedProperty benefitingTeamProp = serializedObject.FindProperty("benefitingTeam");
+        
 
         if (typeProp != null)
         {
@@ -29,6 +31,8 @@ public class EventCardSOEditor : Editor
                 EditorGUILayout.LabelField("Team Conditionals", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(blueTeamProp, new GUIContent("Blue Team Outcome"));
                 EditorGUILayout.PropertyField(redTeamProp, new GUIContent("Red Team Outcome"));
+                EditorGUILayout.PropertyField(benefitingTeamProp, new GUIContent("Beneficial to team"));
+                
             }
             // Only show SubType for relevant event types
             else if (IsSubtypeRelevant(currentEventType))

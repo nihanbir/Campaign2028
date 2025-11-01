@@ -14,6 +14,8 @@ public class EventCardSO : ScriptableObject
     public EventType blueTeam;
     public EventType redTeam;
     
+    [ReadOnly] public ActorTeam benefitingTeam;
+    
     public bool mustPlayImmediately;
     public bool canSave;
     public bool canReturnToDeck;
@@ -32,6 +34,8 @@ public class EventCardSO : ScriptableObject
             requiredInstitution = requiredInstitution != null ? requiredInstitution.ToCard() : null,
             blueTeam = eventType == EventType.TeamConditional ? blueTeam : EventType.None,
             redTeam = eventType == EventType.TeamConditional ? redTeam : EventType.None,
+            benefitingTeam = benefitingTeam,
+            
         };
     }
     
@@ -68,9 +72,36 @@ public class EventCardSO : ScriptableObject
             Debug.LogWarning($"[{eventName}] TeamConditional event requires both Blue and Red team outcomes.", this);
         }
         
+        // --- Compute beneficial team ---
+        if (eventType == EventType.TeamConditional)
+        {
+            bool blueBenefit = IsBeneficial(blueTeam);
+            bool redBenefit = IsBeneficial(redTeam);
+
+            if (blueBenefit && !redBenefit) benefitingTeam = ActorTeam.Blue;
+            else if (redBenefit && !blueBenefit) benefitingTeam = ActorTeam.Red;
+            else benefitingTeam = ActorTeam.None;
+        }
+        else
+        {
+            benefitingTeam = ActorTeam.None;
+        }
+        
         UnityEditor.EditorUtility.SetDirty(this);
 
     }
+    
+    private bool IsBeneficial(EventType effect)
+    {
+        switch (effect)
+        {
+            case EventType.ExtraRoll:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
 #endif
 
 }

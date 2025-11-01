@@ -36,7 +36,8 @@ public class ActorCard : Card
 public enum ActorTeam
 {
     Red,
-    Blue
+    Blue,
+    None
 }
 
 public enum ActorType
