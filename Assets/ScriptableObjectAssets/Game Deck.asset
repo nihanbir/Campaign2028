@@ -46,12 +46,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: daa93609050158349b6cc102d45365e2, type: 2}
   - {fileID: 11400000, guid: e26b05352d6438e49af9822bb18c5ad6, type: 2}
   - {fileID: 11400000, guid: 5f71075cb3db11f4085e3db0bb5213da, type: 2}
-  allEvents:
-  - {fileID: 11400000, guid: d240b6ef565638e45ac009ca4234b4c1, type: 2}
-  - {fileID: 11400000, guid: 7191c933ffe824743a8f08427d9aad98, type: 2}
-  - {fileID: 11400000, guid: 6f6aec6d5ea02e5429c119e6946fad3e, type: 2}
-  - {fileID: 11400000, guid: a66229c14af7868429421b19d8dd4006, type: 2}
-  - {fileID: 11400000, guid: 6a5b7d094c9bae34c94f14333fef0d8e, type: 2}
   allActors:
   - {fileID: 11400000, guid: fdac6c70c842e8543af72f4e3e6ef460, type: 2}
   - {fileID: 11400000, guid: 86e1335a556ac564abb41597dc2c1ed0, type: 2}
@@ -62,3 +56,34 @@ MonoBehaviour:
   allAllegiances:
   - {fileID: 11400000, guid: c94e9b5df7ae0b640b2e98f11311b063, type: 2}
   - {fileID: 11400000, guid: 9f51f1d856c6b6f46b1d7f4f6b4cc966, type: 2}
+  allEvents:
+  - {fileID: 11400000, guid: d240b6ef565638e45ac009ca4234b4c1, type: 2}
+  - {fileID: 11400000, guid: 7191c933ffe824743a8f08427d9aad98, type: 2}
+  - {fileID: 11400000, guid: 6f6aec6d5ea02e5429c119e6946fad3e, type: 2}
+  - {fileID: 11400000, guid: a66229c14af7868429421b19d8dd4006, type: 2}
+  - {fileID: 11400000, guid: 6a5b7d094c9bae34c94f14333fef0d8e, type: 2}
+  - {fileID: 11400000, guid: 26e5dd2739af5f84594d5b7b65a6ba16, type: 2}
+  - {fileID: 11400000, guid: 8601c51a908cf9847a3d8f3a9e7ea083, type: 2}
+  - {fileID: 11400000, guid: bc9ac2210e4389042bc1da0e202bf230, type: 2}
+  - {fileID: 11400000, guid: f52dddd1feb50f04c803f40c2581935d, type: 2}
+  - {fileID: 11400000, guid: 15e1a39607ac51c408b73483ec3d88af, type: 2}
+  - {fileID: 11400000, guid: e3a6acae71a759e4abc7c335393362bc, type: 2}
+  - {fileID: 11400000, guid: 90c03fac0d78b8f46a92c87a06194ea8, type: 2}
+  - {fileID: 11400000, guid: abc972ab6380b7448b70a4a1fe68d8dc, type: 2}
+  extraRollEvents: []
+  needTwoEvents: []
+  challengeEvents: []
+  loseTurnEvents: []
+  noImpactEvents: []
+  drawnCardStaysEvents: []
+  teamConditionalEvents:
+  - {fileID: 11400000, guid: bc9ac2210e4389042bc1da0e202bf230, type: 2}
+  - {fileID: 11400000, guid: f52dddd1feb50f04c803f40c2581935d, type: 2}
+  - {fileID: 11400000, guid: 15e1a39607ac51c408b73483ec3d88af, type: 2}
+  - {fileID: 11400000, guid: e3a6acae71a759e4abc7c335393362bc, type: 2}
+  - {fileID: 11400000, guid: 90c03fac0d78b8f46a92c87a06194ea8, type: 2}
+  - {fileID: 11400000, guid: 9b96f2fd0a507cf488da9a268bc2287a, type: 2}
+  - {fileID: 11400000, guid: 3507f405f0a7d8c418682ef6520e5bc9, type: 2}
+  - {fileID: 11400000, guid: e2987dd263da74b4abcb65b1c28f4124, type: 2}
+  - {fileID: 11400000, guid: fb0c5df018b0af7448d2289ff4e2c81c, type: 2}
+  - {fileID: 11400000, guid: abc972ab6380b7448b70a4a1fe68d8dc, type: 2}
