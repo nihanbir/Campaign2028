@@ -115,7 +115,6 @@ public class MainPhaseUIManager : MonoBehaviour
     private void OnPlayerTurnStarted(Player player)
     {
         _isPlayerAI = AIManager.Instance.IsAIPlayer(player);
-        Debug.Log($"isplayer ai: {_isPlayerAI}");
 
         player.PlayerDisplayCard.Highlight();
     }
@@ -135,7 +134,6 @@ public class MainPhaseUIManager : MonoBehaviour
         {
             enable = false;
         }
-        Debug.Log($"dice button visible: {enable}");
         rollDiceButton.interactable = enable;
     }
 
@@ -210,8 +208,6 @@ public class MainPhaseUIManager : MonoBehaviour
     {
         if (!_currentEventGO) return;
         
-        Debug.Log("Clearing event card");
-
         _currentEventDisplayCard = null;
         
         Destroy(_currentEventGO);

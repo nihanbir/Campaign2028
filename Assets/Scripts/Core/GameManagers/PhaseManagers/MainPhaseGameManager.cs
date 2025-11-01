@@ -111,7 +111,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     private void EvaluateCapture(Player player, int roll)
     {
-        Debug.Log("Evaluating capture");
         bool success = _currentTargetCard switch
         {
             StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
