@@ -19,6 +19,7 @@ MonoBehaviour:
   requiredInstitution: {fileID: 0}
   blueTeam: 0
   redTeam: 1
+  benefitingTeam: 1
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 0

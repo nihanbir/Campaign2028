@@ -15,10 +15,11 @@ MonoBehaviour:
   eventName: Contested State Election Results
   artwork: {fileID: 1246563326444854564, guid: 6097b1768692b9a4b9d8490a7f8f6efa, type: 3}
   eventType: 2
-  subType: 0
+  subType: 4
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7
+  benefitingTeam: 2
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 0

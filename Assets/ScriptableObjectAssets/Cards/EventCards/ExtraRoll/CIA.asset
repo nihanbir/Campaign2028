@@ -15,10 +15,11 @@ MonoBehaviour:
   eventName: CIA
   artwork: {fileID: 6435155807201235407, guid: 6931dca239831cb4d98d9ff91b560358, type: 3}
   eventType: 0
-  subType: 2
-  requiredInstitution: {fileID: 11400000, guid: 096a56eb51139054fa4fd9c66eb28758, type: 2}
+  subType: 0
+  requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7
+  benefitingTeam: 2
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 1

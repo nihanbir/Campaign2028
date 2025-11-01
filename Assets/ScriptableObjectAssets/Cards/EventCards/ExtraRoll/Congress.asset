@@ -15,10 +15,11 @@ MonoBehaviour:
   eventName: Congress
   artwork: {fileID: 5277661926609131091, guid: 69d831369c706fb4cb1d7e8c4db5371c, type: 3}
   eventType: 0
-  subType: 2
-  requiredInstitution: {fileID: 11400000, guid: a94cf33f5d748fb4290a2a9f917dc200, type: 2}
+  subType: 0
+  requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7
+  benefitingTeam: 2
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 1

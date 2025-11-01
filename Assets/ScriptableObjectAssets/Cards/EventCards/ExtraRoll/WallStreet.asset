@@ -15,10 +15,11 @@ MonoBehaviour:
   eventName: Wall Street
   artwork: {fileID: -5906604974296700058, guid: 278fe962622c9164f955499e74dd1908, type: 3}
   eventType: 0
-  subType: 2
-  requiredInstitution: {fileID: 11400000, guid: e26b05352d6438e49af9822bb18c5ad6, type: 2}
+  subType: 0
+  requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7
+  benefitingTeam: 2
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 1

@@ -9,7 +9,7 @@ public class MainPhaseUIManager : MonoBehaviour
     [SerializeField] private Button rollDiceButton;
 
     [Header("Cards")]
-    [SerializeField] private GameObject stateCardPrefab;
+    [SerializeField] public GameObject stateCardPrefab;
     [SerializeField] private GameObject institutionCardPrefab;
     [SerializeField] private GameObject eventCardPrefab;
     [SerializeField] private Transform tableArea;
@@ -18,6 +18,9 @@ public class MainPhaseUIManager : MonoBehaviour
     [Header("Players")]
     [SerializeField] private Transform playerUIParent;
     [SerializeField] private float spacingBetweenPlayerCards = 150f;
+    
+    [Header("Challenge State Holder")]     
+    [SerializeField] public ChallengeStateUIManager challengeUI;
 
     private bool _isPlayerAI = false;
     
@@ -46,6 +49,8 @@ public class MainPhaseUIManager : MonoBehaviour
             rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
         EnableDiceButton(false);
+        
+        challengeUI.InitializeManager();
         
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         InitializePlayersForTesting();

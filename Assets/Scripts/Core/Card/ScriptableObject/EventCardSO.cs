@@ -49,7 +49,7 @@ public class EventCardSO : ScriptableObject
             redTeam = EventType.None;
         }
 
-        if (eventType != EventType.ExtraRoll)
+        if (eventType != EventType.ExtraRoll && eventType != EventType.Challenge)
         {
             subType = EventSubType.None;
             requiredInstitution = null;

@@ -8,6 +8,7 @@ public class EventManager
     private readonly MainPhaseGameManager _game;
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
+    public event Action<List<StateCard>> OnChallengeState;
 
     private bool _needTwoActive = false;
 
@@ -19,11 +20,12 @@ public class EventManager
             { EventType.ExtraRoll, HandleExtraRoll },
             { EventType.NeedTwo, HandleNeedTwo },
             { EventType.LoseTurn, HandleLoseTurn },
+            { EventType.Challenge, HandleChallenge },
             { EventType.NoImpact, (p, c) => {} }
         };
         
     }
-    
+
     public void ApplyEvent(Player player, EventCard card)
     {
         Debug.Log($"Applying event {card.cardName}");
@@ -63,12 +65,42 @@ public class EventManager
     private void HandleNeedTwo(Player player, EventCard card)
     {
         _needTwoActive = true;
-       }
+    }
     
     private void HandleLoseTurn(Player player, EventCard card)
     {
         _game.EndPlayerTurn();
     }
+    
+    private void HandleChallenge(Player player, EventCard card)
+    {
+        bool challengeAnyState = card.subType switch
+        {
+            EventSubType.Challenge_AnyState => true,
+            _ => false
+        };
+
+        if (challengeAnyState)
+        {
+            var heldStates = _game.GetHeldStates();
+
+            if (heldStates.Count == 0)
+            {
+                Debug.Log("No states are currently held. Challenge cannot be applied.");
+                if (card.canReturnToDeck)
+                    _game.ReturnCardToDeck(card);
+                return;
+            }
+
+            List<StateCard> statesToDisplay = new();
+            statesToDisplay.AddRange(_game.GetHeldStates().Values);
+
+            OnChallengeState?.Invoke(statesToDisplay);
+            
+        }
+       
+    }
+
     
     public bool ConsumeNeedTwo()
     {

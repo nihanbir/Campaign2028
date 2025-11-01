@@ -33,10 +33,10 @@ public class MainPhaseAIManager
             yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
         }
         
-        if (GameManager.Instance.CurrentPlayer == aiPlayer)
-        {
-            yield return aiManager.StartCoroutine(RollDice(aiPlayer));
-        }
+        // if (GameManager.Instance.CurrentPlayer == aiPlayer)
+        // {
+        //     yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+        // }
         else
         {
             Debug.Log("AI lost its turn");
@@ -63,14 +63,18 @@ public class MainPhaseAIManager
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
-        if (ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card))
-        {
-            resolved = true;
-        }
-        else
-        {
-            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
-        }
+        // if (ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card))
+        // {
+        //     resolved = true;
+        // }
+        // else
+        // {
+        //     _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+        // }
+        
+        //TODO:Don't forget to remove
+        _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+        
         
         // Wait until UI and game logic both finish
         yield return new WaitUntil(() => resolved);

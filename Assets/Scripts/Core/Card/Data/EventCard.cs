@@ -36,5 +36,8 @@ public enum EventSubType
     None,
     ExtraRoll_Any,
     ExtraRoll_IfHasInstitution,
+    Challenge_IfHasInstitution,
+    Challenge_AnyState,
+    
     
 }

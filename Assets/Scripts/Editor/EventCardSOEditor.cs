@@ -46,7 +46,7 @@ public class EventCardSOEditor : Editor
                     EventSubType currentSubType = (EventSubType)subTypeProp.enumValueIndex;
 
                     // Show institution condition if applicable
-                    if (currentSubType == EventSubType.ExtraRoll_IfHasInstitution)
+                    if (currentSubType == EventSubType.ExtraRoll_IfHasInstitution || currentSubType == EventSubType.Challenge_IfHasInstitution)
                     {
                         EditorGUILayout.Space(4);
                         EditorGUILayout.LabelField("Institution Condition", EditorStyles.boldLabel);
@@ -67,6 +67,7 @@ public class EventCardSOEditor : Editor
         switch (eventType)
         {
             case EventType.ExtraRoll:
+            case EventType.Challenge:
                 return true;
             // Add more cases as you add subtype support for other types
             default:

@@ -9,6 +9,14 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private EventCard _currentEventCard;
 
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
+    private readonly Dictionary<Player, StateCard> _heldStates = new();
+    public Dictionary<Player, StateCard> GetHeldStates() => _heldStates;
+    
+    public void UpdateStateOwnership(Player newOwner, StateCard state)
+    {
+        _heldStates[newOwner] = state;
+    }
+    
     private readonly List<Card> _mainDeck = new();
     private readonly List<EventCard> _eventDeck = new();
 
@@ -35,6 +43,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
         EventManager.OnEventApplied += _ =>ClearEventCard();
         
         BuildAndShuffleDecks();
+        AssignTestStatesToPlayers();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
@@ -131,6 +140,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
         if (success)
         {
             player.CaptureCard(_currentTargetCard);
+            
+            if (_currentTargetCard is StateCard state)
+                _heldStates[player] = state; // track ownership automatically ✅
+            
             OnCardCaptured?.Invoke(player, _currentTargetCard);
             Debug.Log($"Player captured {_currentTargetCard.cardName}");
             _currentTargetCard = null;
@@ -212,6 +225,49 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private void ClearEventCard()
     {
         _currentEventCard = null;
+    }
+    
+    /// <summary>
+    /// Assigns a few StateCards from the deck to each player for testing or setup purposes.
+    /// </summary>
+    /// <param name="statesPerPlayer">How many states each player should receive.</param>
+    public void AssignTestStatesToPlayers(int statesPerPlayer = 2)
+    {
+        if (game.players == null || game.players.Count == 0)
+        {
+            Debug.LogWarning("No players available for state assignment.");
+            return;
+        }
+
+        if (game.stateDeck == null || game.stateDeck.Count == 0)
+        {
+            Debug.LogWarning("No state cards available for assignment.");
+            return;
+        }
+
+        var shuffledStates = new List<StateCard>(game.stateDeck).OrderBy(_ => UnityEngine.Random.value).ToList();
+        int stateIndex = 0;
+
+        foreach (var player in game.players)
+        {
+            for (int i = 0; i < statesPerPlayer; i++)
+            {
+                if (stateIndex >= shuffledStates.Count)
+                {
+                    Debug.LogWarning("Not enough states to assign evenly.");
+                    return;
+                }
+
+                var stateCard = shuffledStates[stateIndex++];
+                player.CaptureCard(stateCard);
+                _heldStates[player] = stateCard;
+                _mainDeck.Remove(stateCard);
+
+                Debug.Log($"Assigned {stateCard.cardName} to Player {player.playerID}");
+            }
+        }
+
+        Debug.Log("✅ Test state assignment completed.");
     }
 }
 
