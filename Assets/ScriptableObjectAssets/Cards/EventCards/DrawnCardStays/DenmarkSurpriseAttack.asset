@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
   eventName: Denmark Surprise Attack
   artwork: {fileID: -1863192965977308837, guid: 42cc9275843cf924cb0b54ed7aef7e56, type: 3}
-  backSide: {fileID: 0}
   eventType: 5
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 1
   canSave: 0
+  canReturnToDeck: 0

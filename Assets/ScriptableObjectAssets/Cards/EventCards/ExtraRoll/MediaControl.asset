@@ -17,6 +17,8 @@ MonoBehaviour:
   eventType: 0
   subType: 2
   requiredInstitution: {fileID: 11400000, guid: 89a8a1d8aca887241a902c2a24f71689, type: 2}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 1
   canSave: 0
   canReturnToDeck: 1

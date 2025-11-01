@@ -15,5 +15,10 @@ MonoBehaviour:
   eventName: Hotel Maid Incident
   artwork: {fileID: -6440063885911063779, guid: 0844cc165be88ea49b9285e89f008c81, type: 3}
   eventType: 2
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 0
   canSave: 1
+  canReturnToDeck: 0

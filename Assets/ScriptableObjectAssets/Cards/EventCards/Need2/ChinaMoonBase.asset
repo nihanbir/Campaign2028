@@ -15,5 +15,10 @@ MonoBehaviour:
   eventName: China Moon Base
   artwork: {fileID: 4472508111866561513, guid: 29e8e3966832aed4a8fa6b0043579e9a, type: 3}
   eventType: 1
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 1
   canSave: 0
+  canReturnToDeck: 0

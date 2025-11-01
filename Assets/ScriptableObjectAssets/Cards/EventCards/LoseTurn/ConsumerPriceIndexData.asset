@@ -15,5 +15,10 @@ MonoBehaviour:
   eventName: Consumer Price Index Data
   artwork: {fileID: -2167691245641200633, guid: 872fcc4677806f24182c0cfffe644b73, type: 3}
   eventType: 3
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 1
   canSave: 0
+  canReturnToDeck: 0

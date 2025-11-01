@@ -15,5 +15,10 @@ MonoBehaviour:
   eventName: Epstein Files
   artwork: {fileID: -3067890660781233378, guid: 2fa479ce32dde254fa12d0d0c5f3bed4, type: 3}
   eventType: 3
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 7
+  redTeam: 7
   mustPlayImmediately: 1
   canSave: 0
+  canReturnToDeck: 0
