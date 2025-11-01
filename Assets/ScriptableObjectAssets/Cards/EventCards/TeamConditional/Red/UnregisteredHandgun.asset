@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
+  m_Name: UnregisteredHandgun
+  m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
+  eventName: Unregistered Handgun
+  artwork: {fileID: 4004515073389878742, guid: 0ce132dcf1ca17245bf03dbda8f44fd2, type: 3}
+  eventType: 6
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 1
+  redTeam: 0
+  mustPlayImmediately: 0
+  canSave: 1
+  canReturnToDeck: 0

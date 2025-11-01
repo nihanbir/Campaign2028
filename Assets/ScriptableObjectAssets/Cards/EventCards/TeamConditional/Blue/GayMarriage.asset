@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
+  m_Name: GayMarriage
+  m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
+  eventName: Gay Marriage
+  artwork: {fileID: 9112861436013803391, guid: 72e2e6f7140a1aa4699419aa59f64b39, type: 3}
+  eventType: 6
+  subType: 0
+  requiredInstitution: {fileID: 0}
+  blueTeam: 0
+  redTeam: 1
+  mustPlayImmediately: 0
+  canSave: 1
+  canReturnToDeck: 0
