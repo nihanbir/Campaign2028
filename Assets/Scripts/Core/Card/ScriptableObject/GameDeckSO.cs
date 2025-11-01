@@ -10,7 +10,7 @@ public class GameDeckSO : ScriptableObject
     public List<InstitutionCardSO> allInstitutions = new List<InstitutionCardSO>();
     public List<ActorCardSO> allActors = new List<ActorCardSO>();
     public List<AllegianceCardSO> allAllegiances = new List<AllegianceCardSO>();
-    [HideInInspector] public List<EventCardSO> allEvents = new List<EventCardSO>();
+    [ReadOnly] public List<EventCardSO> allEvents = new List<EventCardSO>();
     
     [Header("Event Categories")]
     public List<EventCardSO> extraRollEvents = new();
