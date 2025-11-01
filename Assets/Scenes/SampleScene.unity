@@ -705,45 +705,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 249257443414302574, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0.8616677
-      objectReference: {fileID: 0}
-    - target: {fileID: 249257443414302574, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0.19960022
-      objectReference: {fileID: 0}
-    - target: {fileID: 249257443414302574, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.099823
-      objectReference: {fileID: 0}
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 2616465519565126175, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2616465519565126175, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0.05999756
-      objectReference: {fileID: 0}
-    - target: {fileID: 2616465519565126175, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.02999878
-      objectReference: {fileID: 0}
-    - target: {fileID: 3230779965172840872, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: eventArea
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3230779965172840872, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: tableArea
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 3230779965172840872, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: playerUIParent
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x
@@ -825,12 +789,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8066389155480619410, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: challengeUI
-      value: 
-      objectReference: {fileID: 4676871574646860398}
-    m_RemovedComponents:
-    - {fileID: 3230779965172840872, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -846,17 +805,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!114 &4676871574646860398 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4420054567724687799, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
 --- !u!1001 &5483236166574125557
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,8 +1,6 @@
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class ChallengeStateUIManager : MonoBehaviour
@@ -158,7 +156,4 @@ public class ChallengeStateUIManager : MonoBehaviour
 
         Debug.Log($"[ChallengeUI] Placed {count} state cards in {rowCount} rows × {cardsPerRow} max columns (centered rows, scale={scaleFactor:F2}).");
     }
-
-
-
 }

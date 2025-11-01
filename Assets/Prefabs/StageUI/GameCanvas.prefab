@@ -814,6 +814,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5428860093183374431}
     m_Modifications:
+    - target: {fileID: 1210572350680237494, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.8616677
+      objectReference: {fileID: 0}
+    - target: {fileID: 1210572350680237494, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0.19960022
+      objectReference: {fileID: 0}
+    - target: {fileID: 1210572350680237494, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.099853516
+      objectReference: {fileID: 0}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -844,7 +856,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 0.05999756
       objectReference: {fileID: 0}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -880,7 +892,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 0.030029297
       objectReference: {fileID: 0}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -908,6 +920,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
   m_PrefabInstance: {fileID: 1421267700002347736}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4420054567724687799 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3381758312561441647, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+  m_PrefabInstance: {fileID: 1421267700002347736}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
 --- !u!1001 &6219796264034280716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1076,9 +1099,7 @@ MonoBehaviour:
   eventArea: {fileID: 8851943022607196200}
   playerUIParent: {fileID: 6508734186844676860}
   spacingBetweenPlayerCards: 150
-  eventScreen: {fileID: 0}
-  ChallengeUIParent: {fileID: 0}
-  spacingBetweenStateCards: 150
+  challengeUI: {fileID: 4420054567724687799}
 --- !u!224 &8851943022607196200 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3209180837638522148, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
