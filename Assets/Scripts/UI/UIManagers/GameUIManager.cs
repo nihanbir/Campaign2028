@@ -39,7 +39,6 @@ public class GameUIManager : MonoBehaviour
 
             case GamePhase.MainGame:
                 phaseText.text = "Main Game";
-                setupUI.gameObject.SetActive(false);
                 mainUI.gameObject.SetActive(true);
                 mainUI.InitializePhaseUI();
                 break;
