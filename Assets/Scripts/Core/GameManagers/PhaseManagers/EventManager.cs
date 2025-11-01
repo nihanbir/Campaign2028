@@ -9,6 +9,8 @@ public class EventManager
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
 
+    private bool _needTwoActive = false;
+
     public EventManager(MainPhaseGameManager gm)
     {
         _game = gm;
@@ -60,11 +62,20 @@ public class EventManager
 
     private void HandleNeedTwo(Player player, EventCard card)
     {
-        Debug.Log($"Event 'NeedTwo' not yet implemented for {player.playerID}");
-    }
+        _needTwoActive = true;
+       }
     
     private void HandleLoseTurn(Player player, EventCard card)
     {
         _game.EndPlayerTurn();
+    }
+    
+    public bool ConsumeNeedTwo()
+    {
+        if (!_needTwoActive)
+            return false;
+
+        _needTwoActive = false;
+        return true;
     }
 }
