@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "Game Deck", menuName = "Campaign 2028/Game Deck Container")]
 public class GameDeckSO : ScriptableObject
@@ -7,9 +8,18 @@ public class GameDeckSO : ScriptableObject
     [Header("All Cards")]
     public List<StateCardSO> allStates = new List<StateCardSO>();
     public List<InstitutionCardSO> allInstitutions = new List<InstitutionCardSO>();
-    public List<EventCardSO> allEvents = new List<EventCardSO>();
     public List<ActorCardSO> allActors = new List<ActorCardSO>();
     public List<AllegianceCardSO> allAllegiances = new List<AllegianceCardSO>();
+    [HideInInspector] public List<EventCardSO> allEvents = new List<EventCardSO>();
+    
+    [Header("Event Categories")]
+    public List<EventCardSO> extraRollEvents = new();
+    public List<EventCardSO> needTwoEvents = new();
+    public List<EventCardSO> challengeEvents = new();
+    public List<EventCardSO> loseTurnEvents = new();
+    public List<EventCardSO> noImpactEvents = new();
+    public List<EventCardSO> drawnCardStaysEvents = new();
+    public List<EventCardSO> teamConditionalEvents = new();
     
     public List<StateCard> GetStateDeck()
     {
@@ -33,12 +43,26 @@ public class GameDeckSO : ScriptableObject
     
     public List<EventCard> GetEventDeck()
     {
+        BuildAllEventsDeck();
         List<EventCard> deck = new List<EventCard>();
         foreach (var eventSO in allEvents)
         {
             deck.Add(eventSO.ToCard());
         }
         return deck;
+    }
+
+    private void BuildAllEventsDeck()
+    {
+        allEvents.Clear();
+        allEvents.AddRange(extraRollEvents);
+        allEvents.AddRange(needTwoEvents);
+        allEvents.AddRange(challengeEvents);
+        allEvents.AddRange(loseTurnEvents);
+        allEvents.AddRange(noImpactEvents);
+        allEvents.AddRange(drawnCardStaysEvents);
+        allEvents.AddRange(teamConditionalEvents);
+        
     }
     
     public List<ActorCard> GetActorDeck()
@@ -60,4 +84,6 @@ public class GameDeckSO : ScriptableObject
         }
         return deck;
     }
+    
+   
 }
