@@ -1,6 +1,6 @@
 
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,19 +8,25 @@ public class ChallengeStateUIManager : MonoBehaviour
 {
     [SerializeField] private GameObject eventScreen;
     [SerializeField] private Transform challengeUIParent;
-    [SerializeField] private Button rollDiceButton;
     [SerializeField] private float spacingBetweenStateCards = 150f;
+    
+    [Header("Duel")]
+    [SerializeField] private GameObject duelScreen;
+    [SerializeField] private Transform defenderUI;
+    [SerializeField] private Transform playerUI;
+    [SerializeField] private Transform chosenStateUI;
+    [SerializeField] private Button rollDiceButton;
 
     private MainPhaseGameManager _mainPhase;
     private MainPhaseUIManager _mainUI; 
     private EventManager _eventManager;
     
-    private StateDisplayCard _selectedCard;
-    public static event Action<StateCard> OnCardSelected;
+    private StateDisplayCard _chosenCard;
 
     private void Awake()
     {
         eventScreen.SetActive(false);
+        duelScreen.SetActive(false);
     }
 
     public void InitializeManager()
@@ -48,7 +54,6 @@ public class ChallengeStateUIManager : MonoBehaviour
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
 
-        rollDiceButton.gameObject.SetActive(true);
         _mainPhase.PlayerRolledDice();
     }
 
@@ -57,7 +62,6 @@ public class ChallengeStateUIManager : MonoBehaviour
     {
         _mainUI.gameObject.SetActive(false);
         eventScreen.SetActive(true);
-        rollDiceButton.gameObject.SetActive(false);
         
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
     }
@@ -67,12 +71,48 @@ public class ChallengeStateUIManager : MonoBehaviour
         StateDisplayCard.OnCardHeld -= HandleCardHeld;
         _mainUI.gameObject.SetActive(true);
         eventScreen.SetActive(false);
-    }
-
-    private void ShowDuel(Player defender, StateCard selectedState)
-    {
+        duelScreen.SetActive(false);
         
     }
+
+    private void ShowDuel(Player defender, StateCard chosenState)
+    {
+        duelScreen.SetActive(true);
+        
+        // Spawn current player
+        var currentPlayer = GameManager.Instance.CurrentPlayer;
+        CreateCardInTransform<PlayerDisplayCard>(currentPlayer.PlayerDisplayCard.gameObject, playerUI, currentPlayer.assignedActor);
+        
+        // Spawn defender player
+        CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, playerUI, defender.assignedActor);
+        
+        // Spawn chosen state
+        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, chosenStateUI, chosenState);
+        
+        Debug.Log($"[ChallengeUI] Showing duel between attacker {currentPlayer.playerID} and defender {defender.playerID} for state {chosenState.cardName}");
+        
+    }
+
+    private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
+        where T : MonoBehaviour, IDisplayCard
+    {
+        // Clear previous card(s)
+        foreach (Transform child in uiParent)
+            Destroy(child.gameObject);
+
+        var cardGO = Instantiate(prefab, uiParent);
+        cardGO.SetActive(true);
+
+        if (cardGO.TryGetComponent(out T displayCard))
+        {
+            displayCard.SetCard(cardToSet);
+        }
+        else
+        {
+            Debug.LogError($"{prefab.name} is missing {typeof(T).Name} component.");
+        }
+    }
+
 
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
     {
@@ -177,12 +217,11 @@ public class ChallengeStateUIManager : MonoBehaviour
             if (child.TryGetComponent(out StateDisplayCard display))
                 display.SetClickable(false);
         
-        _selectedCard = card;
-        StateCard cardData = card.GetCard();
-        Debug.Log($"[ChallengeUI] Player held {cardData.cardName} → set as challenge target.");
+        _chosenCard = card;
+        StateCard chosenState = card.GetCard();
+        Debug.Log($"[ChallengeUI] Player held {chosenState.cardName} → set as challenge target.");
 
-        OnCardSelected?.Invoke(cardData);
-        // Example: pass to EventManager
-        // GameManager.Instance.mainPhase.EventManager.StartChallenge(chosenState);
+        Player defender = _mainPhase.GetHeldStates().FirstOrDefault(player => player.Value == chosenState).Key;
+        ShowDuel(defender, chosenState);
     }
 }
