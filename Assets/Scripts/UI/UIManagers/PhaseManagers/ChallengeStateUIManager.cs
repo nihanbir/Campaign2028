@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,14 @@ public class ChallengeStateUIManager : MonoBehaviour
     private MainPhaseUIManager _mainUI; 
     private EventManager _eventManager;
     
+    private StateDisplayCard _selectedCard;
+    public static event Action<StateCard> OnCardSelected;
+
+    private void Awake()
+    {
+        eventScreen.SetActive(false);
+    }
+
     public void InitializeManager()
     {
         _mainPhase = GameManager.Instance?.mainPhase;
@@ -25,47 +34,50 @@ public class ChallengeStateUIManager : MonoBehaviour
         }
         _mainUI = GameUIManager.Instance.mainUI;
         _eventManager = _mainPhase.EventManager;
-        _eventManager.OnChallengeState += OnChallengeState;
+        _eventManager.OnChallengeState += ShowStateCards;
         
-        eventScreen.SetActive(false);
+        if (rollDiceButton)
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        
     }
-    
-    private void OnChallengeState(List<StateCard> statesToDisplay)
+
+    public void OnRollDiceClicked()
+    {
+        var currentPlayer = GameManager.Instance.CurrentPlayer;
+        
+        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
+        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
+
+        rollDiceButton.gameObject.SetActive(true);
+        _mainPhase.PlayerRolledDice();
+    }
+
+
+    private void ShowStateCards(List<StateCard> statesToDisplay)
     {
         _mainUI.gameObject.SetActive(false);
         eventScreen.SetActive(true);
         rollDiceButton.gameObject.SetActive(false);
         
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
-        // ShowChallengeSelection(heldStates, selectedState =>
-        // {
-        //     Player defender = heldStates[selectedState];
-        //     ShowChallengeDuel(player, defender, selectedState, () =>
-        //     {
-        //         int roll = GameUIManager.Instance.DiceRoll;
-        //         bool success = selectedState.IsSuccessfulRoll(roll, player.assignedActor.team);
-        //
-        //         if (success)
-        //         {
-        //             Debug.Log($"Player {player.playerID} wins challenge and takes {selectedState.cardName}!");
-        //             defender.RemoveState(selectedState);
-        //             player.CaptureCard(selectedState);
-        //             _game.UpdateStateOwnership(selectedState, player);
-        //         }
-        //         else
-        //         {
-        //             Debug.Log($"Player {player.playerID} failed challenge for {selectedState.cardName}.");
-        //             if (card.canReturnToDeck)
-        //                 _game.ReturnCardToDeck(card);
-        //         }
-        //
-        //         ReturnToMainPhaseUI();
-        //     });
-        // });
+    }
+
+    private void ReturnToMainPhaseUI()
+    {
+        StateDisplayCard.OnCardHeld -= HandleCardHeld;
+        _mainUI.gameObject.SetActive(true);
+        eventScreen.SetActive(false);
+    }
+
+    private void ShowDuel(Player defender, StateCard selectedState)
+    {
+        
     }
 
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
     {
+        StateDisplayCard.OnCardHeld += HandleCardHeld;
+        
         int count = statesToDisplay.Count;
         if (count == 0) return;
 
@@ -86,6 +98,7 @@ public class ChallengeStateUIManager : MonoBehaviour
             }
 
             displayCard.SetCard(statesToDisplay[i]);
+            displayCard.SetClickable(true);
 
             if (uiInstance.TryGetComponent(out RectTransform rt))
                 cardRects.Add(rt);
@@ -155,5 +168,21 @@ public class ChallengeStateUIManager : MonoBehaviour
         }
 
         Debug.Log($"[ChallengeUI] Placed {count} state cards in {rowCount} rows × {cardsPerRow} max columns (centered rows, scale={scaleFactor:F2}).");
+    }
+
+    private void HandleCardHeld(StateDisplayCard card)
+    {
+        // Prevent double selection
+        foreach (Transform child in challengeUIParent)
+            if (child.TryGetComponent(out StateDisplayCard display))
+                display.SetClickable(false);
+        
+        _selectedCard = card;
+        StateCard cardData = card.GetCard();
+        Debug.Log($"[ChallengeUI] Player held {cardData.cardName} → set as challenge target.");
+
+        OnCardSelected?.Invoke(cardData);
+        // Example: pass to EventManager
+        // GameManager.Instance.mainPhase.EventManager.StartChallenge(chosenState);
     }
 }
