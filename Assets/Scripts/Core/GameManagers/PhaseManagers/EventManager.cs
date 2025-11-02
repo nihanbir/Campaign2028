@@ -45,6 +45,7 @@ public class EventManager
         else
             Debug.LogWarning($"Unhandled event type: {effectiveType}");
     }
+#region Extra Roll
 
     private void HandleExtraRoll(Player player, EventCard card)
     {
@@ -61,17 +62,35 @@ public class EventManager
         else if (card.canReturnToDeck)
             _game.ReturnCardToDeck(card);
     }
+    
+#endregion Extra Roll
 
+#region Need Two
     private void HandleNeedTwo(Player player, EventCard card)
     {
         _needTwoActive = true;
     }
-    
+    public bool ConsumeNeedTwo()
+    {
+        if (!_needTwoActive)
+            return false;
+
+        _needTwoActive = false;
+        return true;
+    }
+#endregion Need Two
+
+#region Lose Turn
+
     private void HandleLoseTurn(Player player, EventCard card)
     {
         _game.EndPlayerTurn();
     }
     
+#endregion Lose Turn
+
+#region Challenge
+
     private void HandleChallenge(Player player, EventCard card)
     {
         bool challengeAnyState = card.subType switch
@@ -94,20 +113,21 @@ public class EventManager
 
             List<StateCard> statesToDisplay = new();
             statesToDisplay.AddRange(_game.GetHeldStates().Values);
-
+            
+            
             OnChallengeState?.Invoke(statesToDisplay);
             
         }
        
     }
-
     
-    public bool ConsumeNeedTwo()
+    public void StartChallenge(StateCard chosenState)
     {
-        if (!_needTwoActive)
-            return false;
-
-        _needTwoActive = false;
-        return true;
+        throw new NotImplementedException();
     }
+
+#endregion Challenge
+
+
+
 }
