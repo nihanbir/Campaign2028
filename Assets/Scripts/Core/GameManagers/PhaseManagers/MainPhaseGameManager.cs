@@ -41,17 +41,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
         _aiManager = AIManager.Instance;
         _aiManager.mainAI.InitializeAIManager();
         EventManager.OnEventApplied += _ => ClearEventCard();
-        EventManager.OnChallengeState += _ => OnChallengeState();
         
         BuildAndShuffleDecks();
         AssignTestStatesToPlayers();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
-    }
-
-    private void OnChallengeState()
-    {
-        
     }
 
     private void BuildAndShuffleDecks()

@@ -118,12 +118,6 @@ public class EventManager
             OnChallengeState?.Invoke(statesToDisplay);
             
         }
-       
-    }
-    
-    public void StartChallenge(StateCard chosenState)
-    {
-        throw new NotImplementedException();
     }
 
 #endregion Challenge
