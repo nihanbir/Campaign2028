@@ -152,8 +152,6 @@ public class MainPhaseUIManager : MonoBehaviour
         EnableDiceButton(currentPlayer.CanRoll());
         _mainPhase.PlayerRolledDice();
         
-        //TODO:Do this when extra roll added
-        
     }
 
 #endregion Turn Flow
@@ -179,7 +177,7 @@ public class MainPhaseUIManager : MonoBehaviour
         _currentTargetGO = Instantiate(prefab, tableArea);
         if (_currentTargetGO.TryGetComponent(out IDisplayCard display))
         {
-            display.SetCardBase(card);
+            display.SetCard(card);
         }
         else
         {
