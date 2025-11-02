@@ -1,5 +1,5 @@
 public interface IDisplayCard
 {
-    void SetCardBase(Card card);
-    Card GetCard();
+    void SetCard(Card card);
+    
 }

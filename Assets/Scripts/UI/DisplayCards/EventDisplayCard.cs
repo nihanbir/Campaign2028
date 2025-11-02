@@ -8,7 +8,7 @@ public class EventDisplayCard : BaseDisplayCard<EventCard>
     public Button saveButton;
     public Button playButton;
     
-    public override void SetCard(EventCard card)
+    protected override void SetCard(EventCard card)
     {
         base.SetCard(card);
         InitializeButtons();

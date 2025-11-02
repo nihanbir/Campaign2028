@@ -31,7 +31,7 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         }
     }
 
-    public override void SetCard(ActorCard card)
+    protected override void SetCard(ActorCard card)
     {
         cardData = card;
         displayType = CardDisplayType.UnassignedActor;

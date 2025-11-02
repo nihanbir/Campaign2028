@@ -25,13 +25,7 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
         }
     }
     
-    public virtual void SetCard(T card)
-    {
-        cardData = card;
-        artworkImage.sprite = cardData.artwork;
-    }
-
-    public void SetCardBase(Card card)
+    public void SetCard(Card card)
     {
         // Safe cast
         if (card is T typedCard)
@@ -39,8 +33,14 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
         else
             Debug.LogError($"Invalid card type {card.GetType().Name} passed to {GetType().Name}");
     }
+    
+    protected virtual void SetCard(T card)
+    {
+        cardData = card;
+        artworkImage.sprite = cardData.artwork;
+    }
 
-    public Card GetCard() => cardData;
+    public T GetCard() => cardData;
     
     #region Highlight Methods
     
