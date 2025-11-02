@@ -9,6 +9,13 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
     public Image artworkImage;
     protected T cardData;
     
+    [Header("Highlight Settings")]
+    public float highlightScale = 1.2f;
+    
+    protected Vector3 originalScale;
+    protected int originalSiblingIndex;
+    protected bool isHighlighted = false;
+    
     void Start()
     {
         if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
@@ -34,6 +41,35 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
     }
 
     public Card GetCard() => cardData;
+    
+    #region Highlight Methods
+    
+    public virtual void Highlight()
+    {
+        if (isHighlighted) return;
+        isHighlighted = true;
+        
+        originalScale = transform.localScale;
+        originalSiblingIndex = transform.GetSiblingIndex();
+        
+        // Move to front
+        transform.SetAsLastSibling();
+        
+        transform.localScale = originalScale * highlightScale;
+    }
+    
+    public virtual void RemoveHighlight()
+    {
+        if (!isHighlighted) return;
+        isHighlighted = false;
+        
+        // Restore original sibling index
+        transform.SetSiblingIndex(originalSiblingIndex);
+        
+        transform.localScale = originalScale;
+    }
+    
+    #endregion
 }
 
 

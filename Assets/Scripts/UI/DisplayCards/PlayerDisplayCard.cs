@@ -15,13 +15,6 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
-    
-    [Header("Highlight Settings")]
-    public float highlightScale = 1.2f;
-    
-    private Vector3 _originalScale;
-    private int _originalSiblingIndex;
-    private bool _isHighlighted = false;
 
     void Start()
     {
@@ -45,7 +38,6 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         UpdateUI();
         
     }
-
     public void SetOwnerPlayer(Player player)
     {
         owningPlayer = player;
@@ -57,15 +49,15 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         
         UpdateUI();
     }
-
-    public void UpdateUI()
+    
+#region UI 
+    private void UpdateUI()
     {
         if (cardData != null && displayType != CardDisplayType.UnassignedPlayer)
         {
             UpdateActorUI();
         }
     }
-
     private void UpdateActorUI()
     {
         if (cardData == null) return;
@@ -74,7 +66,15 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         artworkImage.sprite = cardData.artwork;
         UpdateScore();
     }
-
+    public void UpdateScore()
+        {
+            evScoreText.text = cardData.evScore.ToString();
+            instScoreText.text = cardData.instScore.ToString();
+        }
+    public void ShowDice(bool show)
+    {
+        if (diceImage) diceImage.gameObject.SetActive(show);
+    }
     public void SetRolledDiceImage()
     {
         if (diceImage)
@@ -83,35 +83,10 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
             GameUIManager.Instance.SetDiceSprite(diceImage);
         }
     }
+    
+#endregion UI
 
-    #region Highlight Methods
-    
-    public void Highlight()
-    {
-        _originalScale = transform.localScale;
-        _originalSiblingIndex = transform.GetSiblingIndex();
-        
-        if (_isHighlighted) return;
-        _isHighlighted = true;
-        
-        // Move to front
-        transform.SetAsLastSibling();
-        
-        transform.localScale = _originalScale * highlightScale;
-    }
-    
-    public void RemoveHighlight()
-    {
-        if (!_isHighlighted) return;
-        _isHighlighted = false;
-        
-        // Restore original sibling index
-        transform.SetSiblingIndex(_originalSiblingIndex);
-        
-        transform.localScale = _originalScale;
-    }
-    
-    #endregion
+#region Click Handler
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -139,29 +114,24 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
     {
         GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(owningPlayer, this);
     }
+    
+#endregion Click Handler
 
+#region Helper Methods
     public ActorCard GetActorCard()
     {
         return cardData;
     }
-
     public void ConvertToAssignedActor(ActorCard actor)
     {
         cardData = actor;
         displayType = CardDisplayType.AssignedActor;
         UpdateUI();
     }
+    
+#endregion Helper Methods
+   
 
-    public void ShowDice(bool show)
-    {
-        if (diceImage) diceImage.gameObject.SetActive(show);
-    }
-
-    public void UpdateScore()
-    {
-        evScoreText.text = cardData.evScore.ToString();
-        instScoreText.text = cardData.instScore.ToString();
-    }
 }
 
 public enum CardDisplayType
