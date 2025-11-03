@@ -150,6 +150,8 @@ public class MainPhaseUIManager : MonoBehaviour
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
 
         EnableDiceButton(currentPlayer.CanRoll());
+        
+        //TODO: Make an event
         _mainPhase.PlayerRolledDice();
         
     }
@@ -203,7 +205,6 @@ public class MainPhaseUIManager : MonoBehaviour
 
     private void OnCardCaptured(Player player, Card card)
     {
-        player.PlayerDisplayCard.UpdateScore();
         if (_currentTargetGO) Destroy(_currentTargetGO);
     }
 

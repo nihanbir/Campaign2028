@@ -5,17 +5,19 @@ using System;
 public class StateDisplayCard : BaseDisplayCard<StateCard>, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
     public static event Action<StateDisplayCard> OnCardHeld;
+    public static event Action<StateDisplayCard> OnCardHighlighted;
     
-    [SerializeField] private float holdDuration = 0.5f;
+    [SerializeField] private float holdDuration = 1f;
     
     private bool _isClickable;
     private bool _isHolding;
+    private bool _isSelected;
     private float _holdTimer;
-
+    
     
     private void Update()
     {
-        if (_isHolding && _isClickable)
+        if ( _isClickable && _isHolding)
         {
             _holdTimer += Time.deltaTime;
             if (_holdTimer >= holdDuration)
@@ -27,16 +29,37 @@ public class StateDisplayCard : BaseDisplayCard<StateCard>, IPointerClickHandler
     }
     
     public void SetClickable(bool value) => _isClickable = value;
+    public void SetIsSelected(bool value)
+    {
+        _isSelected = value;
+        if (value == true)
+        {
+            Highlight();
+        }
+        else
+        {
+            RemoveHighlight();
+        }
+    } 
     
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!_isClickable) return;
-        Highlight();
+        if (_isSelected)
+        {
+            SetIsSelected(false);
+        }
+        else
+        {
+            SetIsSelected(true);
+            OnCardHighlighted?.Invoke(this);
+        }
     }
     
     public void OnPointerDown(PointerEventData eventData)
     {
         if (!_isClickable) return;
+        if (!_isSelected) return;
         _isHolding = true;
         _holdTimer = 0f;
     }
@@ -44,6 +67,7 @@ public class StateDisplayCard : BaseDisplayCard<StateCard>, IPointerClickHandler
     public void OnPointerUp(PointerEventData eventData)
     {
         if (!_isClickable) return;
+        if (!_isSelected) return;
         
         _isHolding = false;
         _holdTimer = 0f;

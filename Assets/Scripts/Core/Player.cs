@@ -47,8 +47,31 @@ public class Player : MonoBehaviour
                 assignedActor.AddInstitution();
                 break;
         }
-
+        PlayerDisplayCard.UpdateScore();
         Debug.Log($"Player {playerID} captured {card.cardName}");
+    }
+
+    public void RemoveCapturedCard(Card card)
+    {
+        if (card == null) return;
+
+        card.isCaptured = false;
+
+        switch (card)
+        {
+            case StateCard stateCard:
+                _heldStates.Remove(stateCard);
+                assignedActor.AddEV(-stateCard.electoralVotes);
+                break;
+
+            case InstitutionCard institutionCard:
+                _heldInstitutions.Remove(institutionCard);
+                assignedActor.RemoveInstitution();
+                break;
+        }
+        
+        Debug.Log($"Player {playerID} lost {card.cardName}");
+        PlayerDisplayCard.UpdateScore();
     }
 
     public void SaveEvent(EventCard eventCard)

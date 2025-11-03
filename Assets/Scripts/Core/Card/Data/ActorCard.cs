@@ -31,6 +31,11 @@ public class ActorCard : Card
     {
         instScore++;
     }
+
+    public void RemoveInstitution()
+    {
+        instScore--;
+    }
 }
 
 public enum ActorTeam
