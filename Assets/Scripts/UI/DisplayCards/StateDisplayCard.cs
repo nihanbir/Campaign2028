@@ -4,7 +4,7 @@ using System;
 
 public class StateDisplayCard : BaseDisplayCard<StateCard>, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
 {
-    public static event Action<StateDisplayCard> OnCardHeld;
+    public static event Action<StateCard> OnCardHeld;
     public static event Action<StateDisplayCard> OnCardHighlighted;
     
     [SerializeField] private float holdDuration = 1f;
@@ -23,7 +23,7 @@ public class StateDisplayCard : BaseDisplayCard<StateCard>, IPointerClickHandler
             if (_holdTimer >= holdDuration)
             {
                 _isHolding = false; // prevent multiple fires
-                OnCardHeld?.Invoke(this);
+                OnCardHeld?.Invoke(GetCard());
             }
         }
     }

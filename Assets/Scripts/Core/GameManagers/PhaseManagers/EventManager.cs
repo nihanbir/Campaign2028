@@ -6,18 +6,16 @@ using UnityEngine;
 
 public class EventManager
 {
-    private readonly MainPhaseGameManager _game;
+    private readonly MainPhaseGameManager _mainPhase;
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
-    
-    
 
     private bool _needTwoActive = false;
     private EventCard _currentEventCard;
 
     public EventManager(MainPhaseGameManager gm)
     {
-        _game = gm;
+        _mainPhase = gm;
         _handlers = new()
         {
             { EventType.ExtraRoll, HandleExtraRoll },
@@ -64,7 +62,7 @@ public class EventManager
         if (canApply)
             player.AddExtraRoll();
         else if (card.canReturnToDeck)
-            _game.ReturnCardToDeck(card);
+            _mainPhase.ReturnCardToDeck(card);
     }
     
 #endregion Extra Roll
@@ -88,7 +86,7 @@ public class EventManager
 
     private void HandleLoseTurn(Player player, EventCard card)
     {
-        _game.EndPlayerTurn();
+        _mainPhase.EndPlayerTurn();
     }
     
 #endregion Lose Turn
@@ -113,48 +111,55 @@ public class EventManager
 
         if (challengeAnyState)
         {
-            var heldStates = _game.GetHeldStates();
+            var heldStates = _mainPhase.GetHeldStates();
 
             if (heldStates.Count == 0)
             {
                 Debug.Log("No states are currently held. Challenge cannot be applied.");
                 if (card.canReturnToDeck)
-                    _game.ReturnCardToDeck(card);
+                    _mainPhase.ReturnCardToDeck(card);
                 return;
             }
 
-            List<StateCard> statesToDisplay = new();
-            statesToDisplay.AddRange(_game.GetHeldStates().Values);
+            List<StateCard> availableStates = new();
+            availableStates.AddRange(_mainPhase.GetHeldStates().Values);
             
-            //TODO: don't forget to remove this
-            GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.FindIndex(p => p.playerID == 0);
-
+            // //TODO: don't forget to remove this
+            // GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.FindIndex(p => p.playerID == 0);
+            
             _attacker = GameManager.Instance.CurrentPlayer;
             
-            OnChallengeState?.Invoke(statesToDisplay);
+            OnChallengeState?.Invoke(availableStates);
+            
+            if (AIManager.Instance.IsAIPlayer(player))
+            {
+                var aiPlayer = AIManager.Instance.GetAIPlayer(player);
+                GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.HandleChooseState(aiPlayer, availableStates));
+            }
             
             StateDisplayCard.OnCardHeld += HandleStateChosen;
             
         }
     }
 
-    private void HandleStateChosen(StateDisplayCard chosenStateDisplay)
+    //Set to public for AI
+    public void HandleStateChosen(StateCard chosenState)
     {
         StateDisplayCard.OnCardHeld -= HandleStateChosen;
         
-        _chosenState = chosenStateDisplay.GetCard();
+        _chosenState = chosenState;
         
         Debug.Log($"Player held {_chosenState.cardName} → set as challenge target.");
     
-        _defender = _game.GetHeldStates().FirstOrDefault(player => player.Value == _chosenState).Key;
+        _defender = _mainPhase.GetHeldStates().FirstOrDefault(player => player.Value == _chosenState).Key;
         
         OnDuelActive?.Invoke(_defender, _chosenState);
         
-        //TODO:Handle AI turn
         if (AIManager.Instance.IsAIPlayer(_attacker))
         {
-            // var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
-            // game.StartCoroutine(AIManager.Instance.mainAI.ExecuteAITurn(aiPlayer, _chosenState));
+            Debug.Log("is ai player------------------------------------------------------------");
+            var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
+            GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteDuel(aiPlayer));
         }
     }
     
@@ -174,7 +179,7 @@ public class EventManager
         }
         else
         {
-            _game.ReturnCardToDeck(_currentEventCard);
+            _mainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_attacker.playerID} failed to capture {_chosenState.cardName}");
         }
         
@@ -186,7 +191,7 @@ public class EventManager
         defender.RemoveCapturedCard(chosenState);
         attacker.CaptureCard(chosenState);
         
-        _game.UpdateStateOwnership(attacker, chosenState);
+        _mainPhase.UpdateStateOwnership(attacker, chosenState);
         
         Debug.Log($"Player captured {chosenState.cardName}");
     }

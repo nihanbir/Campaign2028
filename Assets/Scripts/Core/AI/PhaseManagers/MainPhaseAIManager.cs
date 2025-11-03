@@ -1,18 +1,19 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class MainPhaseAIManager
 {
-    private readonly AIManager aiManager;
+    private readonly AIManager _aiManager;
     private MainPhaseGameManager _mainPhase;
     private EventManager _eventManager;
 
-    private AIPlayer _currentAIPlayer;
-    
-
     public MainPhaseAIManager(AIManager manager)
     {
-        aiManager = manager;
+        _aiManager = manager;
     }
 
     public void InitializeAIManager()
@@ -30,9 +31,10 @@ public class MainPhaseAIManager
 
         if (card != null)
         {
-            yield return aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
+            yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
         }
         
+        //TODO: Don't forget to recover
         // if (GameManager.Instance.CurrentPlayer == aiPlayer)
         // {
         //     yield return aiManager.StartCoroutine(RollDice(aiPlayer));
@@ -43,11 +45,21 @@ public class MainPhaseAIManager
         }
     }
     
-    private IEnumerator RollDice(AIPlayer aiPlayer)
+    private IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
     {
         Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        GameUIManager.Instance.mainUI.OnRollDiceClicked();
+
+        switch (uiManager)
+        {
+            case MainPhaseUIManager mainUI:
+                mainUI.OnRollDiceClicked();
+                break;
+            
+            case ChallengeStateUIManager challengeUI:
+                challengeUI.OnRollDiceClicked();
+                break;
+        }
     }
     
     private IEnumerator HandleEventCard(AIPlayer aiPlayer, EventCard card)
@@ -63,18 +75,14 @@ public class MainPhaseAIManager
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
-        // if (ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card))
-        // {
-        //     resolved = true;
-        // }
-        // else
-        // {
-        //     _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
-        // }
-        
-        //TODO:Don't forget to remove
-        _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
-        
+        if (ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card))
+        {
+            resolved = true;
+        }
+        else
+        {
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+        }
         
         // Wait until UI and game logic both finish
         yield return new WaitUntil(() => resolved);
@@ -106,10 +114,76 @@ public class MainPhaseAIManager
             case EventSubType.None:
                 // If AI doesn't have the beneficial team, save for later
                 return card.benefitingTeam != aiPlayer.assignedActor.team;
+            
+            case EventSubType.Challenge_AnyState:
+                // If other players don't have states, save for later
+                return !AreOtherPlayersHoldingStates(aiPlayer);
 
             default:
                 // Randomized fallback to keep behavior less predictable
                 return Random.value > 0.7f;
         }
     }
+
+    private bool AreOtherPlayersHoldingStates(AIPlayer aiPlayer)
+    {
+        var heldStates = _mainPhase.GetHeldStates();
+    
+        // Return true if there are any held states and not all are by the given aiPlayer
+        return heldStates.Count > 0 && heldStates.Keys.Any(player => player != aiPlayer);
+    }
+    
+    public IEnumerator HandleChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
+    {
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+
+        var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
+        
+        _eventManager.HandleStateChosen(chosenState);
+
+    }
+
+    private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
+    {
+        // Collect beneficial states
+        List<StateCard> beneficialStates = new();
+        foreach (var state in statesToChooseFrom)
+        {
+            if (state.benefitingTeam == aiPlayer.assignedActor.team)
+                beneficialStates.Add(state);
+        }
+
+        // Pick the pool to choose from
+        List<StateCard> selectionPool = beneficialStates.Count > 0 ? beneficialStates : statesToChooseFrom;
+
+        // Select the one with the highest electoral votes
+        StateCard chosenState = null;
+        int highestVotes = 0;
+
+        for (int i = 0; i < selectionPool.Count; i++)
+        {
+            var state = selectionPool[i];
+            
+            if (state.electoralVotes <= highestVotes) continue;
+            
+            highestVotes = state.electoralVotes;
+            chosenState = state;
+        }
+
+        return chosenState;
+    }
+    
+    
+    public IEnumerator ExecuteDuel(AIPlayer aiPlayer)
+    {
+        Debug.Log("AI is preparing to roll");
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        if (GameManager.Instance.CurrentPlayer == aiPlayer)
+        {
+            ChallengeStateUIManager challengeUI = GameUIManager.Instance.mainUI.challengeUI;
+            yield return _aiManager.StartCoroutine(RollDice(aiPlayer, challengeUI));
+        }
+    }
+    
 }

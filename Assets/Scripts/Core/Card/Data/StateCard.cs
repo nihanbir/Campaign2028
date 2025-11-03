@@ -8,6 +8,7 @@ public class StateCard : Card
     public int electoralVotes;
     public List<int> redSuccessRolls = new List<int>();
     public List<int> blueSuccessRolls = new List<int>();
+    public ActorTeam benefitingTeam;
     public bool hasRollAgain;
     public bool hasSecession;
 

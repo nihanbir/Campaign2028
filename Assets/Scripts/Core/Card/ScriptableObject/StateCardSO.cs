@@ -14,6 +14,8 @@ public class StateCardSO : ScriptableObject
     public bool hasRollAgain;
     public bool hasSecession;
     
+    [ReadOnly] public ActorTeam benefitingTeam;
+    
     public StateCard ToCard()
     {
         return new StateCard
@@ -24,7 +26,29 @@ public class StateCardSO : ScriptableObject
             redSuccessRolls = new List<int>(redSuccessRolls),
             blueSuccessRolls = new List<int>(blueSuccessRolls),
             hasRollAgain = hasRollAgain,
-            hasSecession = hasSecession
+            hasSecession = hasSecession,
+            benefitingTeam = benefitingTeam,
+            
         };
     }
+    
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        benefitingTeam = GetBenefitingTeam();
+        UnityEditor.EditorUtility.SetDirty(this);
+    }
+    
+    private ActorTeam GetBenefitingTeam()
+    {
+        if (redSuccessRolls.Count == 0 || blueSuccessRolls.Count == 0) return ActorTeam.None;
+        if (redSuccessRolls.Count > blueSuccessRolls.Count)
+        {
+            return ActorTeam.Red;
+        }
+        
+        return ActorTeam.Blue;
+    }
+    
+#endif
 }

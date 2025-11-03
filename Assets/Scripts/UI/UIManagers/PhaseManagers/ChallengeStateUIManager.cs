@@ -48,11 +48,11 @@ public class ChallengeStateUIManager : MonoBehaviour
         _eventManager.OnDuelCompleted += ReturnToMainPhaseUI;
         
         if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(RollDiceClicked);
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
     }
 
-    private void RollDiceClicked()
+    public void OnRollDiceClicked()
     {
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         _attacker.PlayerDisplayCard.SetRolledDiceImage();
@@ -61,7 +61,7 @@ public class ChallengeStateUIManager : MonoBehaviour
         _eventManager.EvaluateCapture(roll);
     }
 
-    private void HandleCardHeld(StateDisplayCard card)
+    private void HandleCardHeld()
     {
         // Prevent double selection
         foreach (Transform child in stateCardsUIParent)
@@ -77,7 +77,7 @@ public class ChallengeStateUIManager : MonoBehaviour
         stateCardsUIParent.gameObject.SetActive(true);
         
         StateDisplayCard.OnCardHighlighted += OnCardHighlighted;
-        StateDisplayCard.OnCardHeld += HandleCardHeld;
+        StateDisplayCard.OnCardHeld += _ => HandleCardHeld();
         
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
     }
@@ -101,7 +101,7 @@ public class ChallengeStateUIManager : MonoBehaviour
     private void ShowDuel(Player defender, StateCard chosenState)
     {
         StateDisplayCard.OnCardHighlighted -= OnCardHighlighted;
-        StateDisplayCard.OnCardHeld -= HandleCardHeld;
+        StateDisplayCard.OnCardHeld -= _ => HandleCardHeld();
         
         stateCardsUIParent.gameObject.SetActive(false);
         duelScreen.SetActive(true);
