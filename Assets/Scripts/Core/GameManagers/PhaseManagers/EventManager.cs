@@ -115,17 +115,34 @@ public class EventManager
         if (challengeAnyState)
         {
             var heldStates = _mainPhase.GetHeldStates();
+            
+            // Local function to handle invalid challenge exit
+            void CancelChallenge()
+            {
+                Debug.Log("No valid states are currently held. Challenge cannot be applied.");
+                if (card.canReturnToDeck)
+                    _mainPhase.ReturnCardToDeck(card);
+            }
 
             if (heldStates.Count == 0)
             {
-                Debug.Log("No states are currently held. Challenge cannot be applied.");
-                if (card.canReturnToDeck)
-                    _mainPhase.ReturnCardToDeck(card);
+                CancelChallenge();
                 return;
             }
 
             List<StateCard> availableStates = new();
-            availableStates.AddRange(_mainPhase.GetHeldStates().Values);
+
+            foreach (var kvp in heldStates)
+            {
+                if (kvp.Key != player)
+                    availableStates.Add(kvp.Value);
+            }
+
+            if (availableStates.Count == 0)
+            {
+                CancelChallenge();
+                return;
+            }
             
             // Here for easy testing
             // GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.FindIndex(p => p.playerID == 0);
