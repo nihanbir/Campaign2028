@@ -11,6 +11,9 @@ public class EventManager
     public event Action<EventCard> OnEventApplied;
 
     private bool _needTwoActive = false;
+    private bool _challengeActive = false;
+    public bool IsChallengeActive => _challengeActive;
+    
     private EventCard _currentEventCard;
 
     public EventManager(MainPhaseGameManager gm)
@@ -124,7 +127,7 @@ public class EventManager
             List<StateCard> availableStates = new();
             availableStates.AddRange(_mainPhase.GetHeldStates().Values);
             
-            // //TODO: don't forget to remove this
+            // Here for easy testing
             // GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.FindIndex(p => p.playerID == 0);
             
             _attacker = GameManager.Instance.CurrentPlayer;
@@ -134,11 +137,13 @@ public class EventManager
             if (AIManager.Instance.IsAIPlayer(player))
             {
                 var aiPlayer = AIManager.Instance.GetAIPlayer(player);
-                GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.HandleChooseState(aiPlayer, availableStates));
+                GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, availableStates));
             }
             
             StateDisplayCard.OnCardHeld += HandleStateChosen;
-            
+
+            //TODO: don't forget to set this somewhere else if you add more challenge types
+            _challengeActive = true;
         }
     }
 
@@ -157,7 +162,6 @@ public class EventManager
         
         if (AIManager.Instance.IsAIPlayer(_attacker))
         {
-            Debug.Log("is ai player------------------------------------------------------------");
             var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
             GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteDuel(aiPlayer));
         }
@@ -182,7 +186,8 @@ public class EventManager
             _mainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_attacker.playerID} failed to capture {_chosenState.cardName}");
         }
-        
+
+        _challengeActive = false;
         OnDuelCompleted?.Invoke();
     }
 

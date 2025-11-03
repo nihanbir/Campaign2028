@@ -23,6 +23,8 @@ public class MainPhaseAIManager
 
     }
 
+#region Regular Turn Execution
+
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer, EventCard card)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
@@ -34,31 +36,14 @@ public class MainPhaseAIManager
             yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
         }
         
-        //TODO: Don't forget to recover
-        // if (GameManager.Instance.CurrentPlayer == aiPlayer)
-        // {
-        //     yield return aiManager.StartCoroutine(RollDice(aiPlayer));
-        // }
+        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsChallengeActive)
+        {
+            MainPhaseUIManager mainUI = GameUIManager.Instance.mainUI;
+            yield return _aiManager.StartCoroutine(RollDice(aiPlayer, mainUI));
+        }
         else
         {
-            Debug.Log("AI lost its turn");
-        }
-    }
-    
-    private IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
-    {
-        Debug.Log("Ai is rolling");
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-
-        switch (uiManager)
-        {
-            case MainPhaseUIManager mainUI:
-                mainUI.OnRollDiceClicked();
-                break;
-            
-            case ChallengeStateUIManager challengeUI:
-                challengeUI.OnRollDiceClicked();
-                break;
+            Debug.Log("AI lost its turn or challenge active");
         }
     }
     
@@ -75,13 +60,13 @@ public class MainPhaseAIManager
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
-        if (ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card))
+        if (!(ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card)))
         {
-            resolved = true;
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
         }
         else
         {
-            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+            resolved = true;
         }
         
         // Wait until UI and game logic both finish
@@ -89,7 +74,7 @@ public class MainPhaseAIManager
 
         _eventManager.OnEventApplied -= OnApplied;
     }
-
+    
     /// <summary>
     /// Determines if the AI should save or play the event card.
     /// </summary>
@@ -133,7 +118,28 @@ public class MainPhaseAIManager
         return heldStates.Count > 0 && heldStates.Keys.Any(player => player != aiPlayer);
     }
     
-    public IEnumerator HandleChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
+    private IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
+    {
+        Debug.Log("Ai is rolling");
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+
+        switch (uiManager)
+        {
+            case MainPhaseUIManager mainUI:
+                mainUI.OnRollDiceClicked();
+                break;
+            
+            case ChallengeStateUIManager challengeUI:
+                challengeUI.OnRollDiceClicked();
+                break;
+        }
+    }
+    
+#endregion Regular Turn Execution
+    
+    
+#region Challenge Any State
+    public IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
@@ -173,7 +179,6 @@ public class MainPhaseAIManager
         return chosenState;
     }
     
-    
     public IEnumerator ExecuteDuel(AIPlayer aiPlayer)
     {
         Debug.Log("AI is preparing to roll");
@@ -185,5 +190,7 @@ public class MainPhaseAIManager
             yield return _aiManager.StartCoroutine(RollDice(aiPlayer, challengeUI));
         }
     }
+    
+#endregion Challenge Any State
     
 }
