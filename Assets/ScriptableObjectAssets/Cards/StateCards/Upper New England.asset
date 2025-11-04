@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Upper New England
   artwork: {fileID: 6946664696685772105, guid: 1c6f78355877cf54ea258ce82358ccf2, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 11
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

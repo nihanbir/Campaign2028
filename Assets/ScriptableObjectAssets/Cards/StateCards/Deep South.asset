@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Deep South
   artwork: {fileID: 8362409348838028280, guid: 237e67f8569995143811c0efe18b901b, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 23
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

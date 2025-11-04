@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Carolinas
   artwork: {fileID: 7461687487307208921, guid: 1b6a52f675c1b3a4b86350ff30f68961, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 25
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Lower New England
   artwork: {fileID: 724491293006848175, guid: d06db5ed6fc65b841a6f5014750193d1, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 22
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

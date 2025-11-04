@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Virginia
   artwork: {fileID: 8141795451440997981, guid: 9c78e0a986b3dc94894bf55e4f5625ad, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 13
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

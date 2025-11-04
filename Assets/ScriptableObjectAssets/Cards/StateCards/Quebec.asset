@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Quebec
   artwork: {fileID: -9204118799276628470, guid: 24dc086c924c48c4685ee74ef59418a7, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 20
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

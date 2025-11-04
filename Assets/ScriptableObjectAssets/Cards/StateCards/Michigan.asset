@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Michigan
   artwork: {fileID: 2589909109747905956, guid: 956f2b7ef8fa09a44a18174ba9312521, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 15
   redSuccessRolls: 0500000006000000
   blueSuccessRolls: 0200000003000000
   hasRollAgain: 1
   hasSecession: 1
+  benefitingTeam: 1

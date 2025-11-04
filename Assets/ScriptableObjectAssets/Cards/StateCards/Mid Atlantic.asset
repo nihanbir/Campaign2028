@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Mid Atlantic
   artwork: {fileID: 2789588361247547628, guid: c27cde81c4e887d4dbe6e21d2ceb0053, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 18
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

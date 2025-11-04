@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Central Plains
   artwork: {fileID: -5503005925554698893, guid: 508cac9fff1a17342b73b7aa853cca56, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 23
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Texarkana
   artwork: {fileID: -7816391902300247556, guid: b419e7a1f54da1f4ebd5ff33403e66ca, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 46
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

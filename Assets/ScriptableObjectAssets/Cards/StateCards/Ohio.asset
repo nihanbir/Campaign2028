@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Ohio
   artwork: {fileID: 1387332681571755182, guid: c0cb77646a5e6db4ba3bfb947d7ca214, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 17
   redSuccessRolls: 0500000006000000
   blueSuccessRolls: 0200000003000000
   hasRollAgain: 1
   hasSecession: 1
+  benefitingTeam: 1

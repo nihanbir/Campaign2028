@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Midwest
   artwork: {fileID: -1434544526675025649, guid: b9b0dc6f8c242984f8a88f375bfc0723, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 27
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

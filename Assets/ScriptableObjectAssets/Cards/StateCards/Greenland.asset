@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Greenland
   artwork: {fileID: 8765224376314159556, guid: 362be81e5abce2c489157882abda5058, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 8
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

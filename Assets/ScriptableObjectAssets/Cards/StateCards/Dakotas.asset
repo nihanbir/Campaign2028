@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Dakotas
   artwork: {fileID: -7050467451112355835, guid: 53a31818359af774b90dbabf2ca35171, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 6
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

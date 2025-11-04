@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: South West
   artwork: {fileID: -201420528499159765, guid: f2676e269c54cbe46a086af914e457bb, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 16
   redSuccessRolls: 0500000006000000
   blueSuccessRolls: 0200000003000000
   hasRollAgain: 1
   hasSecession: 1
+  benefitingTeam: 1

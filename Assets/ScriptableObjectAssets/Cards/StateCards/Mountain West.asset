@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Mountain West
   artwork: {fileID: 1093395379865400329, guid: e4279e19f2232fc4dbf70ebc46acf388, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 22
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

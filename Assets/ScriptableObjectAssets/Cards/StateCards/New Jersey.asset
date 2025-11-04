@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: New Jersey
   artwork: {fileID: 5350338221674033624, guid: 93c23736ffe2e4241bdf20ea4e34b324, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 14
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

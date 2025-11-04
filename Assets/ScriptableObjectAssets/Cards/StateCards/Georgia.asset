@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Georgia
   artwork: {fileID: -266796128438205138, guid: 402ef4b4e545a59488366a039cd67920, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 16
   redSuccessRolls: 0500000006000000
   blueSuccessRolls: 0200000003000000
   hasRollAgain: 1
   hasSecession: 1
+  benefitingTeam: 1

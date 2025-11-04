@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Pacific
   artwork: {fileID: -2092221567083804486, guid: 0963ddec25de60041b5c0b5259f39ac1, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 7
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

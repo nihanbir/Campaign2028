@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Illinois
   artwork: {fileID: -3506345617404744561, guid: 4a7e92040d76ae042b1b00c0e8199056, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 19
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

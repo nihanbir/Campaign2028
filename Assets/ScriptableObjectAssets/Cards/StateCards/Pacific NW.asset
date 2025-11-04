@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Pacific NW
   artwork: {fileID: 4199242188000856593, guid: 6da49553d4513df45ab3d35c9b15f829, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 20
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

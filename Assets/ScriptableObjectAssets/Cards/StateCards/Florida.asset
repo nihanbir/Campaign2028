@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: Florida
   artwork: {fileID: 3148262665227553795, guid: 1ea744935d9a86f498f965bc79cb8967, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 30
   redSuccessRolls: 03000000040000000500000006000000
   blueSuccessRolls: 02000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 0

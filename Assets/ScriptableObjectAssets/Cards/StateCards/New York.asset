@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: New York
   artwork: {fileID: 7722135776735213394, guid: 2ce1a227936d9b941b6c788807c5ecaf, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 28
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1

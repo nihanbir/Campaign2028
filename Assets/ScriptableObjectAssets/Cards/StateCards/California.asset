@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateCardSO
   stateName: California
   artwork: {fileID: -4276912099280896990, guid: 33569836fe70e684ea91e5041eb3781c, type: 3}
+  backSide: {fileID: 0}
   electoralVotes: 54
   redSuccessRolls: 02000000
   blueSuccessRolls: 03000000040000000500000006000000
   hasRollAgain: 0
   hasSecession: 1
+  benefitingTeam: 1
