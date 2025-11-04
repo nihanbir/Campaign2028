@@ -25,8 +25,6 @@ public class ChallengeStateUIManager : MonoBehaviour
 
     private Player _attacker;
     
-    // public event Action<int> OnRollDiceClicked;
-    
     private void Awake()
     {
         eventScreen.SetActive(false);
@@ -154,6 +152,7 @@ public class ChallengeStateUIManager : MonoBehaviour
     {
         
         int count = statesToDisplay.Count;
+        Debug.Log($"available states passed to UI: {statesToDisplay.Count}");
         if (count == 0) return;
 
         // Clear previous children

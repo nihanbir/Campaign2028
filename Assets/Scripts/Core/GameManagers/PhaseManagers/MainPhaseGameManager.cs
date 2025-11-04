@@ -9,14 +9,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private EventCard _currentEventCard;
 
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
-    private readonly Dictionary<Player, StateCard> _heldStates = new();
-    public Dictionary<Player, StateCard> GetHeldStates() => _heldStates;
+    private readonly Dictionary<Player, List<StateCard>> _heldStates = new();
+    private readonly Dictionary<Player, List<InstitutionCard>> _heldInstitutions = new();
+    private readonly Dictionary<Card, Player> _cardOwners = new();
     
-    public void UpdateStateOwnership(Player newOwner, StateCard state)
-    {
-        _heldStates[newOwner] = state;
-    }
-    
+    public Dictionary<Player, List<StateCard>> GetHeldStates() => _heldStates;
+    public Dictionary<Player, List<InstitutionCard>> GetHeldInstitutions() => _heldInstitutions;
+
     private readonly List<Card> _mainDeck = new();
     private readonly List<EventCard> _eventDeck = new();
 
@@ -60,6 +59,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
         _eventDeck.AddRange(game.eventDeck.Shuffled());
     }
 
+#region Turn Sequence
     public override void StartPlayerTurn()
     {
         if (_eventDeck.Count == 0)
@@ -69,7 +69,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
         }
         
         Player current = game.CurrentPlayer;
-        Debug.Log($"--- Player {current.playerID} turn started ---");
+        Debug.Log($"--- Player {current.playerID} turn started. Player team: {current.assignedActor.team}---");
         
         //This needs to be invoked before drawing a card to set _isPlayerAI correctly in UImanager
         OnPlayerTurnStarted?.Invoke(current);
@@ -117,7 +117,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
         Debug.Log($"Rolled: {roll}");
         EvaluateCapture(current, roll);
     }
+    
+#endregion
 
+#region Card Capture
     private void EvaluateCapture(Player player, int roll)
     {
         bool success;
@@ -139,13 +142,9 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         if (success)
         {
-            player.CaptureCard(_currentTargetCard);
-            
-            if (_currentTargetCard is StateCard state)
-                _heldStates[player] = state; // track ownership automatically ✅
+            CaptureCard(player, _currentTargetCard);
             
             OnCardCaptured?.Invoke(player, _currentTargetCard);
-            Debug.Log($"Player captured {_currentTargetCard.cardName}");
             _currentTargetCard = null;
             EndPlayerTurn();
         }
@@ -165,23 +164,94 @@ public class MainPhaseGameManager : BasePhaseGameManager
             EndPlayerTurn();
         }
     }
-
-    private Card DrawTargetCard()
+    private void CaptureCard(Player player, Card card)
     {
-        Debug.Log("Draw target card");
-        if (_mainDeck.Count == 0)
+        if (card == null)
+            return;
+
+        // Avoid capturing a card that’s already held
+        if (IsCardHeld(card))
         {
-            Debug.LogWarning("Main deck empty!");
-            return null;
+            Debug.LogWarning($"Attempted to capture {card.cardName}, but it's already held by {GetCardHolder(card)?.playerID}.");
+            return;
         }
 
-        Card drawn = _mainDeck.PopFront();
-        
-        //TODO: add event
-        GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);
-        return drawn;
-    }
+        card.isCaptured = true;
 
+        // Add to the correct collection
+        switch (card)
+        {
+            case StateCard stateCard:
+                if (!_heldStates.ContainsKey(player))
+                    _heldStates[player] = new List<StateCard>();
+                _heldStates[player].Add(stateCard);
+                break;
+
+            case InstitutionCard institutionCard:
+                if (!_heldInstitutions.ContainsKey(player))
+                    _heldInstitutions[player] = new List<InstitutionCard>();
+                _heldInstitutions[player].Add(institutionCard);
+                break;
+        }
+
+        // Keep reverse lookup in sync
+        _cardOwners[card] = player;
+
+        // Remove from main deck if still present
+        _mainDeck.Remove(card);
+
+        // Update player data
+        player.CaptureCard(card);
+
+        Debug.Log($"Player {player.playerID} captured {card.cardName}");
+    }
+    
+    private void UncaptureCard(Card card, bool returnToDeck = false)
+    {
+        if (card == null || !IsCardHeld(card))
+            return;
+
+        card.isCaptured = false;
+
+        // Get the card's current owner using our helper
+        Player owner = GetCardHolder(card);
+        if (owner == null)
+            return;
+
+        // Remove from owner’s data
+        owner.RemoveCapturedCard(card);
+
+        // Remove from type-specific collection
+        switch (card)
+        {
+            case StateCard stateCard:
+                _heldStates[owner].Remove(stateCard);
+                break;
+
+            case InstitutionCard institutionCard:
+                _heldInstitutions[owner].Remove(institutionCard);
+                break;
+        }
+
+        // Remove from reverse lookup
+        _cardOwners.Remove(card);
+
+        if (returnToDeck)
+            ReturnCardToDeck(card);
+    }
+    
+    public void UpdateCardOwnership(Player newOwner, Card card)
+        {
+            // Remove card from its current owner first
+            UncaptureCard(card);
+    
+            // Add to new owner's list
+            CaptureCard(newOwner, card);
+        }
+    
+#endregion    
+
+#region Event Card
     private EventCard DrawEventCard()
     {
         Debug.Log("Draw event card");
@@ -211,27 +281,78 @@ public class MainPhaseGameManager : BasePhaseGameManager
         
         return true;
     }
+    
+    private void ClearEventCard()
+        {
+            _currentEventCard = null;
+        }
+    
+    
+#endregion
+    
+#region Target Card
+
+    private Card DrawTargetCard()
+        {
+            Debug.Log("Draw target card");
+            if (_mainDeck.Count == 0)
+            {
+                Debug.LogWarning("Main deck empty!");
+                return null;
+            }
+    
+            Card drawn = _mainDeck.PopFront();
+            
+            //TODO: add event
+            GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);
+            return drawn;
+        }
 
     public void ReturnCardToDeck(Card card)
     {
-        if (card is not EventCard eventCard) return;
-
-        _eventDeck.Insert(UnityEngine.Random.Range(0, _eventDeck.Count + 1), eventCard);
+        switch (card)
+        {
+            case EventCard eventCard:
+                _eventDeck.Insert(UnityEngine.Random.Range(0, _eventDeck.Count + 1), eventCard);
+                //No need to clear the card here because when the event card is played it's cleared already
+                break;
+            
+            case StateCard stateCard:
+                _mainDeck.Insert(UnityEngine.Random.Range(0, _mainDeck.Count + 1), stateCard);
+                //TODO: do we need to clear the card here?
+                break;
+            
+            case InstitutionCard institutionCard:
+                _mainDeck.Insert(UnityEngine.Random.Range(0, _mainDeck.Count + 1), institutionCard);
+                //TODO: do we need to clear the card here?
+                break;
+        }
+        
         Debug.Log($"Returned to deck {card.cardName}");
         
-        //No need to clear the card here because when the event card is played it's cleared already
     }
     
-    private void ClearEventCard()
+    public Player GetCardHolder(Card card)
     {
-        _currentEventCard = null;
+        if (card == null) return null;
+        if (!IsCardHeld(card)) return null;
+        
+        return _cardOwners.GetValueOrDefault(card);
     }
-    
+
+    private bool IsCardHeld(Card card)
+    {
+        return card != null && _cardOwners.ContainsKey(card);
+    }
+
+    #endregion    
+
+#region Test helpers
     /// <summary>
     /// Assigns a few StateCards from the deck to each player for testing or setup purposes.
     /// </summary>
     /// <param name="statesPerPlayer">How many states each player should receive.</param>
-    public void AssignTestStatesToPlayers(int statesPerPlayer = 2)
+    private void AssignTestStatesToPlayers(int statesPerPlayer = 2)
     {
         if (game.players == null || game.players.Count == 0)
         {
@@ -245,7 +366,14 @@ public class MainPhaseGameManager : BasePhaseGameManager
             return;
         }
 
-        var shuffledStates = new List<StateCard>(game.stateDeck).OrderBy(_ => UnityEngine.Random.value).ToList();
+        // Create a shuffled copy of the state deck
+        var shuffledStates = new List<StateCard>(game.stateDeck);
+        for (int i = 0; i < shuffledStates.Count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, shuffledStates.Count);
+            (shuffledStates[i], shuffledStates[randomIndex]) = (shuffledStates[randomIndex], shuffledStates[i]);
+        }
+
         int stateIndex = 0;
 
         foreach (var player in game.players)
@@ -255,13 +383,14 @@ public class MainPhaseGameManager : BasePhaseGameManager
                 if (stateIndex >= shuffledStates.Count)
                 {
                     Debug.LogWarning("Not enough states to assign evenly.");
+                    Debug.Log("✅ Partial test assignment completed.");
                     return;
                 }
 
                 var stateCard = shuffledStates[stateIndex++];
-                player.CaptureCard(stateCard);
-                _heldStates[player] = stateCard;
-                _mainDeck.Remove(stateCard);
+
+                // Use your proper capture logic — keeps everything in sync
+                CaptureCard(player, stateCard);
 
                 Debug.Log($"Assigned {stateCard.cardName} to Player {player.playerID}");
             }
@@ -269,6 +398,9 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         Debug.Log("✅ Test state assignment completed.");
     }
+
+    
+#endregion
 }
 
 // === Extensions for lists ===
