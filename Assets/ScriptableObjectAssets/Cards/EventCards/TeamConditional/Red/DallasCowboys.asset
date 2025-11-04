@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Dallas Cowboys
   artwork: {fileID: -7035413558144344179, guid: 9ef72278371476744b5798a0d3eafc14, type: 3}
   eventType: 6
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 1
   redTeam: 0

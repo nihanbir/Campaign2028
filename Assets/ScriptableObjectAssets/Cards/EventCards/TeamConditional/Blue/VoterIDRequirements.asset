@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Voter ID Requirements
   artwork: {fileID: 8104272634984502053, guid: 717e5dcba385b4944a0d1e31240e1acc, type: 3}
   eventType: 6
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 0
   redTeam: 1

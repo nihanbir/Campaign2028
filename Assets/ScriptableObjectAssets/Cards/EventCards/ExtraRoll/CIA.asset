@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: CIA
   artwork: {fileID: 6435155807201235407, guid: 6931dca239831cb4d98d9ff91b560358, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

@@ -86,21 +86,22 @@ public class MainPhaseAIManager
         if (!card.canSave) 
             return false;
         
-        switch (card.subType)
+        
+        switch (card.eventConditions)
         {
-            case EventSubType.ExtraRoll_IfHasInstitution:
+            case EventConditions.IfOwnsInstitution:
                 // If AI doesn't have the required institution, save for later
                 return !aiPlayer.HasInstitution(card.requiredInstitution);
 
-            case EventSubType.ExtraRoll_Any:
+            case EventConditions.None:
                 // Always beneficial now
                 return false;
             
-            case EventSubType.None:
+            case EventConditions.TeamConditions:
                 // If AI doesn't have the beneficial team, save for later
                 return card.benefitingTeam != aiPlayer.assignedActor.team;
             
-            case EventSubType.Challenge_AnyState:
+            case EventConditions.Any:
                 // If other players don't have states, save for later
                 return !AreOtherPlayersHoldingStates(aiPlayer);
 

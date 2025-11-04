@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Social Security
   artwork: {fileID: 2651169825022825663, guid: 556e7ed916daa9943ab2358844b4e6bb, type: 3}
   eventType: 3
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

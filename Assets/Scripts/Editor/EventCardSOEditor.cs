@@ -9,23 +9,22 @@ public class EventCardSOEditor : Editor
         serializedObject.Update();
 
         // Draw everything except the ones we control manually
-        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution", "blueTeam", "redTeam", "subType", "benefitingTeam");
+        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution", "eventConditions", "blueTeam", "redTeam", "benefitingTeam");
 
         // Grab relevant serialized properties
         SerializedProperty typeProp = serializedObject.FindProperty("eventType");
-        SerializedProperty subTypeProp = serializedObject.FindProperty("subType");
+        SerializedProperty conditionProp = serializedObject.FindProperty("eventConditions");
         SerializedProperty requiredInstitutionProp = serializedObject.FindProperty("requiredInstitution");
         SerializedProperty blueTeamProp = serializedObject.FindProperty("blueTeam");
         SerializedProperty redTeamProp = serializedObject.FindProperty("redTeam");
         SerializedProperty benefitingTeamProp = serializedObject.FindProperty("benefitingTeam");
         
-
         if (typeProp != null)
         {
             EventType currentEventType = (EventType)typeProp.enumValueIndex;
 
             // TeamConditional events
-            if (currentEventType == EventType.TeamConditional)
+            if (currentEventType == EventType.TeamBased)
             {
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("Team Conditionals", EditorStyles.boldLabel);
@@ -35,18 +34,19 @@ public class EventCardSOEditor : Editor
                 
             }
             // Only show SubType for relevant event types
-            else if (IsSubtypeRelevant(currentEventType))
+            else if (IsConditioningRelevant(currentEventType))
             {
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("Subtype Settings", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(subTypeProp, new GUIContent("Event Sub Type"));
+                EditorGUILayout.PropertyField(conditionProp, new GUIContent("Event Conditions"));
 
-                if (subTypeProp != null)
+                if (conditionProp != null)
                 {
-                    EventSubType currentSubType = (EventSubType)subTypeProp.enumValueIndex;
+                    EventConditions currentCondition = (EventConditions)conditionProp.enumValueIndex;
 
                     // Show institution condition if applicable
-                    if (currentSubType == EventSubType.ExtraRoll_IfHasInstitution || currentSubType == EventSubType.Challenge_IfHasInstitution)
+                    if (currentCondition == EventConditions.IfOwnsInstitution || 
+                        currentCondition == EventConditions.IfInstitutionCaptured)
                     {
                         EditorGUILayout.Space(4);
                         EditorGUILayout.LabelField("Institution Condition", EditorStyles.boldLabel);
@@ -62,7 +62,7 @@ public class EventCardSOEditor : Editor
     /// <summary>
     /// Defines which event types support subtypes.
     /// </summary>
-    private bool IsSubtypeRelevant(EventType eventType)
+    private bool IsConditioningRelevant(EventType eventType)
     {
         switch (eventType)
         {

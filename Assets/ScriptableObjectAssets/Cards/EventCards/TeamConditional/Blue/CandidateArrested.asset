@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Candidate Arrested
   artwork: {fileID: -3278970737677630334, guid: 458ffbb2719c6e540a066653836d3301, type: 3}
   eventType: 6
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 0
   redTeam: 1

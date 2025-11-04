@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Exposed Chinese Agent
   artwork: {fileID: -1471646491635646611, guid: 4bcb385bfa96785499ab5fada8d6799a, type: 3}
   eventType: 3
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

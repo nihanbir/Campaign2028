@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: StockMarketCorrection
   artwork: {fileID: -5762646165702681905, guid: d0911dc1df42e504cb96457dd0601775, type: 3}
   eventType: 3
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

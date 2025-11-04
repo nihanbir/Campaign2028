@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Denmark Surprise Attack
   artwork: {fileID: -1863192965977308837, guid: 42cc9275843cf924cb0b54ed7aef7e56, type: 3}
   eventType: 5
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

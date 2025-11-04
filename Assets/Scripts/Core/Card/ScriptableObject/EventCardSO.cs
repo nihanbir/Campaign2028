@@ -9,7 +9,7 @@ public class EventCardSO : ScriptableObject
     public EventType eventType;
     
     [SerializeField]
-    public EventSubType subType;
+    public EventConditions eventConditions;
     public InstitutionCardSO requiredInstitution;
     public EventType blueTeam;
     public EventType redTeam;
@@ -19,6 +19,7 @@ public class EventCardSO : ScriptableObject
     public bool mustPlayImmediately;
     public bool canSave;
     public bool canReturnToDeck;
+    private bool _requiresInstitution = false;
     
     public EventCard ToCard()
     {
@@ -27,14 +28,14 @@ public class EventCardSO : ScriptableObject
             cardName = eventName,
             artwork = artwork,
             eventType = eventType,
-            subType = subType,
             mustPlayImmediately = mustPlayImmediately,
             canSave = canSave,
             canReturnToDeck = canReturnToDeck,
             requiredInstitution = requiredInstitution != null ? requiredInstitution.ToCard() : null,
-            blueTeam = eventType == EventType.TeamConditional ? blueTeam : EventType.None,
-            redTeam = eventType == EventType.TeamConditional ? redTeam : EventType.None,
+            blueTeam = eventType == EventType.TeamBased ? blueTeam : EventType.None,
+            redTeam = eventType == EventType.TeamBased ? redTeam : EventType.None,
             benefitingTeam = benefitingTeam,
+            eventConditions = eventConditions,
             
         };
     }
@@ -43,37 +44,32 @@ public class EventCardSO : ScriptableObject
     private void OnValidate()
     {
         // --- Reset irrelevant data based on event type ---
-        if (eventType != EventType.TeamConditional)
+        if (eventType != EventType.TeamBased)
         {
             blueTeam = EventType.None;
             redTeam = EventType.None;
         }
 
-        if (eventType != EventType.ExtraRoll && eventType != EventType.Challenge)
+        _requiresInstitution = eventConditions is EventConditions.IfInstitutionCaptured or EventConditions.IfOwnsInstitution;
+
+        switch (_requiresInstitution)
         {
-            subType = EventSubType.None;
-            requiredInstitution = null;
+            case false:
+                requiredInstitution = null;
+                break;
+            // --- Validation warnings ---
+            case true when requiredInstitution == null:
+                Debug.LogWarning($"[{eventName}] requires an institution but none is assigned.", this);
+                break;
         }
 
-        // --- Reset irrelevant data based on subtype ---
-        if (subType != EventSubType.ExtraRoll_IfHasInstitution)
-        {
-            requiredInstitution = null;
-        }
-
-        // --- Validation warnings ---
-        if (subType == EventSubType.ExtraRoll_IfHasInstitution && requiredInstitution == null)
-        {
-            Debug.LogWarning($"[{eventName}] requires an institution but none is assigned.", this);
-        }
-
-        if (eventType == EventType.TeamConditional && (blueTeam == EventType.None || redTeam == EventType.None))
+        if (eventType == EventType.TeamBased && (blueTeam == EventType.None || redTeam == EventType.None))
         {
             Debug.LogWarning($"[{eventName}] TeamConditional event requires both Blue and Red team outcomes.", this);
         }
         
         // --- Compute beneficial team ---
-        if (eventType == EventType.TeamConditional)
+        if (eventType == EventType.TeamBased)
         {
             bool blueBenefit = IsBeneficial(blueTeam);
             bool redBenefit = IsBeneficial(redTeam);

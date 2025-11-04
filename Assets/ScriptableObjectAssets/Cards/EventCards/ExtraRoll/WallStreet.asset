@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Wall Street
   artwork: {fileID: -5906604974296700058, guid: 278fe962622c9164f955499e74dd1908, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

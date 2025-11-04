@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Unregistered Handgun
   artwork: {fileID: 4004515073389878742, guid: 0ce132dcf1ca17245bf03dbda8f44fd2, type: 3}
   eventType: 6
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 1
   redTeam: 0

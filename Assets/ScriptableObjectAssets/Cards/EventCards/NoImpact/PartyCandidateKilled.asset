@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Party Candidate Killed
   artwork: {fileID: 2932829996740422768, guid: a226dca6b36c6c549901a8c3575aaf85, type: 3}
   eventType: 4
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

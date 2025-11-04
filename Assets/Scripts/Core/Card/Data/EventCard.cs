@@ -5,7 +5,7 @@ public class EventCard : Card
 {
     public override CardType CardType => CardType.Event;
     public EventType eventType;
-    public EventSubType subType;
+    public EventConditions eventConditions;
     public EventType blueTeam;
     public EventType redTeam;
     public ActorTeam benefitingTeam;
@@ -25,19 +25,16 @@ public enum EventType
     LoseTurn,
     NoImpact,
     DrawnCardStays,
-    TeamConditional,
+    TeamBased,
     None,
-    
     
 }
 
-public enum EventSubType
+public enum EventConditions
 {
     None,
-    ExtraRoll_Any,
-    ExtraRoll_IfHasInstitution,
-    Challenge_IfHasInstitution,
-    Challenge_AnyState,
-    
-    
+    Any,
+    IfOwnsInstitution,
+    IfInstitutionCaptured,
+    TeamConditions,
 }

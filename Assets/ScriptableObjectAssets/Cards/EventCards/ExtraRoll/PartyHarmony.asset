@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Party Harmony
   artwork: {fileID: -239839460140211939, guid: 95a5eb19abc44834d9902a6fe6eafbb6, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

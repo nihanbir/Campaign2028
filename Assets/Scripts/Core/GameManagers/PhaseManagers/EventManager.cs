@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EventManager
@@ -35,7 +33,7 @@ public class EventManager
         Debug.Log($"Applying event {card.cardName}");
         EventType effectiveType = card.eventType;
 
-        if (card.eventType == EventType.TeamConditional)
+        if (card.eventType == EventType.TeamBased)
         {
             effectiveType = player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
             Debug.Log($"-------------------------------------------------------------{effectiveType}");
@@ -54,11 +52,10 @@ public class EventManager
 
     private void HandleExtraRoll(Player player, EventCard card)
     {
-        bool canApply = card.subType switch
+        bool canApply = card.eventConditions switch
         {
-            EventSubType.ExtraRoll_IfHasInstitution => player.HasInstitution(card.requiredInstitution),
-            EventSubType.ExtraRoll_Any => true,
-            EventSubType.None => true, // ✅ unconditional (e.g., resolved from TeamConditional)
+            EventConditions.IfOwnsInstitution => player.HasInstitution(card.requiredInstitution),
+            EventConditions.None => true,
             _ => false
         };
 
@@ -106,9 +103,9 @@ public class EventManager
 
     private void HandleChallenge(Player player, EventCard card)
     {
-        switch (card.subType)
+        switch (card.eventConditions)
         {
-            case EventSubType.Challenge_AnyState:
+            case EventConditions.Any:
                 ChallengeAnyState(player, card);
                 break;
                 

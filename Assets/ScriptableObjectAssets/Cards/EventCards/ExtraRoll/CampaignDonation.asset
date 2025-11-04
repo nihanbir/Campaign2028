@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Campaign Donation
   artwork: {fileID: -4250938206962622327, guid: 233eec5fac416a14cadb4d36bfeb3090, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Congress
   artwork: {fileID: 5277661926609131091, guid: 69d831369c706fb4cb1d7e8c4db5371c, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

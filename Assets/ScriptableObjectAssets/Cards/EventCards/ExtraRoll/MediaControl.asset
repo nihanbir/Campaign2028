@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Media Control
   artwork: {fileID: 6204148619108001502, guid: b347639e22da42546b100ba1cf7ddd4c, type: 3}
   eventType: 0
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7

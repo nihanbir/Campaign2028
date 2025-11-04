@@ -15,7 +15,7 @@ MonoBehaviour:
   eventName: Vaccine Death
   artwork: {fileID: -5793335530758058516, guid: 97b491b095060b746bfe3d690a0364fa, type: 3}
   eventType: 6
-  subType: 0
+  eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 1
   redTeam: 0
