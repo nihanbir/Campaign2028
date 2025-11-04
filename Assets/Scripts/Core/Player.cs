@@ -48,7 +48,6 @@ public class Player : MonoBehaviour
                 break;
         }
         PlayerDisplayCard.UpdateScore();
-        Debug.Log($"Player {playerID} captured {card.cardName}");
     }
 
     public void RemoveCapturedCard(Card card)
