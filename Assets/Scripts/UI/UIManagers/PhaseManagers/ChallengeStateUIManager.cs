@@ -12,8 +12,8 @@ public class ChallengeStateUIManager : MonoBehaviour
     [Header("Duel")]
     [SerializeField] private GameObject duelScreen;
     [SerializeField] private Transform defenderUI;
-    [SerializeField] private Transform playerUI;
-    [SerializeField] private Transform chosenStateUI;
+    [SerializeField] private Transform attackerUI;
+    [SerializeField] private Transform chosenCardUI;
     [SerializeField] private Button rollDiceButton;
 
     private MainPhaseGameManager _mainPhase;
@@ -63,6 +63,11 @@ public class ChallengeStateUIManager : MonoBehaviour
         foreach (Transform child in stateCardsUIParent)
             if (child.TryGetComponent(out StateDisplayCard display))
                 display.SetClickable(false);
+        
+        StateDisplayCard.OnCardHighlighted -= OnCardHighlighted;
+        StateDisplayCard.OnCardHeld -= _ => HandleCardHeld();
+        
+        stateCardsUIParent.gameObject.SetActive(false);
     }
     
     private void ShowStateCards(List<StateCard> statesToDisplay)
@@ -94,13 +99,9 @@ public class ChallengeStateUIManager : MonoBehaviour
 
     }
 
-    private void ShowDuel(Player defender, StateCard chosenState)
+    private void ShowDuel(Player defender, Card chosenCard)
     {
-        StateDisplayCard.OnCardHighlighted -= OnCardHighlighted;
-        StateDisplayCard.OnCardHeld -= _ => HandleCardHeld();
         
-        stateCardsUIParent.gameObject.SetActive(false);
-        duelScreen.SetActive(true);
         
         _attacker = GameManager.Instance.CurrentPlayer;
         
@@ -110,17 +111,31 @@ public class ChallengeStateUIManager : MonoBehaviour
         }
         
         // Spawn current player
-        CreateCardInTransform<PlayerDisplayCard>(_attacker.PlayerDisplayCard.gameObject, playerUI, _attacker.assignedActor);
+        CreateCardInTransform<PlayerDisplayCard>(_attacker.PlayerDisplayCard.gameObject, attackerUI, _attacker.assignedActor);
         
         // Spawn defender player
         CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, defenderUI, defender.assignedActor);
         
-        // Spawn chosen state
-        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, chosenStateUI, chosenState);
+        // Spawn chosen card
+        switch (chosenCard)
+        {
+            case StateCard stateCard:
+                
+                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, chosenCardUI, stateCard);
+                break;
+            
+            case InstitutionCard institutionCard:
+                
+                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, chosenCardUI, institutionCard);
+                break;
+        }
         
-        Debug.Log($"[ChallengeUI] Showing duel between attacker {_attacker.playerID} and defender {defender.playerID} for state {chosenState.cardName}");
+        Debug.Log($"[ChallengeUI] Showing duel between attacker {_attacker.playerID} and defender {defender.playerID} for state {chosenCard.cardName}");
+        
+        duelScreen.SetActive(true);
         
     }
+
     private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
         where T : MonoBehaviour, IDisplayCard
     {

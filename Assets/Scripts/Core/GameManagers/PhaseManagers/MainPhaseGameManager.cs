@@ -9,12 +9,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private EventCard _currentEventCard;
 
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
-    private readonly Dictionary<Player, List<StateCard>> _heldStates = new();
-    private readonly Dictionary<Player, List<InstitutionCard>> _heldInstitutions = new();
     private readonly Dictionary<Card, Player> _cardOwners = new();
+    private readonly Dictionary<StateCard, Player> _stateOwners = new();
+    private readonly Dictionary<InstitutionCard, Player> _institutionOwners = new();
     
-    public Dictionary<Player, List<StateCard>> GetHeldStates() => _heldStates;
-    public Dictionary<Player, List<InstitutionCard>> GetHeldInstitutions() => _heldInstitutions;
+    public Dictionary<StateCard, Player> GetStateOwners() => _stateOwners;
 
     private readonly List<Card> _mainDeck = new();
     private readonly List<EventCard> _eventDeck = new();
@@ -42,7 +41,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
         EventManager.OnEventApplied += _ => ClearEventCard();
         
         BuildAndShuffleDecks();
-        AssignTestStatesToPlayers();
+        
+        //TODO: dont forget to remove
+        AssignTestCardsToPlayers(game.institutionDeck, 1);
+        // AssignTestCardsToPlayers(game.stateDeck, 1);
+        
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
@@ -182,15 +185,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
         switch (card)
         {
             case StateCard stateCard:
-                if (!_heldStates.ContainsKey(player))
-                    _heldStates[player] = new List<StateCard>();
-                _heldStates[player].Add(stateCard);
+                _stateOwners.TryAdd(stateCard, player);
                 break;
 
             case InstitutionCard institutionCard:
-                if (!_heldInstitutions.ContainsKey(player))
-                    _heldInstitutions[player] = new List<InstitutionCard>();
-                _heldInstitutions[player].Add(institutionCard);
+                _institutionOwners.TryAdd(institutionCard, player);
                 break;
         }
 
@@ -225,11 +224,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
         switch (card)
         {
             case StateCard stateCard:
-                _heldStates[owner].Remove(stateCard);
+                _stateOwners.Remove(stateCard);
                 break;
 
             case InstitutionCard institutionCard:
-                _heldInstitutions[owner].Remove(institutionCard);
+                _institutionOwners.Remove(institutionCard);
                 break;
         }
 
@@ -318,11 +317,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
                 break;
             
             case StateCard stateCard:
+                //TODO:uncapture also?
                 _mainDeck.Insert(UnityEngine.Random.Range(0, _mainDeck.Count + 1), stateCard);
                 //TODO: do we need to clear the card here?
                 break;
             
             case InstitutionCard institutionCard:
+                //TODO:uncapture also?
                 _mainDeck.Insert(UnityEngine.Random.Range(0, _mainDeck.Count + 1), institutionCard);
                 //TODO: do we need to clear the card here?
                 break;
@@ -335,6 +336,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
     public Player GetCardHolder(Card card)
     {
         if (card == null) return null;
+        
         if (!IsCardHeld(card)) return null;
         
         return _cardOwners.GetValueOrDefault(card);
@@ -344,61 +346,78 @@ public class MainPhaseGameManager : BasePhaseGameManager
     {
         return card != null && _cardOwners.ContainsKey(card);
     }
+    
+    public InstitutionCard FindHeldInstitution(InstitutionCard requiredInst, out bool cardFound)
+    {
+        if (requiredInst == null)
+        {
+            cardFound = false;
+            return null;
+        }
+        
+        foreach (var kvp in _institutionOwners)
+        {
+            var inst = kvp.Key;
+            
+            // Match by cardName (or by a unique ID if you have one)
+            if (inst.cardName == requiredInst.cardName)
+            {
+                cardFound = true;
+                return inst;
+            }
+        }
+
+        cardFound = false;
+        return null;
+    }
 
     #endregion    
 
 #region Test helpers
     /// <summary>
-    /// Assigns a few StateCards from the deck to each player for testing or setup purposes.
+    /// Assigns a few cards from the deck to each player for testing or setup purposes.
     /// </summary>
-    /// <param name="statesPerPlayer">How many states each player should receive.</param>
-    private void AssignTestStatesToPlayers(int statesPerPlayer = 2)
+    /// <param name="cardsPerPlayer">How many cards each player should receive.</param>
+    private void AssignTestCardsToPlayers<T>(List<T> sourceDeck, int cardsPerPlayer = 2) where T : Card
     {
         if (game.players == null || game.players.Count == 0)
         {
-            Debug.LogWarning("No players available for state assignment.");
+            Debug.LogWarning("No players available for card assignment.");
             return;
         }
 
-        if (game.stateDeck == null || game.stateDeck.Count == 0)
+        if (sourceDeck == null || sourceDeck.Count == 0)
         {
-            Debug.LogWarning("No state cards available for assignment.");
+            Debug.LogWarning("No cards available for assignment.");
             return;
         }
 
-        // Create a shuffled copy of the state deck
-        var shuffledStates = new List<StateCard>(game.stateDeck);
-        for (int i = 0; i < shuffledStates.Count; i++)
-        {
-            int randomIndex = UnityEngine.Random.Range(i, shuffledStates.Count);
-            (shuffledStates[i], shuffledStates[randomIndex]) = (shuffledStates[randomIndex], shuffledStates[i]);
-        }
+        // Create a shuffled copy of the card deck
+        var shuffled = sourceDeck.Shuffled();
 
-        int stateIndex = 0;
+        int index = 0;
 
         foreach (var player in game.players)
         {
-            for (int i = 0; i < statesPerPlayer; i++)
+            for (int i = 0; i < cardsPerPlayer; i++)
             {
-                if (stateIndex >= shuffledStates.Count)
+                if (index >= shuffled.Count)
                 {
-                    Debug.LogWarning("Not enough states to assign evenly.");
+                    Debug.LogWarning("Not enough cards to assign evenly.");
                     Debug.Log("✅ Partial test assignment completed.");
                     return;
                 }
 
-                var stateCard = shuffledStates[stateIndex++];
+                var card = shuffled[index++];
 
                 // Use your proper capture logic — keeps everything in sync
-                CaptureCard(player, stateCard);
+                CaptureCard(player, card);
 
-                Debug.Log($"Assigned {stateCard.cardName} to Player {player.playerID}");
             }
         }
 
         Debug.Log("✅ Test state assignment completed.");
     }
-
     
 #endregion
 }

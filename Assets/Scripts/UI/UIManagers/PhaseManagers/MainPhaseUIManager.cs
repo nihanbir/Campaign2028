@@ -10,7 +10,7 @@ public class MainPhaseUIManager : MonoBehaviour
 
     [Header("Cards")]
     [SerializeField] public GameObject stateCardPrefab;
-    [SerializeField] private GameObject institutionCardPrefab;
+    [SerializeField] public GameObject institutionCardPrefab;
     [SerializeField] private GameObject eventCardPrefab;
     [SerializeField] private Transform tableArea;
     [SerializeField] private Transform eventArea;

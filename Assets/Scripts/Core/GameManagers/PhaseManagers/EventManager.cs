@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EventManager
@@ -65,7 +66,7 @@ public class EventManager
             _mainPhase.ReturnCardToDeck(card);
     }
     
-#endregion Extra Roll
+#endregion
 
 #region Need Two
     private void HandleNeedTwo(Player player, EventCard card)
@@ -80,7 +81,7 @@ public class EventManager
         _needTwoActive = false;
         return true;
     }
-#endregion Need Two
+#endregion
 
 #region Lose Turn
 
@@ -89,15 +90,15 @@ public class EventManager
         _mainPhase.EndPlayerTurn();
     }
     
-#endregion Lose Turn
+#endregion
 
 #region Challenge
 
     public event Action<List<StateCard>> OnChallengeState;
-    public event Action<Player, StateCard> OnDuelActive;
+    public event Action<Player, Card> OnDuelActive;
     public event Action OnDuelCompleted;
     
-    private StateCard _chosenState;
+    private Card _chosenCard;
     private Player _defender;
     private Player _attacker;
 
@@ -109,28 +110,36 @@ public class EventManager
                 ChallengeAnyState(player, card);
                 break;
                 
+            case EventConditions.IfInstitutionCaptured:
+                ChallengeInstitution(player, card);
+                break;
         }
     }
     
-    //TODO: change it for card instead of state later
     public void EvaluateCapture(int roll)
     {
-        bool success = _chosenState.IsSuccessfulRoll(roll, _attacker.assignedActor.team);
+        bool success = _chosenCard switch
+        {
+            StateCard s => s.IsSuccessfulRoll(roll, _attacker.assignedActor.team),
+            InstitutionCard i => i.IsSuccessfulRoll(roll, _attacker.assignedActor.team),
+            _ => false
+        };
 
         Debug.Log($"rolled: {roll}");
            
         if (success)
         {
-            _mainPhase.UpdateCardOwnership(_attacker, _chosenState);
+            _mainPhase.UpdateCardOwnership(_attacker, _chosenCard);
         }
         else
         {
             _mainPhase.ReturnCardToDeck(_currentEventCard);
-            Debug.Log($"Player {_attacker.playerID} failed to capture {_chosenState.cardName}");
+            Debug.Log($"Player {_attacker.playerID} failed to capture {_chosenCard.cardName}");
         }
 
         _challengeActive = false;
         OnDuelCompleted?.Invoke();
+        NullifyVariables();
     }
     
     void CancelChallenge(EventCard card)
@@ -141,13 +150,62 @@ public class EventManager
                 _mainPhase.ReturnCardToDeck(card);
             }
             _challengeActive = false;
+            NullifyVariables();
+        }
+    private void NullifyVariables()
+        {
+            _chosenCard = null;
+            _defender = null;
+            _attacker = null;
+        }
+    
+
+#endregion
+
+#region Challenge Institution
+
+    private void ChallengeInstitution(Player player, EventCard card)
+    {
+        _attacker = player;
+
+        _chosenCard = _mainPhase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
+        
+        if (!cardFound)
+        {
+            CancelChallenge(card);
+            return;
         }
 
-#endregion Challenge
+        var cardHolder = _mainPhase.GetCardHolder(_chosenCard);
+        
+        if (cardHolder != player)
+        {
+            _defender = cardHolder;
+        }
+        
+        if (!_defender)
+        {
+            CancelChallenge(card);
+            return;
+        }
+        
+        _challengeActive = true;
+        
+        OnDuelActive?.Invoke(player, _chosenCard);
+        
+        if (AIManager.Instance.IsAIPlayer(_attacker))
+        {
+            var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
+            GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteDuel(aiPlayer));
+        }
+        
+    }
+
+#endregion
 
 #region Challenge Any State
 
-private void ChallengeAnyState(Player player, EventCard card)
+    private void ChallengeAnyState(Player player, EventCard card)
     {
         var availableStates = GetChallengableStatesForPlayer(player);
         if (availableStates == null)
@@ -155,11 +213,8 @@ private void ChallengeAnyState(Player player, EventCard card)
             CancelChallenge(card);
             return;
         }
-        
-        // Here for easy testing
-        // GameManager.Instance.currentPlayerIndex = GameManager.Instance.players.FindIndex(p => p.playerID == 0);
             
-        _attacker = GameManager.Instance.CurrentPlayer;
+        _attacker = player;
             
         OnChallengeState?.Invoke(availableStates);
             
@@ -176,19 +231,16 @@ private void ChallengeAnyState(Player player, EventCard card)
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
     {
-        var heldStates = _mainPhase.GetHeldStates();
+        var stateOwners = _mainPhase.GetStateOwners();
         var availableStates = new List<StateCard>();
 
         // Get each state that the current player doesn't own
-        foreach (var kvp in heldStates)
+        foreach (var kvp in stateOwners)
         {
-            if (kvp.Key == player)
+            if (kvp.Value == player)
                 continue;
-
-            foreach (var state in kvp.Value)
-            {
-                availableStates.Add(state);
-            }
+            
+            availableStates.Add(kvp.Key);
         }
 
         return availableStates.Count == 0 ? null : availableStates;
@@ -199,13 +251,13 @@ private void ChallengeAnyState(Player player, EventCard card)
     {
         StateDisplayCard.OnCardHeld -= HandleStateChosen;
         
-        _chosenState = chosenState;
+        _chosenCard = chosenState;
         
-        Debug.Log($"Player held {_chosenState.cardName} → set as challenge target.");
+        Debug.Log($"Player held {_chosenCard.cardName} → set as challenge target.");
 
-        _defender = _mainPhase.GetCardHolder(_chosenState);
+        _defender = _mainPhase.GetCardHolder(_chosenCard);
         
-        OnDuelActive?.Invoke(_defender, _chosenState);
+        OnDuelActive?.Invoke(_defender, _chosenCard);
         
         if (AIManager.Instance.IsAIPlayer(_attacker))
         {

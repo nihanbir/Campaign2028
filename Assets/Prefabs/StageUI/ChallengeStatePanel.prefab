@@ -207,7 +207,7 @@ GameObject:
   - component: {fileID: 3753719586433489799}
   - component: {fileID: 4217174397206709889}
   m_Layer: 5
-  m_Name: Player
+  m_Name: Attacker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -609,8 +609,8 @@ MonoBehaviour:
   spacingBetweenStateCards: 150
   duelScreen: {fileID: 3298725457486808726}
   defenderUI: {fileID: 1033362522861206300}
-  playerUI: {fileID: 6746398929419256253}
-  chosenStateUI: {fileID: 6196279243546758843}
+  attackerUI: {fileID: 6746398929419256253}
+  chosenCardUI: {fileID: 6196279243546758843}
   rollDiceButton: {fileID: 138604891072896263}
 --- !u!1 &6116470471505102135
 GameObject:
@@ -700,7 +700,7 @@ GameObject:
   - component: {fileID: 4353871659650362551}
   - component: {fileID: 6774592290789403750}
   m_Layer: 5
-  m_Name: State
+  m_Name: Card
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

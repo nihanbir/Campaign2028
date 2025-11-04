@@ -92,6 +92,11 @@ public class MainPhaseAIManager
             case EventConditions.IfOwnsInstitution:
                 // If AI doesn't have the required institution, save for later
                 return !aiPlayer.HasInstitution(card.requiredInstitution);
+            
+            case EventConditions.IfInstitutionCaptured:
+                // If none captured the institution yet, save for later
+                _mainPhase.FindHeldInstitution(card.requiredInstitution, out var found);
+                return !found;
 
             case EventConditions.None:
                 // Always beneficial now
@@ -113,10 +118,10 @@ public class MainPhaseAIManager
 
     private bool AreOtherPlayersHoldingStates(AIPlayer aiPlayer)
     {
-        var heldStates = _mainPhase.GetHeldStates();
+        var stateOwners = _mainPhase.GetStateOwners();
     
         // Return true if there are any held states and not all are by the given aiPlayer
-        return heldStates.Count > 0 && heldStates.Keys.Any(player => player != aiPlayer);
+        return stateOwners.Count > 0 && stateOwners.Values.Any(player => player != aiPlayer);
     }
     
     private IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
