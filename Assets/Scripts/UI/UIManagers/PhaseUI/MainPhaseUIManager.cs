@@ -52,8 +52,8 @@ public class MainPhaseUIManager : MonoBehaviour
         
         EnableDiceButton(false);
         
-        challengeUI.InitializeManager();
-        altStateUI.InitializeManager();
+        challengeUI.InitializeEventUI();
+        altStateUI.InitializeEventUI();
         
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         InitializePlayersForTesting();

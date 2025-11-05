@@ -1,11 +1,9 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class ChallengeStateUIManager : MonoBehaviour
+public class ChallengeStateUIManager : BaseEventUI
 {
-    [SerializeField] private GameObject eventScreen;
     [SerializeField] private Transform stateCardsUIParent;
     [SerializeField] private float spacingBetweenStateCards = 150f;
     
@@ -14,47 +12,23 @@ public class ChallengeStateUIManager : MonoBehaviour
     [SerializeField] private Transform defenderUI;
     [SerializeField] private Transform attackerUI;
     [SerializeField] private Transform chosenCardUI;
-    [SerializeField] private Button rollDiceButton;
 
-    private MainPhaseGameManager _mainPhase;
-    private MainPhaseUIManager _mainUI; 
-    private EventManager _eventManager;
     private StateDisplayCard _highlightedCard;
 
-    private Player _attacker;
-    
-    private void Awake()
+    public override void InitializeEventUI()
     {
-        eventScreen.SetActive(false);
+        base.InitializeEventUI();
+        eventManager.OnChallengeState += ShowStateCards;
+        eventManager.OnDuelActive += ShowDuel;
+        eventManager.OnDuelCompleted += ReturnToMainPhaseUI;
     }
 
-    public void InitializeManager()
+    public override void OnRollDiceClicked()
     {
-        _mainPhase = GameManager.Instance?.mainPhase;
-
-        if (_mainPhase == null)
-        {
-            Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
-            return;
-        }
-        _mainUI = GameUIManager.Instance.mainUI;
-        _eventManager = _mainPhase.EventManager;
-        _eventManager.OnChallengeState += ShowStateCards;
-        _eventManager.OnDuelActive += ShowDuel;
-        _eventManager.OnDuelCompleted += ReturnToMainPhaseUI;
+        base.OnRollDiceClicked();
         
-        if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        eventManager.EvaluateChallengeCapture(roll);
         
-    }
-
-    public void OnRollDiceClicked()
-    {
-        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
-        _attacker.PlayerDisplayCard.SetRolledDiceImage();
-        
-        int roll = GameUIManager.Instance.DiceRoll;
-        _eventManager.EvaluateChallengeCapture(roll);
     }
 
     private void HandleCardHeld()
@@ -72,7 +46,7 @@ public class ChallengeStateUIManager : MonoBehaviour
     
     private void ShowStateCards(List<StateCard> statesToDisplay)
     {
-        _mainUI.gameObject.SetActive(false);
+        mainUI.gameObject.SetActive(false);
         eventScreen.SetActive(true);
         duelScreen.SetActive(false);
         stateCardsUIParent.gameObject.SetActive(true);
@@ -101,15 +75,15 @@ public class ChallengeStateUIManager : MonoBehaviour
 
     private void ShowDuel(Player defender, Card chosenCard)
     {
-        _attacker = GameManager.Instance.CurrentPlayer;
+        currentPlayer = GameManager.Instance.CurrentPlayer;
         
-        if (AIManager.Instance.IsAIPlayer(_attacker))
+        if (AIManager.Instance.IsAIPlayer(currentPlayer))
         {
             rollDiceButton.interactable = false;
         }
         
         // Spawn current player
-        CreateCardInTransform<PlayerDisplayCard>(_attacker.PlayerDisplayCard.gameObject, attackerUI, _attacker.assignedActor);
+        CreateCardInTransform<PlayerDisplayCard>(currentPlayer.PlayerDisplayCard.gameObject, attackerUI, currentPlayer.assignedActor);
         
         // Spawn defender player
         CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, defenderUI, defender.assignedActor);
@@ -119,44 +93,21 @@ public class ChallengeStateUIManager : MonoBehaviour
         {
             case StateCard stateCard:
                 
-                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, chosenCardUI, stateCard);
+                CreateCardInTransform<StateDisplayCard>(mainUI.stateCardPrefab, chosenCardUI, stateCard);
                 break;
             
             case InstitutionCard institutionCard:
                 
-                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, chosenCardUI, institutionCard);
+                CreateCardInTransform<InstitutionDisplayCard>(mainUI.institutionCardPrefab, chosenCardUI, institutionCard);
                 break;
         }
         
-        Debug.Log($"[ChallengeUI] Showing duel between attacker {_attacker.playerID} and defender {defender.playerID} for state {chosenCard.cardName}");
+        Debug.Log($"[ChallengeUI] Showing duel between attacker {currentPlayer.playerID} and defender {defender.playerID} for state {chosenCard.cardName}");
+
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(currentPlayer);
         
         duelScreen.SetActive(true);
         
-    }
-
-    private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
-        where T : MonoBehaviour, IDisplayCard
-    {
-        // Clear previous card(s)
-        foreach (Transform child in uiParent)
-            Destroy(child.gameObject);
-
-        var cardGO = Instantiate(prefab, uiParent);
-        cardGO.SetActive(true);
-
-        if (cardGO.TryGetComponent(out T displayCard))
-        {
-            displayCard.SetCard(cardToSet);
-        }
-        else
-        {
-            Debug.LogError($"{prefab.name} is missing {typeof(T).Name} component.");
-        }
-        
-        if (displayCard.TryGetComponent(out RectTransform rt))
-        {
-            rt.anchoredPosition = Vector2.zero;
-        }
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
@@ -175,7 +126,7 @@ public class ChallengeStateUIManager : MonoBehaviour
         // 1️⃣ Instantiate all cards
         for (int i = 0; i < count; i++)
         {
-            GameObject uiInstance = Instantiate(_mainUI.stateCardPrefab, stateCardsUIParent);
+            GameObject uiInstance = Instantiate(mainUI.stateCardPrefab, stateCardsUIParent);
             if (!uiInstance.TryGetComponent(out StateDisplayCard displayCard))
             {
                 Debug.LogError("CardDisplayPrefab missing StateDisplayCard component.");
@@ -255,25 +206,24 @@ public class ChallengeStateUIManager : MonoBehaviour
         Debug.Log($"[ChallengeUI] Placed {count} state cards in {rowCount} rows × {cardsPerRow} max columns (centered rows, scale={scaleFactor:F2}).");
     }
 
-    private void ReturnToMainPhaseUI()
+    protected override void ReturnToMainPhaseUI()
     {
+        base.ReturnToMainPhaseUI();
+        
         NullifyVariables();
         
         ToggleGOs();
         
-        _mainPhase.EndPlayerTurn();
     }
 
     private void NullifyVariables()
     {
-        _attacker = null;
+        currentPlayer = null;
         _highlightedCard = null;
     }
 
     private void ToggleGOs()
     {
-        _mainUI.gameObject.SetActive(true);
-        eventScreen.SetActive(false);
         duelScreen.SetActive(false);
         stateCardsUIParent.gameObject.SetActive(false);
     }

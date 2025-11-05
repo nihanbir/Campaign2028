@@ -211,7 +211,10 @@ public class EventManager
 
         _challengeActive = false;
         OnDuelCompleted?.Invoke();
+        
         NullifyVariables();
+        _mainPhase.EndPlayerTurn();
+        
     }
     
     void CancelChallenge(EventCard card)
