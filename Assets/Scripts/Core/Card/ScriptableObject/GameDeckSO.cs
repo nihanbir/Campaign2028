@@ -18,8 +18,8 @@ public class GameDeckSO : ScriptableObject
     public List<EventCardSO> challengeEvents = new();
     public List<EventCardSO> loseTurnEvents = new();
     public List<EventCardSO> noImpactEvents = new();
-    public List<EventCardSO> drawnCardStaysEvents = new();
-    public List<EventCardSO> teamConditionalEvents = new();
+    public List<EventCardSO> alternativeStatesEvents = new();
+    public List<EventCardSO> teamBasedEvents = new();
     
     public List<StateCard> GetStateDeck()
     {
@@ -60,8 +60,8 @@ public class GameDeckSO : ScriptableObject
         allEvents.AddRange(challengeEvents);
         allEvents.AddRange(loseTurnEvents);
         allEvents.AddRange(noImpactEvents);
-        allEvents.AddRange(drawnCardStaysEvents);
-        allEvents.AddRange(teamConditionalEvents);
+        allEvents.AddRange(alternativeStatesEvents);
+        allEvents.AddRange(teamBasedEvents);
         
     }
     
