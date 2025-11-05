@@ -119,7 +119,7 @@ public class EventManager
         }
         else
         {
-            _eventActive = false;
+            CancelEvent(card);
         }
     }
 
@@ -153,7 +153,8 @@ public class EventManager
         }
 
         OnAltStatesCompleted?.Invoke();
-        _eventActive = false;
+        
+        NullifyVariables();
         _mainPhase.EndPlayerTurn();   
     }
 
@@ -203,8 +204,7 @@ public class EventManager
             _mainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
-
-        _eventActive = false;
+        
         OnDuelCompleted?.Invoke();
         
         NullifyVariables();
@@ -212,9 +212,6 @@ public class EventManager
         
     }
     
-    
-    
-
 #endregion
 
 #region Challenge Institution
@@ -324,8 +321,6 @@ public class EventManager
         {
             _mainPhase.ReturnCardToDeck(card);
         }
-                    
-        _eventActive = false;
         NullifyVariables();
     }
     private void NullifyVariables()
@@ -335,6 +330,9 @@ public class EventManager
         _altState1 = null;
         _altState2 = null;
         _currentPlayer = null;
+        activeEventUI = null;
+        
+        _eventActive = false;
     }
 
     private void RollDiceForAI()
