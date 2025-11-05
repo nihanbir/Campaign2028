@@ -13,13 +13,11 @@ MonoBehaviour:
   m_Name: SouthernRural
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
   actorName: Southern Rural
-  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
+  artwork: {fileID: 1245631777715258648, guid: 5dc6cf191e8c3cb468fa7754894be269, type: 3}
   team: 0
   actorType: 0
   evScore: 0
   instScore: 0
-  isCaptured: 0
-  isRevealed: 0
   intelligence: 3
   wealth: 1
   influence: 2

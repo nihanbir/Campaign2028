@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d9c191f808b5d5640a01e2c41491e1ff
+guid: 5dc6cf191e8c3cb468fa7754894be269
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7416840895964042104
-    second: ActorC_Karen-png_0
+      213: 1245631777715258648
+    second: ActorC_Southern_Rural_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ActorC_Karen-png_0
+      name: ActorC_Southern_Rural_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 825
-        height: 1125
+        width: 211
+        height: 222
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 88c29705086121990800000000000000
-      internalID: -7416840895964042104
+      spriteID: 81508af808f594110800000000000000
+      internalID: 1245631777715258648
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ActorC_Karen-png_0: -7416840895964042104
+      ActorC_Southern_Rural_0: 1245631777715258648
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -13,13 +13,11 @@ MonoBehaviour:
   m_Name: TradWifeInfluencer
   m_EditorClassIdentifier: Assembly-CSharp::ActorCardSO
   actorName: Trad Wife Influencer
-  artwork: {fileID: 7843776957995330766, guid: 60b1b19cb5a665448967fe727ddf0ed2, type: 3}
+  artwork: {fileID: 5430745682864430810, guid: c539d5201bc731042ac3233d493b342b, type: 3}
   team: 0
   actorType: 2
   evScore: 0
   instScore: 0
-  isCaptured: 0
-  isRevealed: 0
   intelligence: 4
   wealth: 3
   influence: 4

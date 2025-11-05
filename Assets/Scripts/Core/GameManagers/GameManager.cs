@@ -32,7 +32,7 @@ public class GameManager : GameManagerBase
     {
         LoadDecks();
         InitializePhases();
-        CurrentPhase = GamePhase.MainGame;
+        CurrentPhase = GamePhase.Setup;
     }
     
     private void InitializePhases()

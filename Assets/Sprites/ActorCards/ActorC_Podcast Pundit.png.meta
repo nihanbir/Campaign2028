@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f361fd089162aa342b9bafb49aa87090
+guid: bd26b01cd5dc9c949af7085e0bfc326e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 85983172660392783
-    second: ActorC_Trad-wifepng_0
+      213: 2863904446227602076
+    second: ActorC_Podcast Pundit_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ActorC_Trad-wifepng_0
+      name: ActorC_Podcast Pundit_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 825
-        height: 1125
+        width: 211
+        height: 222
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f43751f6d39713100800000000000000
-      internalID: 85983172660392783
+      spriteID: c9ade049be1aeb720800000000000000
+      internalID: 2863904446227602076
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ActorC_Trad-wifepng_0: 85983172660392783
+      ActorC_Podcast Pundit_0: 2863904446227602076
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 58b2232e2a164eb46808cd42b8785302
+guid: ec3764ff204657e458f65f83e461056f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7651465124576865203
-    second: ActorC_Tech-Oligarch-png_0
+      213: -9127396009698311127
+    second: ActorC_Karen_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ActorC_Tech-Oligarch-png_0
+      name: ActorC_Karen_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 825
-        height: 1125
+        width: 211
+        height: 222
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3bba1b9ddf67f2a60800000000000000
-      internalID: 7651465124576865203
+      spriteID: 9244d9d20b9f45180800000000000000
+      internalID: -9127396009698311127
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ActorC_Tech-Oligarch-png_0: 7651465124576865203
+      ActorC_Karen_0: -9127396009698311127
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

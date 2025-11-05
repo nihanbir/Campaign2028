@@ -37,8 +37,6 @@ public class SetupPhaseUIManager : MonoBehaviour
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
-        
-        actorUIParent.gameObject.SetActive(false);
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -126,7 +124,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         
         // Show/hide appropriate UI elements
-        actorUIParent.gameObject.SetActive(isAssignStage);
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
         // Disable UI for AI players

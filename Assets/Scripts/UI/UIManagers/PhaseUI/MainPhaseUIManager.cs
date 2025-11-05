@@ -54,8 +54,8 @@ public class MainPhaseUIManager : MonoBehaviour
         challengeUI.InitializeEventUI();
         altStateUI.InitializeEventUI();
         
-        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
-        InitializePlayersForTesting();
+        RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        // InitializePlayersForTesting();
     }
     
     private void SubscribeToPhaseEvents()
