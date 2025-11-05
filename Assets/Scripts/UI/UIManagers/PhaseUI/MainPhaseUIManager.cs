@@ -19,8 +19,10 @@ public class MainPhaseUIManager : MonoBehaviour
     [SerializeField] private Transform playerUIParent;
     [SerializeField] private float spacingBetweenPlayerCards = 150f;
     
-    [Header("Challenge State Holder")]     
+    [Header("Event UI")]     
     [SerializeField] public ChallengeStateUIManager challengeUI;
+    [SerializeField] public AlternativeStatesUIManager altStateUI;
+    
 
     private bool _isPlayerAI = false;
     
@@ -51,6 +53,7 @@ public class MainPhaseUIManager : MonoBehaviour
         EnableDiceButton(false);
         
         challengeUI.InitializeManager();
+        altStateUI.InitializeManager();
         
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         InitializePlayersForTesting();

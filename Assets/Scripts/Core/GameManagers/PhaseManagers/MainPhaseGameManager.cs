@@ -167,7 +167,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
             EndPlayerTurn();
         }
     }
-    private void CaptureCard(Player player, Card card)
+    public void CaptureCard(Player player, Card card)
     {
         if (card == null)
             return;
@@ -364,6 +364,28 @@ public class MainPhaseGameManager : BasePhaseGameManager
             {
                 cardFound = true;
                 return inst;
+            }
+        }
+
+        cardFound = false;
+        return null;
+    }
+    
+    public StateCard FindStateFromDeck(StateCard state, out bool cardFound)
+    {
+        if (state == null)
+        {
+            cardFound = false;
+            return null;
+        }
+        
+        foreach (var card in _mainDeck)
+        {
+            // Match by cardName (or by a unique ID if you have one)
+            if (card.cardName == state.cardName)
+            {
+                cardFound = true;
+                return card as StateCard;
             }
         }
 

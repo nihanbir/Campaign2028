@@ -109,7 +109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.6046398, y: 0}
   m_AnchorMax: {x: 1, y: 0.32700002}
-  m_AnchoredPosition: {x: -0.099975586, y: 0.65802}
+  m_AnchoredPosition: {x: -0.099975586, y: 0.657959}
   m_SizeDelta: {x: 0.2000122, y: -1.3160019}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3990862225724219938
@@ -184,7 +184,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000061035156}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1202318453534229292
@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: 4294091404621125284}
   - component: {fileID: 6097095633143882996}
   - component: {fileID: 2532124056049916474}
+  - component: {fileID: 2307700427813731981}
   m_Layer: 5
   m_Name: SetupPanel
   m_TagString: Untagged
@@ -316,9 +317,30 @@ CanvasGroup:
   m_GameObject: {fileID: 2085586330490423814}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
+--- !u!114 &2307700427813731981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085586330490423814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
+  setupGamePhase: {fileID: 2085586330490423814}
+  rollDiceButton: {fileID: 4966983952646787642}
+  cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
+  playerUIParent: {fileID: 7431674135243233640}
+  actorUIParent: {fileID: 9010180728352839122}
+  spacingBetweenPlayerCards: 150
+  spacingBetweenActorCards: 200
+  unassignedPlayerCards: []
+  unassignedActorCards: []
 --- !u!1 &2778742110003720283
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +375,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0.397, y: 0.32700002}
-  m_AnchoredPosition: {x: -1.4000244, y: -0.6600342}
+  m_AnchoredPosition: {x: -1.3999023, y: -0.6599121}
   m_SizeDelta: {x: -2.7999878, y: -1.316}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3535836601145969910
@@ -429,7 +451,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0.32700002}
-  m_AnchoredPosition: {x: 0, y: -0.6600342}
+  m_AnchoredPosition: {x: 0, y: -0.6599121}
   m_SizeDelta: {x: 311.59998, y: -1.31604}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4565204680858257469
@@ -601,6 +623,7 @@ GameObject:
   - component: {fileID: 7431674135243233640}
   - component: {fileID: 8076223613518087619}
   - component: {fileID: 5327017649402471640}
+  - component: {fileID: 548984315687458321}
   m_Layer: 5
   m_Name: UnassignedPlayersPanel
   m_TagString: Untagged
@@ -665,3 +688,15 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!225 &548984315687458321
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6007478419830241758}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

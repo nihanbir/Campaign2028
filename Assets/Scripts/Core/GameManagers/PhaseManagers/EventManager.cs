@@ -10,8 +10,9 @@ public class EventManager
     public event Action<EventCard> OnEventApplied;
 
     private bool _needTwoActive = false;
+    private bool _altStates = false;
     private bool _challengeActive = false;
-    public bool IsChallengeActive => _challengeActive;
+    public bool IsEventActive => _challengeActive || _altStates;
     
     private EventCard _currentEventCard;
 
@@ -23,12 +24,14 @@ public class EventManager
             { EventType.ExtraRoll, HandleExtraRoll },
             { EventType.NeedTwo, HandleNeedTwo },
             { EventType.LoseTurn, HandleLoseTurn },
+            { EventType.AlternativeStates, HandleAlternativeStates },
             { EventType.Challenge, HandleChallenge },
             { EventType.NoImpact, (p, c) => {} }
         };
         
     }
 
+    
     public void ApplyEvent(Player player, EventCard card)
     {
         Debug.Log($"Applying event {card.cardName}");
@@ -92,6 +95,75 @@ public class EventManager
     
 #endregion
 
+#region Alternative States
+
+    private StateCard _altState1;
+    private StateCard _altState2;
+    private Player _currentPlayer;
+    public event Action<Player, StateCard, StateCard> OnAltStatesActive;
+    public event Action OnAltStatesCompleted;
+
+    private void HandleAlternativeStates(Player player, EventCard card)
+    {
+        _altState1 = _mainPhase.FindStateFromDeck(card.altState1, out var found1);
+        _altState2 = _mainPhase.FindStateFromDeck(card.altState1, out var found2);
+
+        if (found1 || found2)
+        {
+            _altStates = true;
+            _currentPlayer = player;
+            _currentEventCard = card;
+            OnAltStatesActive?.Invoke(player, _altState1, _altState2);
+            
+            if (AIManager.Instance.IsAIPlayer(_currentPlayer))
+            {
+                var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
+                GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteRollForAltStates(aiPlayer));
+            }
+        }
+        else
+        {
+            _altStates = false;
+        }
+    }
+
+
+    public void EvaluateAltStatesCapture(int roll)
+    {
+        StateCard cardToCapture = null;
+        switch (roll)
+        {
+            case 1:
+                if (_altState1 != null)
+                {
+                    cardToCapture = _altState1;
+                }
+                break;
+            case 2:
+                if (_altState2 != null)
+                {
+                    cardToCapture = _altState2;
+                }
+                break;
+        }
+
+        if (cardToCapture != null)
+        {
+            _mainPhase.CaptureCard(_currentPlayer, cardToCapture);
+        }
+        else
+        {
+            Debug.Log($"Player {_currentPlayer.playerID} failed to capture the available state");
+        }
+
+        OnAltStatesCompleted?.Invoke();
+        _altStates = false;
+        _mainPhase.EndPlayerTurn();   
+    }
+
+#endregion
+    
+
 #region Challenge
 
     public event Action<List<StateCard>> OnChallengeState;
@@ -116,7 +188,7 @@ public class EventManager
         }
     }
     
-    public void EvaluateCapture(int roll)
+    public void EvaluateChallengeCapture(int roll)
     {
         bool success = _chosenCard switch
         {

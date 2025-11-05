@@ -9,15 +9,21 @@ public class EventCardSOEditor : Editor
         serializedObject.Update();
 
         // Draw everything except the ones we control manually
-        DrawPropertiesExcluding(serializedObject, "m_Script", "requiredInstitution", "eventConditions", "blueTeam", "redTeam", "benefitingTeam");
+        DrawPropertiesExcluding(serializedObject, "m_Script", "altState1", "altState2", "requiredInstitution", "eventConditions", "blueTeam", "redTeam", "benefitingTeam");
 
         // Grab relevant serialized properties
         SerializedProperty typeProp = serializedObject.FindProperty("eventType");
+        
         SerializedProperty conditionProp = serializedObject.FindProperty("eventConditions");
         SerializedProperty requiredInstitutionProp = serializedObject.FindProperty("requiredInstitution");
+        
         SerializedProperty blueTeamProp = serializedObject.FindProperty("blueTeam");
         SerializedProperty redTeamProp = serializedObject.FindProperty("redTeam");
         SerializedProperty benefitingTeamProp = serializedObject.FindProperty("benefitingTeam");
+        
+        SerializedProperty altState1Prop = serializedObject.FindProperty("altState1");
+        SerializedProperty altState2Prop = serializedObject.FindProperty("altState2");
+        
         
         if (typeProp != null)
         {
@@ -27,14 +33,22 @@ public class EventCardSOEditor : Editor
             if (currentEventType == EventType.TeamBased)
             {
                 EditorGUILayout.Space(4);
-                EditorGUILayout.LabelField("Team Conditionals", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField("Team Outcomes", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(blueTeamProp, new GUIContent("Blue Team Outcome"));
                 EditorGUILayout.PropertyField(redTeamProp, new GUIContent("Red Team Outcome"));
                 EditorGUILayout.PropertyField(benefitingTeamProp, new GUIContent("Beneficial to team"));
                 
             }
+            else if (currentEventType == EventType.AlternativeStates)
+            {
+                EditorGUILayout.Space(4);
+                EditorGUILayout.LabelField("Alternative States", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(altState1Prop, new GUIContent("Alternative State 1"));
+                EditorGUILayout.PropertyField(altState2Prop, new GUIContent("Alternative State 2"));
+            }
+                
             // Only show SubType for relevant event types
-            else if (IsConditioningRelevant(currentEventType))
+            if (IsConditioningRelevant(currentEventType))
             {
                 EditorGUILayout.Space(4);
                 EditorGUILayout.LabelField("Subtype Settings", EditorStyles.boldLabel);

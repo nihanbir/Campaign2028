@@ -19,6 +19,8 @@ MonoBehaviour:
   requiredInstitution: {fileID: 0}
   blueTeam: 7
   redTeam: 7
+  altState1: {fileID: 11400000, guid: 4b56d320438019d42bfafa9bae7ed274, type: 2}
+  altState2: {fileID: 11400000, guid: 05eb2b9ea93a9324a9e4cc9e064dbd4e, type: 2}
   benefitingTeam: 2
   mustPlayImmediately: 1
   canSave: 0

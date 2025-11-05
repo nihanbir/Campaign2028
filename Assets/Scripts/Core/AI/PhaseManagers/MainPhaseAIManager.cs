@@ -36,7 +36,7 @@ public class MainPhaseAIManager
             yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
         }
         
-        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsChallengeActive)
+        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
         {
             MainPhaseUIManager mainUI = GameUIManager.Instance.mainUI;
             yield return _aiManager.StartCoroutine(RollDice(aiPlayer, mainUI));
@@ -138,6 +138,10 @@ public class MainPhaseAIManager
             case ChallengeStateUIManager challengeUI:
                 challengeUI.OnRollDiceClicked();
                 break;
+            
+            case AlternativeStatesUIManager altUI:
+                altUI.OnRollDiceClicked();
+                break;
         }
     }
     
@@ -198,5 +202,17 @@ public class MainPhaseAIManager
     }
     
 #endregion Challenge Any State
+
+public IEnumerator ExecuteRollForAltStates(AIPlayer aiPlayer)
+{
+    Debug.Log("AI is preparing to roll");
+    yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+    if (GameManager.Instance.CurrentPlayer == aiPlayer)
+    {
+        AlternativeStatesUIManager altStateUI = GameUIManager.Instance.mainUI.altStateUI;
+        yield return _aiManager.StartCoroutine(RollDice(aiPlayer, altStateUI));
+    }
+}
     
 }

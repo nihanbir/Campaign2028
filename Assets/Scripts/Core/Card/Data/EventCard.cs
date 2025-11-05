@@ -14,6 +14,8 @@ public class EventCard : Card
     public bool canReturnToDeck;
     
     public InstitutionCard requiredInstitution;
+    public StateCard altState1;
+    public StateCard altState2;
     
 }
 
@@ -24,7 +26,7 @@ public enum EventType
     Challenge,
     LoseTurn,
     NoImpact,
-    DrawnCardStays,
+    AlternativeStates,
     TeamBased,
     None,
     

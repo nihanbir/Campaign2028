@@ -56,12 +56,13 @@ MonoBehaviour:
   allAllegiances:
   - {fileID: 11400000, guid: c94e9b5df7ae0b640b2e98f11311b063, type: 2}
   - {fileID: 11400000, guid: 9f51f1d856c6b6f46b1d7f4f6b4cc966, type: 2}
-  allEvents: []
+  allEvents:
+  - {fileID: 11400000, guid: be6349aa0bf08a0438a394663f052797, type: 2}
   extraRollEvents: []
   needTwoEvents: []
-  challengeEvents:
-  - {fileID: 11400000, guid: ee04fbbff2e7a454faa0c923b8faa87c, type: 2}
+  challengeEvents: []
   loseTurnEvents: []
   noImpactEvents: []
-  drawnCardStaysEvents: []
+  drawnCardStaysEvents:
+  - {fileID: 11400000, guid: be6349aa0bf08a0438a394663f052797, type: 2}
   teamConditionalEvents: []

@@ -13,6 +13,8 @@ public class EventCardSO : ScriptableObject
     public InstitutionCardSO requiredInstitution;
     public EventType blueTeam;
     public EventType redTeam;
+    public StateCardSO altState1;
+    public StateCardSO altState2;
     
     [ReadOnly] public ActorTeam benefitingTeam;
     
@@ -36,6 +38,8 @@ public class EventCardSO : ScriptableObject
             redTeam = eventType == EventType.TeamBased ? redTeam : EventType.None,
             benefitingTeam = benefitingTeam,
             eventConditions = eventConditions,
+            altState1 = altState1 != null ? altState1.ToCard() : null,
+            altState2 = altState2 != null ? altState2.ToCard() : null,
             
         };
     }
@@ -61,6 +65,12 @@ public class EventCardSO : ScriptableObject
             case true when requiredInstitution == null:
                 Debug.LogWarning($"[{eventName}] requires an institution but none is assigned.", this);
                 break;
+        }
+        
+        if (eventType != EventType.AlternativeStates)
+        {
+            altState1 = null;
+            altState2 = null;
         }
 
         if (eventType == EventType.TeamBased && (blueTeam == EventType.None || redTeam == EventType.None))

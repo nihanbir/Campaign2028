@@ -54,7 +54,7 @@ public class ChallengeStateUIManager : MonoBehaviour
         _attacker.PlayerDisplayCard.SetRolledDiceImage();
         
         int roll = GameUIManager.Instance.DiceRoll;
-        _eventManager.EvaluateCapture(roll);
+        _eventManager.EvaluateChallengeCapture(roll);
     }
 
     private void HandleCardHeld()
@@ -101,8 +101,6 @@ public class ChallengeStateUIManager : MonoBehaviour
 
     private void ShowDuel(Player defender, Card chosenCard)
     {
-        
-        
         _attacker = GameManager.Instance.CurrentPlayer;
         
         if (AIManager.Instance.IsAIPlayer(_attacker))

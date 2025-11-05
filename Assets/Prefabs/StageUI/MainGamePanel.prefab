@@ -314,8 +314,8 @@ GameObject:
   - component: {fileID: 4799507147203409464}
   - component: {fileID: 1873173497916125497}
   - component: {fileID: 2974073964415388581}
-  - component: {fileID: 3189876636900371039}
-  - component: {fileID: 3380235643682900504}
+  - component: {fileID: 9059959801080100329}
+  - component: {fileID: 1918790564760583912}
   m_Layer: 5
   m_Name: MainGamePanel
   m_TagString: Untagged
@@ -330,7 +330,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4403753703118668355}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -383,7 +383,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!225 &3189876636900371039
+--- !u!225 &9059959801080100329
 CanvasGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -395,7 +395,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &3380235643682900504
+--- !u!114 &1918790564760583912
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -416,6 +416,7 @@ MonoBehaviour:
   eventArea: {fileID: 3209180837638522148}
   playerUIParent: {fileID: 865409099167287280}
   spacingBetweenPlayerCards: 150
+  challengeUI: {fileID: 0}
 --- !u!1 &5937534768045356583
 GameObject:
   m_ObjectHideFlags: 0

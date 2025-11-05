@@ -233,17 +233,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &368763188 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1883302400061274757, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -433,8 +422,8 @@ MonoBehaviour:
   - {fileID: 5825575627708896380, guid: 45dfa72476cad164a8e33631860713a9, type: 3}
   - {fileID: -8128665846399157676, guid: c6210080dfcdd7e43b65b2976501ab2d, type: 3}
   phaseText: {fileID: 4359298127492457271}
-  setupUI: {fileID: 368763188}
-  mainUI: {fileID: 7871011285792013931}
+  setupUI: {fileID: 2031575820}
+  mainUI: {fileID: 7871011285792013936}
 --- !u!1 &871762788
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,6 +686,17 @@ MonoBehaviour:
   numberOfAIPlayers: 5
   aiPlayerPrefab: {fileID: 6437916321570752279, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
   aiPlayers: []
+--- !u!114 &2031575820 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2672511314526740918, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_PrefabInstance: {fileID: 2553868797784039014}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
 --- !u!1001 &2553868797784039014
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -919,9 +919,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
---- !u!114 &7871011285792013931 stripped
+--- !u!114 &7871011285792013936 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8066389155480619410, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5544439552543579108, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
   m_PrefabInstance: {fileID: 2553868797784039014}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
