@@ -60,6 +60,8 @@ public abstract class BaseEventUI : MonoBehaviour
         foreach (Transform child in uiParent)
             Destroy(child.gameObject);
 
+        if (cardToSet == null) return;
+        
         var cardGO = Instantiate(prefab, uiParent);
         cardGO.SetActive(true);
 

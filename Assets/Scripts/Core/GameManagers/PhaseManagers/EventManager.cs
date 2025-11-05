@@ -122,34 +122,34 @@ public class EventManager
             CancelEvent(card);
         }
     }
-
-
-    public void EvaluateAltStatesCapture(int roll)
+    
+    public void EvaluateStateDiscard(int roll)
     {
-        StateCard cardToCapture = null;
+        StateCard cardToDiscard = null;
+        
         switch (roll)
         {
             case 1:
                 if (_altState1 != null)
                 {
-                    cardToCapture = _altState1;
+                    cardToDiscard = _altState1;
                 }
                 break;
             case 2:
                 if (_altState2 != null)
                 {
-                    cardToCapture = _altState2;
+                    cardToDiscard = _altState2;
                 }
                 break;
         }
 
-        if (cardToCapture != null)
+        if (cardToDiscard != null)
         {
-            _mainPhase.CaptureCard(_currentPlayer, cardToCapture);
+            _mainPhase.DiscardState(cardToDiscard);
         }
         else
         {
-            Debug.Log($"Player {_currentPlayer.playerID} failed to capture the available state");
+            Debug.Log($"Player {_currentPlayer.playerID} didn't discard any states!");
         }
 
         OnAltStatesCompleted?.Invoke();
@@ -160,7 +160,6 @@ public class EventManager
 
 #endregion
     
-
 #region Challenge
 
     public event Action<List<StateCard>> OnChallengeState;

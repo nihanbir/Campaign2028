@@ -21,16 +21,10 @@ public class AlternativeStatesUIManager : BaseEventUI
         currentPlayer = player;
         eventManager.activeEventUI = this;
         CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, playerUI, player.assignedActor);
-
-        if (card1 != null)
-        {
-            CreateCardInTransform<StateDisplayCard>(mainUI.stateCardPrefab, leftCardUI, card1);
-        }
         
-        if (card2 != null)
-        {
-            CreateCardInTransform<StateDisplayCard>(mainUI.stateCardPrefab, rightCardUI, card2);
-        }
+        CreateCardInTransform<StateDisplayCard>(mainUI.stateCardPrefab, leftCardUI, card1);
+        
+        CreateCardInTransform<StateDisplayCard>(mainUI.stateCardPrefab, rightCardUI, card2);
         
         eventScreen.SetActive(true);
 
@@ -41,6 +35,6 @@ public class AlternativeStatesUIManager : BaseEventUI
     {
         base.OnRollDiceClicked();
         
-        eventManager.EvaluateAltStatesCapture(roll);
+        eventManager.EvaluateStateDiscard(roll);
     }
 }

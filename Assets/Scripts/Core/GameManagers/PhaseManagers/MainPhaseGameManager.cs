@@ -124,8 +124,37 @@ public class MainPhaseGameManager : BasePhaseGameManager
 #endregion
 
 #region Card Capture
+
+    public void CheckStateCardConditions(int roll, out bool stateDiscarded)
+    {
+        if (_currentTargetCard is StateCard state)
+        {
+            if (state.hasSecession && roll == 1)
+            {
+                DiscardState(state);
+                stateDiscarded = true;
+                return;
+            }
+
+            if (state.hasRollAgain && roll == 2)
+            {
+                game.CurrentPlayer.AddExtraRoll();
+            }
+        }
+
+        stateDiscarded = false;
+    }
     private void EvaluateCapture(Player player, int roll)
     {
+        CheckStateCardConditions(roll, out var discarded);
+
+        if (discarded)
+        {
+            Debug.Log($"Player {player.playerID} rolled: {roll} and {_currentTargetCard.cardName} had secession");
+            EndPlayerTurn();
+            return;
+        }
+        
         bool success;
             
         if (EventManager.ConsumeNeedTwo())
@@ -247,6 +276,15 @@ public class MainPhaseGameManager : BasePhaseGameManager
             // Add to new owner's list
             CaptureCard(newOwner, card);
         }
+
+    public void DiscardState(StateCard stateToDiscard)
+    {
+        if (!_mainDeck.Contains(stateToDiscard)) return;
+        
+        Debug.Log($"{stateToDiscard.cardName} was discarded");
+        _mainDeck.Remove(stateToDiscard);
+
+    }
     
 #endregion    
 
