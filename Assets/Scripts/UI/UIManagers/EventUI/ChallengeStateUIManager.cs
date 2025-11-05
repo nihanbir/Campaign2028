@@ -77,6 +77,8 @@ public class ChallengeStateUIManager : BaseEventUI
 
     private void ShowDuel(Player defender, Card chosenCard)
     {
+        stateCardsUIParent.gameObject.SetActive(false);
+        
         currentPlayer = GameManager.Instance.CurrentPlayer;
         
         if (AIManager.Instance.IsAIPlayer(currentPlayer))
