@@ -19,6 +19,7 @@ public class AlternativeStatesUIManager : BaseEventUI
     private void ShowUI(Player player, StateCard card1, StateCard card2)
     {
         currentPlayer = player;
+        eventManager.activeEventUI = this;
         CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, playerUI, player.assignedActor);
 
         if (card1 != null)

@@ -50,6 +50,7 @@ public abstract class BaseEventUI : MonoBehaviour
     {
         mainUI.gameObject.SetActive(true);
         eventScreen.SetActive(false);
+        eventManager.activeEventUI = null;
     }
     
     protected void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)

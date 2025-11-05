@@ -46,6 +46,8 @@ public class ChallengeStateUIManager : BaseEventUI
     
     private void ShowStateCards(List<StateCard> statesToDisplay)
     {
+        eventManager.activeEventUI = this;
+        
         mainUI.gameObject.SetActive(false);
         eventScreen.SetActive(true);
         duelScreen.SetActive(false);

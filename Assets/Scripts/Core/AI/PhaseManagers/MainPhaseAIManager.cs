@@ -124,7 +124,7 @@ public class MainPhaseAIManager
         return stateOwners.Count > 0 && stateOwners.Values.Any(player => player != aiPlayer);
     }
     
-    private IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
+    public IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
     {
         Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
@@ -189,30 +189,6 @@ public class MainPhaseAIManager
         return chosenState;
     }
     
-    public IEnumerator ExecuteDuel(AIPlayer aiPlayer)
-    {
-        Debug.Log("AI is preparing to roll");
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
-        if (GameManager.Instance.CurrentPlayer == aiPlayer)
-        {
-            ChallengeStateUIManager challengeUI = GameUIManager.Instance.mainUI.challengeUI;
-            yield return _aiManager.StartCoroutine(RollDice(aiPlayer, challengeUI));
-        }
-    }
-    
 #endregion Challenge Any State
-
-public IEnumerator ExecuteRollForAltStates(AIPlayer aiPlayer)
-{
-    Debug.Log("AI is preparing to roll");
-    yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
-    if (GameManager.Instance.CurrentPlayer == aiPlayer)
-    {
-        AlternativeStatesUIManager altStateUI = GameUIManager.Instance.mainUI.altStateUI;
-        yield return _aiManager.StartCoroutine(RollDice(aiPlayer, altStateUI));
-    }
-}
     
 }

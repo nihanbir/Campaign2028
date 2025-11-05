@@ -8,11 +8,11 @@ public class EventManager
     private readonly MainPhaseGameManager _mainPhase;
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
+    public MonoBehaviour activeEventUI;
 
     private bool _needTwoActive = false;
-    private bool _altStates = false;
-    private bool _challengeActive = false;
-    public bool IsEventActive => _challengeActive || _altStates;
+    private bool _eventActive = false;
+    public bool IsEventActive => _eventActive;
     
     private EventCard _currentEventCard;
 
@@ -110,20 +110,16 @@ public class EventManager
 
         if (found1 || found2)
         {
-            _altStates = true;
+            _eventActive = true;
             _currentPlayer = player;
             _currentEventCard = card;
             OnAltStatesActive?.Invoke(player, _altState1, _altState2);
             
-            if (AIManager.Instance.IsAIPlayer(_currentPlayer))
-            {
-                var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
-                GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteRollForAltStates(aiPlayer));
-            }
+            RollDiceForAI();
         }
         else
         {
-            _altStates = false;
+            _eventActive = false;
         }
     }
 
@@ -157,7 +153,7 @@ public class EventManager
         }
 
         OnAltStatesCompleted?.Invoke();
-        _altStates = false;
+        _eventActive = false;
         _mainPhase.EndPlayerTurn();   
     }
 
@@ -172,7 +168,6 @@ public class EventManager
     
     private Card _chosenCard;
     private Player _defender;
-    private Player _attacker;
 
     private void HandleChallenge(Player player, EventCard card)
     {
@@ -192,8 +187,8 @@ public class EventManager
     {
         bool success = _chosenCard switch
         {
-            StateCard s => s.IsSuccessfulRoll(roll, _attacker.assignedActor.team),
-            InstitutionCard i => i.IsSuccessfulRoll(roll, _attacker.assignedActor.team),
+            StateCard s => s.IsSuccessfulRoll(roll, _currentPlayer.assignedActor.team),
+            InstitutionCard i => i.IsSuccessfulRoll(roll, _currentPlayer.assignedActor.team),
             _ => false
         };
 
@@ -201,15 +196,15 @@ public class EventManager
            
         if (success)
         {
-            _mainPhase.UpdateCardOwnership(_attacker, _chosenCard);
+            _mainPhase.UpdateCardOwnership(_currentPlayer, _chosenCard);
         }
         else
         {
             _mainPhase.ReturnCardToDeck(_currentEventCard);
-            Debug.Log($"Player {_attacker.playerID} failed to capture {_chosenCard.cardName}");
+            Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
 
-        _challengeActive = false;
+        _eventActive = false;
         OnDuelCompleted?.Invoke();
         
         NullifyVariables();
@@ -217,22 +212,7 @@ public class EventManager
         
     }
     
-    void CancelChallenge(EventCard card)
-        {
-            Debug.Log("Challenge cannot be applied.");
-            if (card.canReturnToDeck)
-            {
-                _mainPhase.ReturnCardToDeck(card);
-            }
-            _challengeActive = false;
-            NullifyVariables();
-        }
-    private void NullifyVariables()
-        {
-            _chosenCard = null;
-            _defender = null;
-            _attacker = null;
-        }
+    
     
 
 #endregion
@@ -241,13 +221,13 @@ public class EventManager
 
     private void ChallengeInstitution(Player player, EventCard card)
     {
-        _attacker = player;
+        _currentPlayer = player;
 
         _chosenCard = _mainPhase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
         
         if (!cardFound)
         {
-            CancelChallenge(card);
+            CancelEvent(card);
             return;
         }
 
@@ -260,19 +240,15 @@ public class EventManager
         
         if (!_defender)
         {
-            CancelChallenge(card);
+            CancelEvent(card);
             return;
         }
         
-        _challengeActive = true;
+        _eventActive = true;
         
         OnDuelActive?.Invoke(player, _chosenCard);
         
-        if (AIManager.Instance.IsAIPlayer(_attacker))
-        {
-            var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
-            GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteDuel(aiPlayer));
-        }
+        RollDiceForAI();
         
     }
 
@@ -285,11 +261,11 @@ public class EventManager
         var availableStates = GetChallengableStatesForPlayer(player);
         if (availableStates == null)
         {
-            CancelChallenge(card);
+            CancelEvent(card);
             return;
         }
             
-        _attacker = player;
+        _currentPlayer = player;
             
         OnChallengeState?.Invoke(availableStates);
             
@@ -301,7 +277,7 @@ public class EventManager
             
         StateDisplayCard.OnCardHeld += HandleStateChosen;
 
-        _challengeActive = true;
+        _eventActive = true;
     }
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
@@ -334,13 +310,42 @@ public class EventManager
         
         OnDuelActive?.Invoke(_defender, _chosenCard);
         
-        if (AIManager.Instance.IsAIPlayer(_attacker))
-        {
-            var aiPlayer = AIManager.Instance.GetAIPlayer(_attacker);
-            GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteDuel(aiPlayer));
-        }
+        
     }
 
 #endregion
+
+#region Helper Methods
+
+    void CancelEvent(EventCard card)
+    {
+        Debug.Log("Challenge cannot be applied.");
+        if (card.canReturnToDeck)
+        {
+            _mainPhase.ReturnCardToDeck(card);
+        }
+                    
+        _eventActive = false;
+        NullifyVariables();
+    }
+    private void NullifyVariables()
+    {
+        _chosenCard = null;
+        _defender = null;
+        _altState1 = null;
+        _altState2 = null;
+        _currentPlayer = null;
+    }
+
+    private void RollDiceForAI()
+    {
+        if (!AIManager.Instance.IsAIPlayer(_currentPlayer)) return;
+        
+        var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
+        GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.RollDice(aiPlayer, activeEventUI));
+    }
+
+#endregion
+   
 
 }
