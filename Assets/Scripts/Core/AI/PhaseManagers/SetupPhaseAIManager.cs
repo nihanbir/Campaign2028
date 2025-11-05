@@ -63,7 +63,7 @@ public class SetupPhaseAIManager
         var selectedActor = availableActors[actorIndex];
         var selectedPlayer = eligiblePlayers[playerIndex];
 
-        Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.GetActorCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
+        Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.GetCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
 
         GameUIManager.Instance.setupUI.SelectActorCard(selectedActor);
         GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(selectedPlayer.owningPlayer, selectedPlayer);

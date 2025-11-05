@@ -38,7 +38,7 @@ public class ChallengeStateUIManager : BaseEventUI
             if (child.TryGetComponent(out StateDisplayCard display))
                 display.SetClickable(false);
         
-        StateDisplayCard.OnCardHighlighted -= OnCardHighlighted;
+        StateDisplayCard.OnCardSelected -= OnCardSelected;
         StateDisplayCard.OnCardHeld -= _ => HandleCardHeld();
         
         stateCardsUIParent.gameObject.SetActive(false);
@@ -53,14 +53,17 @@ public class ChallengeStateUIManager : BaseEventUI
         duelScreen.SetActive(false);
         stateCardsUIParent.gameObject.SetActive(true);
         
-        StateDisplayCard.OnCardHighlighted += OnCardHighlighted;
+        StateDisplayCard.OnCardSelected += OnCardSelected;
         StateDisplayCard.OnCardHeld += _ => HandleCardHeld();
         
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
     }
 
-    private void OnCardHighlighted(StateDisplayCard newHighlightedCard)
+    private void OnCardSelected(ISelectableDisplayCard card)
     {
+        var newHighlightedCard = card as StateDisplayCard;
+        if (!newHighlightedCard) return;
+        
         if (!_highlightedCard)
         {
             _highlightedCard = newHighlightedCard;

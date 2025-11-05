@@ -31,7 +31,9 @@ public class SetupPhaseGameManager : BasePhaseGameManager
     public override void InitializePhase()
     {
         Debug.Log("Begin Roll");
-        BeginRollStage();
+        // BeginRollStage();
+        
+        CurrentStage = SetupStage.AssignActor;
     }
 
     private void InitializeRollTracking()
@@ -79,7 +81,12 @@ public class SetupPhaseGameManager : BasePhaseGameManager
 
     private void BeginAssignActorStage()
     {
-        game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
+        
+        // game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
+        
+        //TODO: dont forget to remove
+        game.currentPlayerIndex = game.players.FindIndex(p => p.playerID == 0);
+
         StartPlayerTurn();
     }
 

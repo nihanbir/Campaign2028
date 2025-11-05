@@ -16,6 +16,8 @@ public class SetupPhaseUIManager : MonoBehaviour
     public float spacingBetweenPlayerCards = 150f;
     public float spacingBetweenActorCards = 300f;
     
+    private PlayerDisplayCard _highlightedCard;
+    
     [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
     [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
     
@@ -37,6 +39,8 @@ public class SetupPhaseUIManager : MonoBehaviour
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
+
+        PlayerDisplayCard.OnCardSelected += SelectActorCard;
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -150,17 +154,26 @@ public class SetupPhaseUIManager : MonoBehaviour
     #endregion
 
     #region Actor Assignment UI
-
-    public void SelectActorCard(PlayerDisplayCard actorCard)
+    
+    public void SelectActorCard(ISelectableDisplayCard card)
     {
-        // Deselect previous card if any
-        if (_selectedActorCard != null)
+        var actorCard = card as PlayerDisplayCard;
+        if (!actorCard)
         {
-            // TODO: Remove visual highlight from previous selection
+            Debug.Log($"no actor");
+            return;
         }
+        
+        if (_selectedActorCard == actorCard)
+            return;
+
+        if (_selectedActorCard != null)
+            _selectedActorCard.SetIsSelected(false);
 
         _selectedActorCard = actorCard;
-        Debug.Log($"Selected actor: {_selectedActorCard.GetActorCard().cardName}");
+        _selectedActorCard?.SetIsSelected(true);
+
+        Debug.Log($"Selected actor: {_selectedActorCard.GetCard().cardName}");
         
         // TODO: Add visual highlight for selected card
     }
@@ -173,7 +186,7 @@ public class SetupPhaseUIManager : MonoBehaviour
             return;
         }
 
-        ActorCard actorToAssign = _selectedActorCard.GetActorCard();
+        ActorCard actorToAssign = _selectedActorCard.GetCard();
         
         // Update UI
         RemoveCard(_selectedActorCard, unassignedActorCards);
@@ -192,7 +205,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         PlayerDisplayCard lastActorCard = unassignedActorCards[0];
         
         Player lastPlayer = lastPlayerCard.owningPlayer;
-        ActorCard lastActor = lastActorCard.GetActorCard();
+        ActorCard lastActor = lastActorCard.GetCard();
         
         Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
         

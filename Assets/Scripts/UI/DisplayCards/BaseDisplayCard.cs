@@ -10,11 +10,11 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
     protected T cardData;
     
     [Header("Highlight Settings")]
-    public float highlightScale = 1.2f;
+    public float movefrontScale = 1.2f;
     
     protected Vector3 originalScale;
     protected int originalSiblingIndex;
-    protected bool isHighlighted = false;
+    protected bool isResized = false;
     
     void Start()
     {
@@ -46,8 +46,8 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
     
     public virtual void Highlight()
     {
-        if (isHighlighted) return;
-        isHighlighted = true;
+        if (isResized) return;
+        isResized = true;
         
         originalScale = transform.localScale;
         originalSiblingIndex = transform.GetSiblingIndex();
@@ -55,13 +55,13 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
         // Move to front
         transform.SetAsLastSibling();
         
-        transform.localScale = originalScale * highlightScale;
+        transform.localScale = originalScale * movefrontScale;
     }
     
     public virtual void RemoveHighlight()
     {
-        if (!isHighlighted) return;
-        isHighlighted = false;
+        if (!isResized) return;
+        isResized = false;
         
         // Restore original sibling index
         transform.SetSiblingIndex(originalSiblingIndex);

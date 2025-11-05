@@ -1,9 +1,10 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandler
+public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
 {
     [Header("Common Elements")]
     public Player owningPlayer;
@@ -15,7 +16,7 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
-
+    
     void Start()
     {
         if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
@@ -29,6 +30,9 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         {
             if (scorePanel) scorePanel.SetActive(false);
         }
+        
+        SetClickable(true);
+        
     }
 
     protected override void SetCard(ActorCard card)
@@ -88,12 +92,12 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
 
 #region Click Handler
 
-    public void OnPointerClick(PointerEventData eventData)
+    public override void OnPointerClick(PointerEventData eventData)
     {
         switch (displayType)
         {
             case CardDisplayType.UnassignedActor:
-                HandleActorCardClick();
+                base.OnPointerClick(eventData);
                 break;
             case CardDisplayType.UnassignedPlayer:
                 HandlePlayerCardClick();
@@ -104,12 +108,6 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
         }
     }
 
-    private void HandleActorCardClick()
-    {
-        if (owningPlayer != null) return; // Already assigned
-        GameUIManager.Instance.setupUI.SelectActorCard(this);
-    }
-
     private void HandlePlayerCardClick()
     {
         GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(owningPlayer, this);
@@ -118,10 +116,7 @@ public class PlayerDisplayCard : BaseDisplayCard<ActorCard>, IPointerClickHandle
 #endregion Click Handler
 
 #region Helper Methods
-    public ActorCard GetActorCard()
-    {
-        return cardData;
-    }
+
     public void ConvertToAssignedActor(ActorCard actor)
     {
         cardData = actor;
