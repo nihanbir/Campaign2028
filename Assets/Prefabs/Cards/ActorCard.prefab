@@ -295,7 +295,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Southern Rural
+  m_text: Social Justice Karen
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}
@@ -322,8 +322,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 27
+  m_fontSizeBase: 27
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -669,13 +669,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15fd040f81b4410997a9148e8e3ff700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDisplayCard
-  displayType: 0
+  artworkImage: {fileID: 8504294734625609448}
+  highlightScale: 1.2
   owningPlayer: {fileID: 0}
   diceImage: {fileID: 984289220250231948}
-  actorCardElements: {fileID: 905036470361953945}
+  displayType: 0
   scorePanel: {fileID: 905036470361953945}
   nameText: {fileID: 6299975752636668638}
-  artworkImage: {fileID: 8504294734625609448}
   evScoreText: {fileID: 745340592477653207}
   instScoreText: {fileID: 7295231253132639161}
 --- !u!1 &4920630220979605414
@@ -1058,10 +1058,10 @@ RectTransform:
   - {fileID: 4326984664776955151}
   m_Father: {fileID: 837206523995134153}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0.32500002}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -0.49700165}
+  m_AnchorMin: {x: 0, y: 0.020000001}
+  m_AnchorMax: {x: 1, y: 0.31500003}
+  m_AnchoredPosition: {x: 0, y: -0.108306885}
+  m_SizeDelta: {x: 0, y: -0.1968}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &7313153411949957556
 CanvasRenderer:
