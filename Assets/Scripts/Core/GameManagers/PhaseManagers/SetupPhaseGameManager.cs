@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -9,6 +10,8 @@ public class SetupPhaseGameManager : BasePhaseGameManager
     // Roll tracking
     private List<Player> playersToRoll = new List<Player>();
     private Dictionary<Player, int> rolledPlayers = new Dictionary<Player, int>();
+
+    private ActorCard _actorToAssign;
     
     // Actor assignment tracking
     private Player _playerToSelect;
@@ -27,6 +30,8 @@ public class SetupPhaseGameManager : BasePhaseGameManager
             }
         }
     }
+
+    public event Action<Player, PlayerDisplayCard> OnActorAssignedToPlayer; 
 
     public override void InitializePhase()
     {
@@ -66,6 +71,8 @@ public class SetupPhaseGameManager : BasePhaseGameManager
 
     private void BeginRollStage()
     {
+        PlayerDisplayCard.OnPlayerCardClicked -= AssignActorToPlayer;
+        
         Debug.Log("All players will roll dice");
         InitializeRollTracking();
         game.currentPlayerIndex = 0;
@@ -81,7 +88,8 @@ public class SetupPhaseGameManager : BasePhaseGameManager
 
     private void BeginAssignActorStage()
     {
-        
+        PlayerDisplayCard.OnCardSelected += OnActorSelected;
+        PlayerDisplayCard.OnPlayerCardClicked += AssignActorToPlayer;
         // game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
         
         //TODO: dont forget to remove
@@ -226,6 +234,13 @@ public class SetupPhaseGameManager : BasePhaseGameManager
 
     #region Actor Assignment Logic
 
+    private void OnActorSelected(ISelectableDisplayCard card)
+    {
+        var playerCard = card as PlayerDisplayCard;
+        if (!playerCard) return;
+        _actorToAssign = playerCard.GetCard();
+    }
+    
     private bool CanAssignActor(Player targetPlayer)
     {
         if (CurrentStage != SetupStage.AssignActor)
@@ -243,15 +258,15 @@ public class SetupPhaseGameManager : BasePhaseGameManager
         return true;
     }
 
-    public void AssignActorToPlayer(Player targetPlayer, ActorCard actor)
+    public void AssignActorToPlayer(Player targetPlayer, PlayerDisplayCard displayCard)
     {
         if (!CanAssignActor(targetPlayer))
         {
             return;
         }
-
-        targetPlayer.assignedActor = actor;
-        Debug.Log($"Assigned {actor.cardName} to Player {targetPlayer.playerID}");
+        
+        targetPlayer.assignedActor = _actorToAssign;
+        Debug.Log($"Assigned {_actorToAssign.cardName} to Player {targetPlayer.playerID}");
         
         EndPlayerTurn();
         
@@ -264,6 +279,8 @@ public class SetupPhaseGameManager : BasePhaseGameManager
         {
             CurrentStage = SetupStage.Roll;
         }
+        
+        OnActorAssignedToPlayer?.Invoke(targetPlayer, displayCard);        
     }
 
     private bool ShouldAutoAssignLastActor()

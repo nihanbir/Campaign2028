@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,6 +42,8 @@ public class SetupPhaseUIManager : MonoBehaviour
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
 
         PlayerDisplayCard.OnCardSelected += SelectActorCard;
+        GameManager.Instance.setupPhase.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
+        
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -116,6 +119,13 @@ public class SetupPhaseUIManager : MonoBehaviour
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
+        GameManager.Instance.StartCoroutine(WaitForVisuals());
+        
+    }
+    
+    private IEnumerator WaitForVisuals()
+    {
+        yield return new WaitForSeconds(0.5f); // small delay ensures rolled dices being visible
         GameManager.Instance.setupPhase.PlayerRolledDice();
     }
     
@@ -167,7 +177,7 @@ public class SetupPhaseUIManager : MonoBehaviour
         if (_selectedActorCard == actorCard)
             return;
 
-        if (_selectedActorCard != null)
+        if (_selectedActorCard)
             _selectedActorCard.SetIsSelected(false);
 
         _selectedActorCard = actorCard;
@@ -194,9 +204,6 @@ public class SetupPhaseUIManager : MonoBehaviour
         unassignedPlayerCards.Remove(playerCard);
         
         _selectedActorCard = null;
-        
-        // Let the game manager handle the logic and validation
-        GameManager.Instance.setupPhase.AssignActorToPlayer(targetPlayer, actorToAssign);
     }
 
     public void AutoAssignLastActor()

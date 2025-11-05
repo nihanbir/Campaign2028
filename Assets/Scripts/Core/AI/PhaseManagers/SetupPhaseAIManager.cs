@@ -65,6 +65,7 @@ public class SetupPhaseAIManager
 
         Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.GetCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
 
+        //TODO: Clean all this
         GameUIManager.Instance.setupUI.SelectActorCard(selectedActor);
         GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(selectedPlayer.owningPlayer, selectedPlayer);
     }

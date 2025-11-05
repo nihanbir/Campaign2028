@@ -29,6 +29,7 @@ public class GameUIManager : MonoBehaviour
         setupUI.gameObject.SetActive(false);
         mainUI.gameObject.SetActive(false);
 
+        //TODO: not okay to initialize UIs over and over again
         switch (phase)
         {
             case GamePhase.Setup:

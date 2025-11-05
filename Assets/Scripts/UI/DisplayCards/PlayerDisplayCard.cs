@@ -16,6 +16,8 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
+
+    public static event Action<Player, PlayerDisplayCard> OnPlayerCardClicked; 
     
     void Start()
     {
@@ -100,17 +102,12 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
                 base.OnPointerClick(eventData);
                 break;
             case CardDisplayType.UnassignedPlayer:
-                HandlePlayerCardClick();
+                OnPlayerCardClicked?.Invoke(owningPlayer, this);
                 break;
             case CardDisplayType.AssignedActor:
                 // Already assigned, no action
                 break;
         }
-    }
-
-    private void HandlePlayerCardClick()
-    {
-        GameUIManager.Instance.setupUI.AssignSelectedActorToPlayer(owningPlayer, this);
     }
     
 #endregion Click Handler
