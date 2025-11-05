@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
-  m_Name: TransgenderChild
+  m_Name: VaccineDeath
   m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
-  eventName: Transgender Child
-  artwork: {fileID: -4865957326679275105, guid: 048f2e0b7a73a904e8becf41f8262920, type: 3}
+  eventName: Vaccine Death
+  artwork: {fileID: -5793335530758058516, guid: 97b491b095060b746bfe3d690a0364fa, type: 3}
   eventType: 6
   eventConditions: 0
   requiredInstitution: {fileID: 0}
-  blueTeam: 0
-  redTeam: 1
-  benefitingTeam: 1
+  blueTeam: 1
+  redTeam: 0
+  altState1: {fileID: 0}
+  altState2: {fileID: 0}
+  benefitingTeam: 0
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 0

@@ -42,10 +42,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
         
         BuildAndShuffleDecks();
         
-        //TODO: dont forget to remove
-        AssignTestCardsToPlayers(game.institutionDeck, 1);
-        // AssignTestCardsToPlayers(game.stateDeck, 1);
-        
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }

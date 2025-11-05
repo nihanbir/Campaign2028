@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
-  m_Name: GayMarriage
+  m_Name: AntifaOperation
   m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
-  eventName: Gay Marriage
-  artwork: {fileID: 9112861436013803391, guid: 72e2e6f7140a1aa4699419aa59f64b39, type: 3}
+  eventName: Antifa Operation
+  artwork: {fileID: -8488993684153236416, guid: 730a459dd86041c42b5f88e85fbaa238, type: 3}
   eventType: 6
   eventConditions: 0
   requiredInstitution: {fileID: 0}
-  blueTeam: 0
-  redTeam: 1
-  benefitingTeam: 1
+  blueTeam: 1
+  redTeam: 0
+  altState1: {fileID: 0}
+  altState2: {fileID: 0}
+  benefitingTeam: 0
   mustPlayImmediately: 0
   canSave: 1
   canReturnToDeck: 0

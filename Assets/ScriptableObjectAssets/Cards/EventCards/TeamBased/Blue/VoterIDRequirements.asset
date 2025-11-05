@@ -10,15 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86a4e45ffda38054fab0f6f1d5cb0ad7, type: 3}
-  m_Name: CandidateArrested
+  m_Name: VoterIDRequirements
   m_EditorClassIdentifier: Assembly-CSharp::EventCardSO
-  eventName: Candidate Arrested
-  artwork: {fileID: -3278970737677630334, guid: 458ffbb2719c6e540a066653836d3301, type: 3}
+  eventName: Voter ID Requirements
+  artwork: {fileID: 8104272634984502053, guid: 717e5dcba385b4944a0d1e31240e1acc, type: 3}
   eventType: 6
   eventConditions: 0
   requiredInstitution: {fileID: 0}
   blueTeam: 0
   redTeam: 1
+  altState1: {fileID: 0}
+  altState2: {fileID: 0}
   benefitingTeam: 1
   mustPlayImmediately: 0
   canSave: 1
