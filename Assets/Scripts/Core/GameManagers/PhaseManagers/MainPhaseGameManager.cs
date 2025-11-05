@@ -26,7 +26,8 @@ public class MainPhaseGameManager : BasePhaseGameManager
     public event Action<Player> OnPlayerTurnStarted;
     public event Action<Player> OnPlayerTurnEnded;
     public event Action<EventCard> OnCardSaved;
-
+    public event Action<StateCard> OnStateDiscarded;
+    
     public MainPhaseGameManager(GameManager gm) : base(gm)
     {
         EventManager = new EventManager(this);
@@ -127,12 +128,13 @@ public class MainPhaseGameManager : BasePhaseGameManager
         {
             if (state.hasSecession && roll == 1)
             {
+                Debug.Log($"Player {game.CurrentPlayer.playerID} rolled: {roll} and {_currentTargetCard.cardName} had secession");
                 DiscardState(state);
                 stateDiscarded = true;
                 return;
             }
 
-            if (state.hasRollAgain && roll == 2)
+            if (state.hasRollAgain && roll == 4)
             {
                 game.CurrentPlayer.AddExtraRoll();
             }
@@ -146,7 +148,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         if (discarded)
         {
-            Debug.Log($"Player {player.playerID} rolled: {roll} and {_currentTargetCard.cardName} had secession");
             EndPlayerTurn();
             return;
         }
@@ -275,11 +276,17 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     public void DiscardState(StateCard stateToDiscard)
     {
-        if (!_mainDeck.Contains(stateToDiscard)) return;
+        if (_mainDeck.Contains(stateToDiscard))
+        {
+            Debug.Log($"{stateToDiscard.cardName} was discarded");
+            _mainDeck.Remove(stateToDiscard);
+        }
+        else if (_currentTargetCard == stateToDiscard)
+        {
+            OnStateDiscarded?.Invoke(stateToDiscard);
+            _currentTargetCard = null;
+        }
         
-        Debug.Log($"{stateToDiscard.cardName} was discarded");
-        _mainDeck.Remove(stateToDiscard);
-
     }
     
 #endregion    
@@ -287,12 +294,11 @@ public class MainPhaseGameManager : BasePhaseGameManager
 #region Event Card
     private EventCard DrawEventCard()
     {
-        Debug.Log("Draw event card");
         if (_eventDeck.Count == 0) return null;
 
         EventCard card = _eventDeck.PopFront();
         
-        Debug.Log($"{card.cardName}");
+        Debug.Log($"Draw event card: {card.cardName}");
         
         //TODO: add event
         GameUIManager.Instance.mainUI.SpawnEventCard(card);
@@ -327,7 +333,6 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
     private Card DrawTargetCard()
         {
-            Debug.Log("Draw target card");
             if (_mainDeck.Count == 0)
             {
                 Debug.LogWarning("Main deck empty!");
@@ -335,6 +340,8 @@ public class MainPhaseGameManager : BasePhaseGameManager
             }
     
             Card drawn = _mainDeck.PopFront();
+            
+            Debug.Log($"Draw target card: {drawn.cardName}");
             
             //TODO: add event
             GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);

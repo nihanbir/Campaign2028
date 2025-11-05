@@ -23,7 +23,6 @@ public class MainPhaseUIManager : MonoBehaviour
     [SerializeField] public ChallengeStateUIManager challengeUI;
     [SerializeField] public AlternativeStatesUIManager altStateUI;
     
-
     private bool _isPlayerAI = false;
     
     private GameObject _currentTargetGO;
@@ -65,6 +64,7 @@ public class MainPhaseUIManager : MonoBehaviour
         _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
         _mainPhase.OnCardSaved += _ => OnEventSaved();
+        _mainPhase.OnStateDiscarded += _ => ClearTargetCard();
         _eventManager.OnEventApplied += _ => OnEventApplied();
         
     }
@@ -76,7 +76,8 @@ public class MainPhaseUIManager : MonoBehaviour
         _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured -= OnCardCaptured;
-        _mainPhase.OnCardSaved -= _ => ClearEventCard();
+        _mainPhase.OnCardSaved -= _ => OnEventSaved();
+        _mainPhase.OnStateDiscarded -= _ => ClearTargetCard();
         _eventManager.OnEventApplied -= _ => OnEventApplied();
         
     }
@@ -219,12 +220,17 @@ public class MainPhaseUIManager : MonoBehaviour
         
         Destroy(_currentEventGO);
     }
+    
+    private void ClearTargetCard()
+    {
+        if (_currentTargetGO) Destroy(_currentTargetGO);
+    }
 
     private void OnEventApplied()
     {
         ClearEventCard();
         
-        if (GameManager.Instance.CurrentPlayer.CanRoll())
+        if (!_eventManager.IsEventActive && GameManager.Instance.CurrentPlayer.CanRoll())
         {
             EnableDiceButton(true);
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -30,13 +31,13 @@ public class EventManager
         };
         
     }
-
     
     public void ApplyEvent(Player player, EventCard card)
     {
         Debug.Log($"Applying event {card.cardName}");
         EventType effectiveType = card.eventType;
 
+        _currentPlayer = player;
         if (card.eventType == EventType.TeamBased)
         {
             effectiveType = player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
@@ -90,10 +91,18 @@ public class EventManager
 
     private void HandleLoseTurn(Player player, EventCard card)
     {
-        _mainPhase.EndPlayerTurn();
+        _eventActive = true;
+        GameManager.Instance.StartCoroutine(EndTurnAfterDelay());
     }
     
-#endregion
+    private IEnumerator EndTurnAfterDelay()
+    {
+        yield return new WaitForSeconds(0.1f); // small delay ensures coroutines finish
+        _eventActive = false;
+        _mainPhase.EndPlayerTurn();
+    }
+
+    #endregion
 
 #region Alternative States
 

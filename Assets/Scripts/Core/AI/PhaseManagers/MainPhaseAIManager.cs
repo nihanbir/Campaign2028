@@ -43,7 +43,7 @@ public class MainPhaseAIManager
         }
         else
         {
-            Debug.Log("AI lost its turn or challenge active");
+            Debug.Log($"AI Player: {aiPlayer.playerID} lost its turn or challenge active");
         }
     }
     
