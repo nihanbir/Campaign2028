@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainPhaseUIManager : MonoBehaviour
+public class UM_MainPhase : MonoBehaviour
 {
     [Header("Main Phase Elements")]     
     [SerializeField] private GameObject mainGamePhase;
@@ -278,7 +278,7 @@ public class MainPhaseUIManager : MonoBehaviour
             player.assignedActor = actor;
 
             // Spawn player display card for this actor
-            var displayGo = Instantiate(ui.setupUI.cardDisplayPrefab, playerUIParent);
+            var displayGo = Instantiate(ui.umSetupUI.cardDisplayPrefab, playerUIParent);
             var displayCard = displayGo.GetComponent<PlayerDisplayCard>();
 
             if (displayCard != null)

@@ -1,11 +1,12 @@
-using System;
+
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SetupPhaseUIManager : MonoBehaviour
+public class UM_SetupPhase : UM_BasePhase
 {
+    public override GamePhase PhaseType => GamePhase.Setup;
+    
    [Header("Setup Phase")]     
     public GameObject setupGamePhase;
     public Button rollDiceButton;
@@ -19,27 +20,18 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     private PlayerDisplayCard _highlightedCard;
     
-    // [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
-    // [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
-    
     private PlayerDisplayCard _selectedActorCard;
     private CanvasGroup _canvasGroup;
     
-    private GameManager _game;
     private GM_SetupPhase _phase;
-
+    
     #region Initialize Phase UI
 
-    private void Awake()
-    {
-        _game = GameManager.Instance;
-        _phase = _game.setupPhase;
-        _phase.OnSetupPhaseStarted += InitializePhaseUI;
-    }
-
-    public void InitializePhaseUI()
+    public override void OnPhaseEnabled()
     {
         Debug.Log("init setup ui");
+        
+        _phase = game.GetCurrentPhaseAs<GM_SetupPhase>();
         
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
@@ -50,9 +42,11 @@ public class SetupPhaseUIManager : MonoBehaviour
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
-
+        
         // PlayerDisplayCard.OnCardSelected += SelectActorCard;
         // game.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
+        
+        base.OnPhaseEnabled();
         
     }
     

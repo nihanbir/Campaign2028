@@ -44,12 +44,10 @@ public class GameManager : GameManagerBase
         mainPhase = new GM_MainPhase();
     }
     
-    public T CurrentPhaseAs<T>() where T : GM_BasePhase
+    public T GetCurrentPhaseAs<T>() where T : GM_BasePhase
     {
         return _currentPhaseManager as T;
     }
-    
-    
     
 }
 public enum GamePhase

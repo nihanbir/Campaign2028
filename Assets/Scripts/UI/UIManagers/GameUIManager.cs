@@ -11,8 +11,8 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI phaseText;
 
     [Header("Phase UIs")]
-    [SerializeField] public SetupPhaseUIManager setupUI;
-    [SerializeField] public MainPhaseUIManager mainUI;
+    [SerializeField] public UM_SetupPhase umSetupUI;
+    [SerializeField] public UM_MainPhase mainUI;
     // Add others (CivilWarUI, GameOverUI) as needed
 
     public int DiceRoll { get; private set; }

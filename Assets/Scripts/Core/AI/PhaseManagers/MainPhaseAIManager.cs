@@ -36,7 +36,7 @@ public class MainPhaseAIManager
         
         if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
         {
-            MainPhaseUIManager mainUI = GameUIManager.Instance.mainUI;
+            UM_MainPhase mainUI = GameUIManager.Instance.mainUI;
             yield return _aiManager.StartCoroutine(RollDice(aiPlayer, mainUI));
         }
         else
@@ -129,7 +129,7 @@ public class MainPhaseAIManager
 
         switch (uiManager)
         {
-            case MainPhaseUIManager mainUI:
+            case UM_MainPhase mainUI:
                 mainUI.OnRollDiceClicked();
                 break;
             

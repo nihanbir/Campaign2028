@@ -32,7 +32,7 @@ public class SetupPhaseAIManager
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        GameUIManager.Instance.setupUI.OnRollDiceClicked();
+        GameUIManager.Instance.umSetupUI.OnRollDiceClicked();
     }
 
     // private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)

@@ -8,7 +8,7 @@ public abstract class BaseEventUI : MonoBehaviour
     [SerializeField] protected Button rollDiceButton;
     
     protected GM_MainPhase gmMainPhase;
-    protected MainPhaseUIManager mainUI; 
+    protected UM_MainPhase mainUI; 
     protected EventManager eventManager;
     
     protected Player currentPlayer;

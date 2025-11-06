@@ -44,20 +44,18 @@ public class GM_SetupPhase : GM_BasePhase
     }
 
     // public event Action<Player, PlayerDisplayCard> OnActorAssignedToPlayer; 
-    public event Action OnSetupPhaseStarted; 
-    public event Action OnSetupPhaseEnded;
 
 
     protected override void BeginPhase()
     {
-        OnSetupPhaseStarted?.Invoke();
 
         CurrentStage = SetupStage.Roll;
     }
 
     protected override void EndPhase()
     {
-        OnSetupPhaseEnded?.Invoke();
+        // game.CurrentPhase = GamePhase.MainGame;
+        
     }
 
     #region Stage Transitions
@@ -223,7 +221,7 @@ public class GM_SetupPhase : GM_BasePhase
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
 
         //TODO: event for ui
-        GameUIManager.Instance.setupUI.OnPlayerTurnStarted(current);
+        GameUIManager.Instance.umSetupUI.OnPlayerTurnStarted(current);
         
         if (AIManager.Instance.IsAIPlayer(current))
         {
@@ -237,7 +235,7 @@ public class GM_SetupPhase : GM_BasePhase
         Player current = game.CurrentPlayer;
         
         //TODO: event for ui
-        GameUIManager.Instance.setupUI.OnplayerTurnEnded(current);
+        GameUIManager.Instance.umSetupUI.OnplayerTurnEnded(current);
         Debug.Log($"Player {current.playerID} turn ended");
     }
 
@@ -336,8 +334,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
         //TODO: ui
-        // game.CurrentPhase = GamePhase.MainGame;
-       
+       EndPhase();
     }
 
     #endregion
