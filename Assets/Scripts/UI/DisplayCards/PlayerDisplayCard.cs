@@ -28,7 +28,7 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
         }
         
         if (diceImage) diceImage.gameObject.SetActive(false);
-        if (GameManager.Instance.CurrentPhase is not GM_MainPhase)
+        if (GameManager.Instance.CurrentPhase == GamePhase.MainGame)
         {
             if (scorePanel) scorePanel.SetActive(false);
         }
