@@ -10,7 +10,7 @@ public class GameManager : GameManagerBase
 
     private GM_BasePhase _currentPhaseManager;
 
-    public GM_BasePhase CurrentPhaseManager => _currentPhaseManager;
+    public GamePhase CurrentPhase => _currentPhaseManager.PhaseType;
 
     public event Action<GM_BasePhase> OnPhaseChanged;
 
