@@ -44,7 +44,7 @@ public class GM_SetupPhase : GM_BasePhase
     }
 
     // public event Action<Player, PlayerDisplayCard> OnActorAssignedToPlayer; 
-
+    public event Action OnAllPlayersRolled;
 
     protected override void BeginPhase()
     {
@@ -138,12 +138,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Debug.Log("=== Processing roll results ===");
         
-        //TODO: ui work
-        // Show all dice results
-        foreach (var rolledPlayer in _rolledPlayers)
-        {
-            rolledPlayer.Key.PlayerDisplayCard.ShowDice(false);
-        }
+        OnAllPlayersRolled?.Invoke();
         
         //TODO: ui work
         int highestRoll = _rolledPlayers.Values.Max();
@@ -162,6 +157,8 @@ public class GM_SetupPhase : GM_BasePhase
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
             HandleTiedRoll(winnersOfRoll);
         }
+        
+        
     }
 
     private List<Player> GetPlayersWithRoll(int rollValue)

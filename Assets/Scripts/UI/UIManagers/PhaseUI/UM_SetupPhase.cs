@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,7 @@ public class UM_SetupPhase : UM_BasePhase
     public float spacingBetweenActorCards = 300f;
     
     private PlayerDisplayCard _highlightedCard;
+    private List<PlayerDisplayCard> _playerDisplayCards = new();
     
     private PlayerDisplayCard _selectedActorCard;
     private CanvasGroup _canvasGroup;
@@ -43,8 +45,18 @@ public class UM_SetupPhase : UM_BasePhase
     {
         _setupPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        _setupPhase.OnAllPlayersRolled += HideDiceResults;
         // PlayerDisplayCard.OnCardSelected += SelectActorCard;
         // game.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
+    }
+
+    private void HideDiceResults()
+    {
+        // StartCoroutine(WaitForVisuals());
+        foreach (var card in _playerDisplayCards)
+        {
+            card.ShowDice(true);
+        }
     }
 
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
@@ -90,6 +102,7 @@ public class UM_SetupPhase : UM_BasePhase
                 else
                 {
                     _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
+                    _playerDisplayCards.Add(displayCard);
                 }
                 
                 RectTransform rt = uiInstance.GetComponent<RectTransform>();

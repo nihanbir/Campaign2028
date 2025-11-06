@@ -70,7 +70,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     protected virtual void OnPlayerTurnEnded(Player player)
     {
         EnableDiceButton(false);
-        player.PlayerDisplayCard.ShowDice(false);
+        
         player.PlayerDisplayCard.RemoveHighlight();
     }
     
@@ -81,10 +81,10 @@ public abstract class UM_BasePhase : MonoBehaviour
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
-        GameManager.Instance.StartCoroutine(WaitForVisuals());
+        // StartCoroutine(WaitForVisuals());
     }
     
-    private IEnumerator WaitForVisuals()
+    protected IEnumerator WaitForVisuals()
     {
         yield return new WaitForSeconds(0.5f); // small delay ensures rolled dices being visible
         // GameManager.Instance.setupPhase.PlayerRolledDice();

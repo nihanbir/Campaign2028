@@ -116,6 +116,7 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnEnded(Player player)
     {
        base.OnPlayerTurnEnded(player);
+       player.PlayerDisplayCard.ShowDice(false);
         ClearEventCard();
     }
 
