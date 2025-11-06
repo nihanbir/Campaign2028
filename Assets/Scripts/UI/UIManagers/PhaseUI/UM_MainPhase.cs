@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UM_MainPhase : MonoBehaviour
+public class UM_MainPhase : UM_BasePhase
 {
-    [Header("Main Phase Elements")]     
-    [SerializeField] private GameObject mainGamePhase;
-    [SerializeField] private Button rollDiceButton;
-
+    public override GamePhase PhaseType => GamePhase.MainGame;
+    
     [Header("Cards")]
     [SerializeField] public GameObject stateCardPrefab;
     [SerializeField] public GameObject institutionCardPrefab;
@@ -23,63 +21,56 @@ public class UM_MainPhase : MonoBehaviour
     [SerializeField] public ChallengeStateUIManager challengeUI;
     [SerializeField] public AlternativeStatesUIManager altStateUI;
     
-    private bool _isPlayerAI = false;
-    
     private GameObject _currentTargetGO;
     private GameObject _currentEventGO;
     private EventDisplayCard _currentEventDisplayCard;
 
-    private GM_MainPhase _gmMainPhase;
+    private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
     
-    public void InitializePhaseUI()
+    protected override void OnPhaseEnabled()
     {
-        _gmMainPhase = GameManager.Instance?.mainPhase;
-
-        if (_gmMainPhase == null)
+        _mainPhase = game.GetCurrentPhaseAs<GM_MainPhase>();
+        
+        if (_mainPhase == null)
         {
             Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
         
-        _eventManager = _gmMainPhase.EventManager;
-
-        SubscribeToPhaseEvents();
-
-        if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        
-        EnableDiceButton(false);
+        _eventManager = _mainPhase.EventManager;
         
         challengeUI.InitializeEventUI();
         altStateUI.InitializeEventUI();
         
         RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        
+        base.OnPhaseEnabled();
         // InitializePlayersForTesting();
     }
-    
-    private void SubscribeToPhaseEvents()
+
+    protected override void SubscribeToPhaseEvents()
     {
-        _gmMainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _gmMainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
-        _gmMainPhase.OnCardCaptured += OnCardCaptured;
-        _gmMainPhase.OnCardSaved += _ => OnEventSaved();
-        _gmMainPhase.OnStateDiscarded += _ => ClearTargetCard();
+        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured += OnCardCaptured;
+        _mainPhase.OnCardSaved += _ => OnEventSaved();
+        _mainPhase.OnStateDiscarded += _ => ClearTargetCard();
         _eventManager.OnEventApplied += _ => OnEventApplied();
         
     }
 
-    private void OnDestroy()
-    {
-        if (_gmMainPhase == null) return;
 
-        _gmMainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _gmMainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
-        _gmMainPhase.OnCardCaptured -= OnCardCaptured;
-        _gmMainPhase.OnCardSaved -= _ => OnEventSaved();
-        _gmMainPhase.OnStateDiscarded -= _ => ClearTargetCard();
-        _eventManager.OnEventApplied -= _ => OnEventApplied();
+    protected override void UnsubscribeToPhaseEvents()
+    {
+        if (_mainPhase == null) return;
         
+        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        _mainPhase.OnCardCaptured -= OnCardCaptured;
+        _mainPhase.OnCardSaved -= _ => OnEventSaved();
+        _mainPhase.OnStateDiscarded -= _ => ClearTargetCard();
+        _eventManager.OnEventApplied -= _ => OnEventApplied();
     }
 
 #region Player Management
@@ -121,48 +112,25 @@ public class UM_MainPhase : MonoBehaviour
 #endregion Player Management
 
 #region Turn Flow
-    private void OnPlayerTurnStarted(Player player)
-    {
-        _isPlayerAI = AIManager.Instance.IsAIPlayer(player);
 
-        player.PlayerDisplayCard.Highlight();
-    }
-
-    private void OnPlayerTurnEnded(Player player)
+    protected override void OnPlayerTurnEnded(Player player)
     {
-        EnableDiceButton(false);
-        player.PlayerDisplayCard.ShowDice(false);
-        player.PlayerDisplayCard.RemoveHighlight();
+       base.OnPlayerTurnEnded(player);
         ClearEventCard();
     }
 
-    private void EnableDiceButton(bool enable)
+    public override void OnRollDiceClicked()
     {
-        if (!rollDiceButton) return;
-        if (_isPlayerAI)
-        {
-            enable = false;
-        }
-        rollDiceButton.interactable = enable;
-    }
+        base.OnRollDiceClicked();
 
-    public void OnRollDiceClicked()
-    {
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
-        
-        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-
-        EnableDiceButton(currentPlayer.CanRoll());
-        
-        //TODO: Make an event
-        _gmMainPhase.PlayerRolledDice();
+        EnableDiceButton(GameManager.Instance.CurrentPlayer.CanRoll());
         
     }
 
 #endregion Turn Flow
     
 #region Card Spawning
+
     public void SpawnTargetCard(Card card)
     {
         if (_currentTargetGO) Destroy(_currentTargetGO);
@@ -200,7 +168,7 @@ public class UM_MainPhase : MonoBehaviour
         _currentEventDisplayCard?.SetCard(card);
         
         if (_currentEventDisplayCard)
-            _currentEventDisplayCard.SetButtonsVisible(!_isPlayerAI);
+            _currentEventDisplayCard.SetButtonsVisible(!isPlayerAI);
     }
 
 #endregion Card Spawning
@@ -278,7 +246,7 @@ public class UM_MainPhase : MonoBehaviour
             player.assignedActor = actor;
 
             // Spawn player display card for this actor
-            var displayGo = Instantiate(ui.umSetupUI.cardDisplayPrefab, playerUIParent);
+            var displayGo = Instantiate(ui.setupUI.cardDisplayPrefab, playerUIParent);
             var displayCard = displayGo.GetComponent<PlayerDisplayCard>();
 
             if (displayCard != null)

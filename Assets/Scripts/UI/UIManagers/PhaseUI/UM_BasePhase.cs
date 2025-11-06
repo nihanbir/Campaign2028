@@ -1,36 +1,103 @@
 
-using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class UM_BasePhase : MonoBehaviour
 {
     protected GameManager game;
-    protected GM_BasePhase phase;
-    public abstract GamePhase PhaseType { get; }
     
+    [Header("Phase Elements")]     
+    public Button rollDiceButton;
+    public abstract GamePhase PhaseType { get; }
+
+    protected bool isPlayerAI;
     
     private void Awake()
     {
         game = GameManager.Instance;
+        
+        if (rollDiceButton)
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        
         game.OnPhaseChanged += OnPhaseChanged;
         
     }
     private void OnDestroy()
     {
+        UnsubscribeToPhaseEvents();
         if (game != null)
             game.OnPhaseChanged -= OnPhaseChanged;
     }
     
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
-        phase = newPhase;
         if (newPhase.PhaseType == PhaseType)
             OnPhaseEnabled();
         else
             OnPhaseDisabled();
     }
+
+    protected virtual void OnPhaseEnabled()
+    {
+        rollDiceButton.onClick.RemoveAllListeners();
+        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        
+        EnableDiceButton(false);
+        
+        SubscribeToPhaseEvents();
+        
+        gameObject.SetActive(true);
+    }
+
+    protected virtual void OnPhaseDisabled()
+    {
+        UnsubscribeToPhaseEvents();
+        gameObject.SetActive(false);
+    }
+
+    protected virtual void SubscribeToPhaseEvents() { }
     
-    public virtual void OnPhaseEnabled()  { gameObject.SetActive(true);  }
-    public virtual void OnPhaseDisabled() { gameObject.SetActive(false); }
+    protected virtual void UnsubscribeToPhaseEvents() { }
+    
+    protected virtual void OnPlayerTurnStarted(Player player)
+    {
+        isPlayerAI = AIManager.Instance.IsAIPlayer(player);
+
+        player.PlayerDisplayCard.Highlight();
+    }
+    
+    protected virtual void OnPlayerTurnEnded(Player player)
+    {
+        EnableDiceButton(false);
+        player.PlayerDisplayCard.ShowDice(false);
+        player.PlayerDisplayCard.RemoveHighlight();
+    }
+    
+    public virtual void OnRollDiceClicked()
+    {
+        var currentPlayer = GameManager.Instance.CurrentPlayer;
+        
+        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
+        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
+        
+        GameManager.Instance.StartCoroutine(WaitForVisuals());
+    }
+    
+    private IEnumerator WaitForVisuals()
+    {
+        yield return new WaitForSeconds(0.5f); // small delay ensures rolled dices being visible
+        // GameManager.Instance.setupPhase.PlayerRolledDice();
+    }
+
+    protected virtual void EnableDiceButton(bool enable)
+    {
+        if (!rollDiceButton) return;
+        if (isPlayerAI)
+        {
+            enable = false;
+        }
+        rollDiceButton.interactable = enable;
+    }
     
 }

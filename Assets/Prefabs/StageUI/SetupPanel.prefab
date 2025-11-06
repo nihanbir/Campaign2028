@@ -332,15 +332,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a4909a447d9454781ed63ea1326726f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SetupPhaseUIManager
-  setupGamePhase: {fileID: 2085586330490423814}
+  self: {fileID: 2085586330490423814}
   rollDiceButton: {fileID: 4966983952646787642}
   cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 7431674135243233640}
   actorUIParent: {fileID: 9010180728352839122}
   spacingBetweenPlayerCards: 150
   spacingBetweenActorCards: 200
-  unassignedPlayerCards: []
-  unassignedActorCards: []
 --- !u!1 &2778742110003720283
 GameObject:
   m_ObjectHideFlags: 0

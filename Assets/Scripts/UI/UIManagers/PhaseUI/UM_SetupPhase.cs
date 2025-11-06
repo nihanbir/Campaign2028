@@ -7,10 +7,6 @@ public class UM_SetupPhase : UM_BasePhase
 {
     public override GamePhase PhaseType => GamePhase.Setup;
     
-   [Header("Setup Phase")]     
-    public GameObject setupGamePhase;
-    public Button rollDiceButton;
-    
     [Header("Card Display")]
     public GameObject cardDisplayPrefab;
     public Transform playerUIParent;
@@ -23,33 +19,34 @@ public class UM_SetupPhase : UM_BasePhase
     private PlayerDisplayCard _selectedActorCard;
     private CanvasGroup _canvasGroup;
     
-    private GM_SetupPhase _phase;
+    private GM_SetupPhase _setupPhase;
     
     #region Initialize Phase UI
 
-    public override void OnPhaseEnabled()
+    protected override void OnPhaseEnabled()
     {
-        Debug.Log("init setup ui");
+        _setupPhase = game.GetCurrentPhaseAs<GM_SetupPhase>();
         
-        _phase = game.GetCurrentPhaseAs<GM_SetupPhase>();
-        
-        rollDiceButton.onClick.RemoveAllListeners();
-        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        
+        // _phase.OnPlayerTurnStarted +=
         if (!_canvasGroup)
-            _canvasGroup = setupGamePhase.GetComponent<CanvasGroup>() 
-                           ?? setupGamePhase.AddComponent<CanvasGroup>();
+            _canvasGroup = gameObject.GetComponent<CanvasGroup>() 
+                           ?? gameObject.AddComponent<CanvasGroup>();
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
         
-        // PlayerDisplayCard.OnCardSelected += SelectActorCard;
-        // game.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
-        
         base.OnPhaseEnabled();
         
     }
-    
+
+    protected override void SubscribeToPhaseEvents()
+    {
+        _setupPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        // PlayerDisplayCard.OnCardSelected += SelectActorCard;
+        // game.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
+    }
+
     void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
     {
         if (!GameManager.Instance)
@@ -63,11 +60,11 @@ public class UM_SetupPhase : UM_BasePhase
         switch (cardType)
         {
             case CardDisplayType.UnassignedActor:
-                count = _phase.GetUnassignedActors().Count;
+                count = _setupPhase.GetUnassignedActors().Count;
                 break;
             
             case CardDisplayType.UnassignedPlayer:
-                count = _phase.GetUnassignedPlayers().Count;
+                count = _setupPhase.GetUnassignedPlayers().Count;
                 break;
             
             default:
@@ -88,11 +85,11 @@ public class UM_SetupPhase : UM_BasePhase
                 
                 if (cardType == CardDisplayType.UnassignedActor)
                 {
-                    displayCard.SetCard(_phase.GetUnassignedActors()[i]);
+                    displayCard.SetCard(_setupPhase.GetUnassignedActors()[i]);
                 }
                 else
                 {
-                    _phase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
+                    _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
                 }
                 
                 RectTransform rt = uiInstance.GetComponent<RectTransform>();
@@ -111,52 +108,24 @@ public class UM_SetupPhase : UM_BasePhase
     
     #endregion
     
-    #region Dice Rolling UI
-
-    public void OnRollDiceClicked()
-    {
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
-        
-        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-        
-        GameManager.Instance.StartCoroutine(WaitForVisuals());
-        
-    }
-    
-    private IEnumerator WaitForVisuals()
-    {
-        yield return new WaitForSeconds(0.5f); // small delay ensures rolled dices being visible
-        GameManager.Instance.setupPhase.PlayerRolledDice();
-    }
-    
-    #endregion
-
     #region Turn State UI
 
-    public void OnPlayerTurnStarted(Player currentPlayer)
+    protected override void OnPlayerTurnStarted(Player player)
     {
+        base.OnPlayerTurnStarted(player);
+        
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         
         // Show/hide appropriate UI elements
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
-        // Disable UI for AI players
-        bool isAI = AIManager.Instance.IsAIPlayer(currentPlayer);
-        EnableCanvasGroup(!isAI);
-        
-        currentPlayer.PlayerDisplayCard.Highlight();
-        
-    }
-
-    public void OnplayerTurnEnded(Player previousPlayer)
-    {
-        previousPlayer.PlayerDisplayCard.RemoveHighlight();
+        EnableDiceButton(!isPlayerAI);
+        EnableCanvasGroup(!isPlayerAI);
     }
 
     private void EnableCanvasGroup(bool enable)
     {
-        if (!_canvasGroup) _canvasGroup = setupGamePhase.GetComponent<CanvasGroup>();
+        if (!_canvasGroup) _canvasGroup = gameObject.GetComponent<CanvasGroup>();
         
         _canvasGroup.interactable = enable;
         _canvasGroup.blocksRaycasts = enable;
@@ -249,15 +218,5 @@ public class UM_SetupPhase : UM_BasePhase
     // }
 
     #endregion
-
-    #region Cleanup
-
-    public void OnSetupPhaseComplete()
-    {
-        Debug.Log("Setup phase UI cleanup");
-        setupGamePhase.SetActive(false);
-        // Additional cleanup if needed
-    }
-
-    #endregion
+    
 }

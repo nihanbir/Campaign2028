@@ -10,7 +10,8 @@ public class GameManager : GameManagerBase
 
     private GM_BasePhase _currentPhaseManager;
 
-    public GamePhase CurrentPhase => _currentPhaseManager.PhaseType;
+    private GamePhase _currentPhase;
+    public GamePhase CurrentPhase =>  _currentPhaseManager?.PhaseType ?? GamePhase.None;
 
     public event Action<GM_BasePhase> OnPhaseChanged;
 
@@ -30,7 +31,7 @@ public class GameManager : GameManagerBase
     
     public void SetPhase(GM_BasePhase newPhase)
     {
-        if (_currentPhaseManager == newPhase) return;
+        if (CurrentPhase == newPhase.PhaseType) return;
 
         Debug.Log($"=== Transitioning to {newPhase.GetType().Name} ===");
 

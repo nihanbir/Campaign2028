@@ -25,8 +25,6 @@ public class GM_MainPhase : GM_BasePhase
 
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;
-    public event Action<Player> OnPlayerTurnStarted;
-    public event Action<Player> OnPlayerTurnEnded;
     public event Action<EventCard> OnCardSaved;
     public event Action<StateCard> OnStateDiscarded;
 
@@ -39,6 +37,7 @@ public class GM_MainPhase : GM_BasePhase
 
     protected override void BeginPhase()
     {
+        base.BeginPhase();
         EventManager.OnEventApplied += _ => ClearEventCard();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
@@ -47,6 +46,7 @@ public class GM_MainPhase : GM_BasePhase
     protected override void EndPhase()
     {
         //TODO:Clear all event listeners
+        base.EndPhase();
         EventManager.OnEventApplied -= _ => ClearEventCard();
     }
 
@@ -75,12 +75,12 @@ public class GM_MainPhase : GM_BasePhase
         Debug.Log($"--- Player {current.playerID} turn started. Player team: {current.assignedActor.team}---");
         
         //This needs to be invoked before drawing a card to set _isPlayerAI correctly in UImanager
-        OnPlayerTurnStarted?.Invoke(current);
 
         _currentTargetCard ??= DrawTargetCard();
 
         _currentEventCard ??= DrawEventCard();
         
+        //TODO: ai can do this
         if (aiManager.IsAIPlayer(current))
         {
             var aiPlayer = aiManager.GetAIPlayer(current);
@@ -93,7 +93,9 @@ public class GM_MainPhase : GM_BasePhase
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn ended ---");
         current.ResetRollCount();
-        OnPlayerTurnEnded?.Invoke(current);
+        
+        base.EndPlayerTurn();
+        
         ClearEventCard();
         
         MoveToNextPlayer();
@@ -105,7 +107,7 @@ public class GM_MainPhase : GM_BasePhase
         StartPlayerTurn();
     }
 
-    public override void PlayerRolledDice()
+    public override void PlayerRolledDice(int roll)
     {
         Player current = game.CurrentPlayer;
         if (!current.CanRoll())
@@ -116,7 +118,6 @@ public class GM_MainPhase : GM_BasePhase
 
         current.RegisterRoll();
         
-        int roll = GameUIManager.Instance.DiceRoll;
         Debug.Log($"Rolled: {roll}");
         EvaluateCapture(current, roll);
     }

@@ -1,6 +1,9 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -9,13 +12,18 @@ public class GameUIManager : MonoBehaviour
     [Header("Dice & Actions")]
     [SerializeField] private Sprite[] diceFaces;
     [SerializeField] private TextMeshProUGUI phaseText;
-
+    
     [Header("Phase UIs")]
-    [SerializeField] public UM_SetupPhase umSetupUI;
+    [SerializeField] public UM_SetupPhase setupUI;
     [SerializeField] public UM_MainPhase mainUI;
+    
+    private UM_BasePhase _currentPhaseManager;
+    
     // Add others (CivilWarUI, GameOverUI) as needed
 
     public int DiceRoll { get; private set; }
+    
+    public event Action<int> OnRolledDice;
 
     private void Awake()
     {
@@ -23,7 +31,7 @@ public class GameUIManager : MonoBehaviour
         else Destroy(gameObject);
         
     }
-    
+
     //TODO: add an event for roll dice clicked
 
     #region Dice & Actions
@@ -32,6 +40,7 @@ public class GameUIManager : MonoBehaviour
     {
         DiceRoll = Random.Range(1, 7);
         SetDiceSprite(diceButton.image);
+        OnRolledDice?.Invoke(DiceRoll);
     }
 
     public void SetDiceSprite(Image diceImage)

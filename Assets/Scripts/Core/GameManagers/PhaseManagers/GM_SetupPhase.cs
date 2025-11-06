@@ -48,12 +48,15 @@ public class GM_SetupPhase : GM_BasePhase
 
     protected override void BeginPhase()
     {
-
+        base.BeginPhase();
         CurrentStage = SetupStage.Roll;
     }
 
     protected override void EndPhase()
     {
+        base.EndPhase();
+        CurrentStage = SetupStage.None;
+        
         // game.CurrentPhase = GamePhase.MainGame;
         
     }
@@ -79,9 +82,7 @@ public class GM_SetupPhase : GM_BasePhase
                 break;
         }
     }
-    #endregion
-
-    #region Roll Stage
+    
     private void BeginRollStage()
     {
         // PlayerDisplayCard.OnPlayerCardClicked -= AssignActorToPlayer;
@@ -106,10 +107,12 @@ public class GM_SetupPhase : GM_BasePhase
         StartPlayerTurn();
     }
     
-    public override void PlayerRolledDice()
+    #endregion
+
+    #region Roll Stage
+    
+    public override void PlayerRolledDice(int roll)
     {
-        //TODO: handle this with an event from ui
-        int roll = GameUIManager.Instance.DiceRoll;
         _rolledPlayers.Add(game.CurrentPlayer, roll);
         _playersToRoll.Remove(game.CurrentPlayer);
         
@@ -185,8 +188,6 @@ public class GM_SetupPhase : GM_BasePhase
         _playersToRoll.Clear();
         _playersToRoll.AddRange(tiedPlayers);
         _rolledPlayers.Clear();
-
-        CurrentStage = SetupStage.Reroll;
         
         if (CurrentStage == SetupStage.Reroll)
         {
@@ -200,9 +201,6 @@ public class GM_SetupPhase : GM_BasePhase
 
     #endregion
     
-    
-    
-
     private void BeginAssignActorStage()
     {
         // PlayerDisplayCard.OnCardSelected += OnActorSelected;
@@ -219,9 +217,8 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
-
-        //TODO: event for ui
-        GameUIManager.Instance.umSetupUI.OnPlayerTurnStarted(current);
+        
+        base.StartPlayerTurn();
         
         if (AIManager.Instance.IsAIPlayer(current))
         {
@@ -234,8 +231,8 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Player current = game.CurrentPlayer;
         
-        //TODO: event for ui
-        GameUIManager.Instance.umSetupUI.OnplayerTurnEnded(current);
+        base.EndPlayerTurn();
+        
         Debug.Log($"Player {current.playerID} turn ended");
     }
 
