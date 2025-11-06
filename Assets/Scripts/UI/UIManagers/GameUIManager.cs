@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
 {
-    public static GameUIManager Instance;
+    public static GameUIManager Instance { get; private set; }
 
     [Header("Dice & Actions")]
     [SerializeField] private Sprite[] diceFaces;
@@ -23,37 +23,8 @@ public class GameUIManager : MonoBehaviour
         else Destroy(gameObject);
         
     }
-
-    public void OnTransitionToPhase(GamePhase phase)
-    {
-        setupUI.gameObject.SetActive(false);
-        mainUI.gameObject.SetActive(false);
-
-        //TODO: not okay to initialize UIs over and over again
-        switch (phase)
-        {
-            case GamePhase.Setup:
-                phaseText.text = "Setup Phase";
-                setupUI.gameObject.SetActive(true);
-                setupUI.InitializePhaseUI();
-                break;
-
-            case GamePhase.MainGame:
-                phaseText.text = "Main Game";
-                mainUI.gameObject.SetActive(true);
-                mainUI.InitializePhaseUI();
-                break;
-
-            case GamePhase.CivilWar:
-                phaseText.text = "⚔️ CIVIL WAR ⚔️";
-                phaseText.color = Color.red;
-                break;
-
-            case GamePhase.GameOver:
-                phaseText.text = "Game Over";
-                break;
-        }
-    }
+    
+    //TODO: add an event for roll dice clicked
 
     #region Dice & Actions
 

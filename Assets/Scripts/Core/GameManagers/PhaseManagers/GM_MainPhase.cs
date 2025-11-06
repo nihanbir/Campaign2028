@@ -3,8 +3,10 @@ using System.Linq;
 using UnityEngine;
 using System;
 
-public class MainPhaseGameManager : BasePhaseGameManager
+public class GM_MainPhase : GM_BasePhase
 {
+    public override GamePhase PhaseType => GamePhase.MainGame;
+    
     private Card _currentTargetCard;
     private EventCard _currentEventCard;
 
@@ -19,7 +21,7 @@ public class MainPhaseGameManager : BasePhaseGameManager
     private readonly List<EventCard> _eventDeck = new();
 
     public EventManager EventManager { get; private set; }
-    private AIManager _aiManager;
+    private MainPhaseAIManager _aiManager;
 
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;
@@ -27,24 +29,25 @@ public class MainPhaseGameManager : BasePhaseGameManager
     public event Action<Player> OnPlayerTurnEnded;
     public event Action<EventCard> OnCardSaved;
     public event Action<StateCard> OnStateDiscarded;
-    
-    public MainPhaseGameManager(GameManager gm) : base(gm)
+
+    public GM_MainPhase()
     {
         EventManager = new EventManager(this);
-    }
-    
-    public override void InitializePhase()
-    {
-        Debug.Log("=== MAIN PHASE START ===");
-
-        _aiManager = AIManager.Instance;
-        _aiManager.mainAI.InitializeAIManager();
-        EventManager.OnEventApplied += _ => ClearEventCard();
         
         BuildAndShuffleDecks();
-        
+    }
+
+    protected override void BeginPhase()
+    {
+        EventManager.OnEventApplied += _ => ClearEventCard();
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
+    }
+
+    protected override void EndPhase()
+    {
+        //TODO:Clear all event listeners
+        EventManager.OnEventApplied -= _ => ClearEventCard();
     }
 
     private void BuildAndShuffleDecks()
@@ -78,10 +81,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
 
         _currentEventCard ??= DrawEventCard();
         
-        if (_aiManager.IsAIPlayer(current))
+        if (aiManager.IsAIPlayer(current))
         {
-            var aiPlayer = _aiManager.GetAIPlayer(current);
-            game.StartCoroutine(_aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+            var aiPlayer = aiManager.GetAIPlayer(current);
+            game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
         }
     }
 
@@ -181,10 +184,10 @@ public class MainPhaseGameManager : BasePhaseGameManager
         {
             Debug.Log("-------- Player can roll again ----------");
             //wait for player to roll again
-            if (_aiManager.IsAIPlayer(player))
+            if (aiManager.IsAIPlayer(player))
             {
-                var aiPlayer = _aiManager.GetAIPlayer(player);
-                game.StartCoroutine(_aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+                var aiPlayer = aiManager.GetAIPlayer(player);
+                game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
             }
         }
         else
@@ -483,27 +486,4 @@ public class MainPhaseGameManager : BasePhaseGameManager
     }
     
 #endregion
-}
-
-// === Extensions for lists ===
-public static class ListExtensions
-{
-    public static void ShuffleInPlace<T>(this IList<T> list)
-    {
-        for (int i = 0; i < list.Count; i++)
-        {
-            int j = UnityEngine.Random.Range(i, list.Count);
-            (list[i], list[j]) = (list[j], list[i]);
-        }
-    }
-
-    public static List<T> Shuffled<T>(this IEnumerable<T> source)
-        => source.OrderBy(_ => UnityEngine.Random.value).ToList();
-
-    public static T PopFront<T>(this IList<T> list)
-    {
-        T value = list[0];
-        list.RemoveAt(0);
-        return value;
-    }
 }

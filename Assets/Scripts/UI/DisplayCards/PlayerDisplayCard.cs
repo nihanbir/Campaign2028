@@ -17,7 +17,7 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
 
-    public static event Action<Player, PlayerDisplayCard> OnPlayerCardClicked; 
+    public static event Action<PlayerDisplayCard> OnPlayerCardClicked; 
     
     void Start()
     {
@@ -28,7 +28,7 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
         }
         
         if (diceImage) diceImage.gameObject.SetActive(false);
-        if (GameManager.Instance.CurrentPhase != GamePhase.MainGame)
+        if (GameManager.Instance.CurrentPhase is not GM_MainPhase)
         {
             if (scorePanel) scorePanel.SetActive(false);
         }
@@ -102,7 +102,7 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
                 base.OnPointerClick(eventData);
                 break;
             case CardDisplayType.UnassignedPlayer:
-                OnPlayerCardClicked?.Invoke(owningPlayer, this);
+                OnPlayerCardClicked?.Invoke(this);
                 break;
             case CardDisplayType.AssignedActor:
                 // Already assigned, no action

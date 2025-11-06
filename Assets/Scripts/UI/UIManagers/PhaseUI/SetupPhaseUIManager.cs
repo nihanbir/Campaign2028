@@ -19,18 +19,28 @@ public class SetupPhaseUIManager : MonoBehaviour
     
     private PlayerDisplayCard _highlightedCard;
     
-    [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
-    [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
+    // [HideInInspector] public List<PlayerDisplayCard> unassignedPlayerCards = new List<PlayerDisplayCard>();
+    // [HideInInspector] public List<PlayerDisplayCard> unassignedActorCards = new List<PlayerDisplayCard>();
     
     private PlayerDisplayCard _selectedActorCard;
     private CanvasGroup _canvasGroup;
+    
+    private GameManager _game;
+    private GM_SetupPhase _phase;
 
     #region Initialize Phase UI
 
+    private void Awake()
+    {
+        _game = GameManager.Instance;
+        _phase = _game.setupPhase;
+        _phase.OnSetupPhaseStarted += InitializePhaseUI;
+    }
+
     public void InitializePhaseUI()
     {
-        
         Debug.Log("init setup ui");
+        
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
@@ -41,8 +51,8 @@ public class SetupPhaseUIManager : MonoBehaviour
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
 
-        PlayerDisplayCard.OnCardSelected += SelectActorCard;
-        GameManager.Instance.setupPhase.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
+        // PlayerDisplayCard.OnCardSelected += SelectActorCard;
+        // game.OnActorAssignedToPlayer += AssignSelectedActorToPlayer;
         
     }
     
@@ -54,19 +64,18 @@ public class SetupPhaseUIManager : MonoBehaviour
             return;
         }
 
-        List<PlayerDisplayCard> targetList;
         int count;
         
         switch (cardType)
         {
             case CardDisplayType.UnassignedActor:
-                targetList = unassignedActorCards;
-                count = GameManager.Instance.actorDeck.Count;
+                count = _phase.GetUnassignedActors().Count;
                 break;
+            
             case CardDisplayType.UnassignedPlayer:
-                targetList = unassignedPlayerCards;
-                count = GameManager.Instance.players.Count;
+                count = _phase.GetUnassignedPlayers().Count;
                 break;
+            
             default:
                 Debug.LogError($"Invalid card type for creation: {cardType}");
                 return;
@@ -85,14 +94,12 @@ public class SetupPhaseUIManager : MonoBehaviour
                 
                 if (cardType == CardDisplayType.UnassignedActor)
                 {
-                    displayCard.SetCard(GameManager.Instance.actorDeck[i]);
+                    displayCard.SetCard(_phase.GetUnassignedActors()[i]);
                 }
                 else
                 {
-                    GameManager.Instance.players[i].SetDisplayCard(displayCard);
+                    _phase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
                 }
-                
-                targetList.Add(displayCard);
                 
                 RectTransform rt = uiInstance.GetComponent<RectTransform>();
                 if (rt)
@@ -165,72 +172,87 @@ public class SetupPhaseUIManager : MonoBehaviour
 
     #region Actor Assignment UI
     
-    public void SelectActorCard(ISelectableDisplayCard card)
-    {
-        var actorCard = card as PlayerDisplayCard;
-        if (!actorCard)
-        {
-            Debug.Log($"no actor");
-            return;
-        }
-        
-        if (_selectedActorCard == actorCard)
-            return;
-
-        if (_selectedActorCard)
-            _selectedActorCard.SetIsSelected(false);
-
-        _selectedActorCard = actorCard;
-        _selectedActorCard?.SetIsSelected(true);
-
-        Debug.Log($"Selected actor: {_selectedActorCard.GetCard().cardName}");
-        
-        // TODO: Add visual highlight for selected card
-    }
-    
-    public void AssignSelectedActorToPlayer(Player targetPlayer, PlayerDisplayCard playerCard)
-    {
-        if (_selectedActorCard == null)
-        {
-            Debug.LogWarning("No actor card selected to assign.");
-            return;
-        }
-
-        ActorCard actorToAssign = _selectedActorCard.GetCard();
-        
-        // Update UI
-        RemoveCard(_selectedActorCard, unassignedActorCards);
-        playerCard.ConvertToAssignedActor(actorToAssign);
-        unassignedPlayerCards.Remove(playerCard);
-        
-        _selectedActorCard = null;
-    }
-
-    public void AutoAssignLastActor()
-    {
-        PlayerDisplayCard lastPlayerCard = unassignedPlayerCards[0];
-        PlayerDisplayCard lastActorCard = unassignedActorCards[0];
-        
-        Player lastPlayer = lastPlayerCard.owningPlayer;
-        ActorCard lastActor = lastActorCard.GetCard();
-        
-        Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
-        
-        // Let game manager handle the assignment
-        lastPlayer.assignedActor = lastActor;
-        
-        // Update UI
-        RemoveCard(lastActorCard, unassignedActorCards);
-        lastPlayerCard.ConvertToAssignedActor(lastActor);
-        unassignedPlayerCards.Remove(lastPlayerCard);
-        
-    }
-
-    private void RemoveCard(PlayerDisplayCard card, List<PlayerDisplayCard> fromList)
-    {
-        fromList.Remove(card);
-        Destroy(card.gameObject);
-    }
+    // public void SelectActorCard(ISelectableDisplayCard card)
+    // {
+    //     var actorCard = card as PlayerDisplayCard;
+    //     if (!actorCard)
+    //     {
+    //         Debug.Log($"no actor");
+    //         return;
+    //     }
+    //     
+    //     if (_selectedActorCard == actorCard)
+    //         return;
+    //
+    //     if (_selectedActorCard)
+    //         _selectedActorCard.SetIsSelected(false);
+    //
+    //     _selectedActorCard = actorCard;
+    //     _selectedActorCard?.SetIsSelected(true);
+    //
+    //     Debug.Log($"Selected actor: {_selectedActorCard.GetCard().cardName}");
+    // }
+    //
+    // public void AssignSelectedActorToPlayer(PlayerDisplayCard playerCard)
+    // {
+    //     if (_selectedActorCard == null)
+    //     {
+    //         Debug.LogWarning("No actor card selected to assign.");
+    //         return;
+    //     }
+    //
+    //     ActorCard actorToAssign = _selectedActorCard.GetCard();
+    //     
+    //     // Update UI
+    //     RemoveCard(_selectedActorCard);
+    //     playerCard.ConvertToAssignedActor(actorToAssign);
+    //     
+    //     _selectedActorCard = null;
+    // }
+    //
+    // public void AutoAssignLastActor(Player lastPlayer, ActorCard lastActor)
+    // { 
+    //     Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
+    //
+    //     var lastActorCard = FindDisplayCardForUnassignedActor(lastActor);
+    //     var lastPlayerCard = FindDisplayCardForPlayer(lastPlayer);
+    //     // Update UI
+    //     RemoveCard(lastActorCard);
+    //     lastPlayerCard.ConvertToAssignedActor(lastActor);
+    // }
+    //
+    // private void RemoveCard(PlayerDisplayCard card)
+    // {
+    //     Destroy(card.gameObject);
+    // }
+    //
+    // private PlayerDisplayCard FindDisplayCardForPlayer(Player player)
+    // {
+    //     foreach (var playerDisplay in playerUIParent)
+    //     {
+    //         var display = playerDisplay as PlayerDisplayCard;
+    //         if (!display) return null;
+    //         
+    //         if (display.owningPlayer == player)
+    //             return display;
+    //     }
+    //
+    //     return null;
+    // }
+    //
+    // private PlayerDisplayCard FindDisplayCardForUnassignedActor(ActorCard actor)
+    // {
+    //     foreach (var actorDisplay in actorUIParent)
+    //     {
+    //         var display = actorDisplay as PlayerDisplayCard;
+    //         if (!display) return null;
+    //         
+    //         if (display.GetCard() == actor)
+    //             return display;
+    //     }
+    //
+    //     return null;
+    // }
 
     #endregion
 

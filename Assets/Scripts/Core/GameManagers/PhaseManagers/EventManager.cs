@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class EventManager
 {
-    private readonly MainPhaseGameManager _mainPhase;
+    private readonly GM_MainPhase _gmMainPhase;
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
     public MonoBehaviour activeEventUI;
@@ -17,9 +17,9 @@ public class EventManager
     
     private EventCard _currentEventCard;
 
-    public EventManager(MainPhaseGameManager gm)
+    public EventManager(GM_MainPhase gm)
     {
-        _mainPhase = gm;
+        _gmMainPhase = gm;
         _handlers = new()
         {
             { EventType.ExtraRoll, HandleExtraRoll },
@@ -67,7 +67,7 @@ public class EventManager
         if (canApply)
             player.AddExtraRoll();
         else if (card.canReturnToDeck)
-            _mainPhase.ReturnCardToDeck(card);
+            _gmMainPhase.ReturnCardToDeck(card);
     }
     
 #endregion
@@ -99,7 +99,7 @@ public class EventManager
     {
         yield return new WaitForSeconds(0.1f); // small delay ensures coroutines finish
         _eventActive = false;
-        _mainPhase.EndPlayerTurn();
+        _gmMainPhase.EndPlayerTurn();
     }
 
     #endregion
@@ -114,8 +114,8 @@ public class EventManager
 
     private void HandleAlternativeStates(Player player, EventCard card)
     {
-        _altState1 = _mainPhase.FindStateFromDeck(card.altState1, out var found1);
-        _altState2 = _mainPhase.FindStateFromDeck(card.altState1, out var found2);
+        _altState1 = _gmMainPhase.FindStateFromDeck(card.altState1, out var found1);
+        _altState2 = _gmMainPhase.FindStateFromDeck(card.altState1, out var found2);
 
         if (found1 || found2)
         {
@@ -154,7 +154,7 @@ public class EventManager
 
         if (cardToDiscard != null)
         {
-            _mainPhase.DiscardState(cardToDiscard);
+            _gmMainPhase.DiscardState(cardToDiscard);
         }
         else
         {
@@ -164,7 +164,7 @@ public class EventManager
         OnAltStatesCompleted?.Invoke();
         
         NullifyVariables();
-        _mainPhase.EndPlayerTurn();   
+        _gmMainPhase.EndPlayerTurn();   
     }
 
 #endregion
@@ -205,18 +205,18 @@ public class EventManager
            
         if (success)
         {
-            _mainPhase.UpdateCardOwnership(_currentPlayer, _chosenCard);
+            _gmMainPhase.UpdateCardOwnership(_currentPlayer, _chosenCard);
         }
         else
         {
-            _mainPhase.ReturnCardToDeck(_currentEventCard);
+            _gmMainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
         
         OnDuelCompleted?.Invoke();
         
         NullifyVariables();
-        _mainPhase.EndPlayerTurn();
+        _gmMainPhase.EndPlayerTurn();
         
     }
     
@@ -228,7 +228,7 @@ public class EventManager
     {
         _currentPlayer = player;
 
-        _chosenCard = _mainPhase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
+        _chosenCard = _gmMainPhase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
         
         if (!cardFound)
         {
@@ -236,7 +236,7 @@ public class EventManager
             return;
         }
 
-        var cardHolder = _mainPhase.GetCardHolder(_chosenCard);
+        var cardHolder = _gmMainPhase.GetCardHolder(_chosenCard);
         
         if (cardHolder != player)
         {
@@ -287,7 +287,7 @@ public class EventManager
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
     {
-        var stateOwners = _mainPhase.GetStateOwners();
+        var stateOwners = _gmMainPhase.GetStateOwners();
         var availableStates = new List<StateCard>();
 
         // Get each state that the current player doesn't own
@@ -311,7 +311,7 @@ public class EventManager
         
         Debug.Log($"Player held {_chosenCard.cardName} → set as challenge target.");
 
-        _defender = _mainPhase.GetCardHolder(_chosenCard);
+        _defender = _gmMainPhase.GetCardHolder(_chosenCard);
         
         OnDuelActive?.Invoke(_defender, _chosenCard);
         
@@ -327,7 +327,7 @@ public class EventManager
         Debug.Log("Challenge cannot be applied.");
         if (card.canReturnToDeck)
         {
-            _mainPhase.ReturnCardToDeck(card);
+            _gmMainPhase.ReturnCardToDeck(card);
         }
         NullifyVariables();
     }

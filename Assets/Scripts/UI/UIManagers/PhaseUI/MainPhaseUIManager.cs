@@ -29,20 +29,20 @@ public class MainPhaseUIManager : MonoBehaviour
     private GameObject _currentEventGO;
     private EventDisplayCard _currentEventDisplayCard;
 
-    private MainPhaseGameManager _mainPhase;
+    private GM_MainPhase _gmMainPhase;
     private EventManager _eventManager;
     
     public void InitializePhaseUI()
     {
-        _mainPhase = GameManager.Instance?.mainPhase;
+        _gmMainPhase = GameManager.Instance?.mainPhase;
 
-        if (_mainPhase == null)
+        if (_gmMainPhase == null)
         {
             Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
         
-        _eventManager = _mainPhase.EventManager;
+        _eventManager = _gmMainPhase.EventManager;
 
         SubscribeToPhaseEvents();
 
@@ -60,24 +60,24 @@ public class MainPhaseUIManager : MonoBehaviour
     
     private void SubscribeToPhaseEvents()
     {
-        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
-        _mainPhase.OnCardCaptured += OnCardCaptured;
-        _mainPhase.OnCardSaved += _ => OnEventSaved();
-        _mainPhase.OnStateDiscarded += _ => ClearTargetCard();
+        _gmMainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        _gmMainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        _gmMainPhase.OnCardCaptured += OnCardCaptured;
+        _gmMainPhase.OnCardSaved += _ => OnEventSaved();
+        _gmMainPhase.OnStateDiscarded += _ => ClearTargetCard();
         _eventManager.OnEventApplied += _ => OnEventApplied();
         
     }
 
     private void OnDestroy()
     {
-        if (_mainPhase == null) return;
+        if (_gmMainPhase == null) return;
 
-        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
-        _mainPhase.OnCardCaptured -= OnCardCaptured;
-        _mainPhase.OnCardSaved -= _ => OnEventSaved();
-        _mainPhase.OnStateDiscarded -= _ => ClearTargetCard();
+        _gmMainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        _gmMainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        _gmMainPhase.OnCardCaptured -= OnCardCaptured;
+        _gmMainPhase.OnCardSaved -= _ => OnEventSaved();
+        _gmMainPhase.OnStateDiscarded -= _ => ClearTargetCard();
         _eventManager.OnEventApplied -= _ => OnEventApplied();
         
     }
@@ -156,7 +156,7 @@ public class MainPhaseUIManager : MonoBehaviour
         EnableDiceButton(currentPlayer.CanRoll());
         
         //TODO: Make an event
-        _mainPhase.PlayerRolledDice();
+        _gmMainPhase.PlayerRolledDice();
         
     }
 

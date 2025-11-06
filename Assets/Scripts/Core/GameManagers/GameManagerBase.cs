@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public abstract class GameManagerBase : MonoBehaviour
@@ -36,5 +37,33 @@ public abstract class GameManagerBase : MonoBehaviour
         eventDeck = gameDeckData.GetEventDeck();
         actorDeck = gameDeckData.GetActorDeck();
         allegianceDeck = gameDeckData.GetAllegianceDeck();
+    }
+}
+
+// === Extensions for lists ===
+public static class ListExtensions
+{
+    public static void ShuffleInPlace<T>(this IList<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            int j = Random.Range(i, list.Count);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
+
+    public static List<T> Shuffled<T>(this IEnumerable<T> source)
+        => source.OrderBy(_ => Random.value).ToList();
+
+    public static T PopFront<T>(this IList<T> list)
+    {
+        T value = list[0];
+        list.RemoveAt(0);
+        return value;
+    }
+    
+    public static string GetPlayerIDList(this List<Player> playerList)
+    {
+        return string.Join(", ", playerList.Select(p => p.playerID));
     }
 }

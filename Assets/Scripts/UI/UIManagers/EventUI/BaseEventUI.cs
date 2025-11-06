@@ -7,7 +7,7 @@ public abstract class BaseEventUI : MonoBehaviour
     [SerializeField] protected GameObject eventScreen;
     [SerializeField] protected Button rollDiceButton;
     
-    protected MainPhaseGameManager mainPhase;
+    protected GM_MainPhase gmMainPhase;
     protected MainPhaseUIManager mainUI; 
     protected EventManager eventManager;
     
@@ -22,15 +22,15 @@ public abstract class BaseEventUI : MonoBehaviour
 
     public virtual void InitializeEventUI()
     {
-        mainPhase = GameManager.Instance?.mainPhase;
+        gmMainPhase = GameManager.Instance?.mainPhase;
 
-        if (mainPhase == null)
+        if (gmMainPhase == null)
         {
             Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
         mainUI = GameUIManager.Instance.mainUI;
-        eventManager = mainPhase.EventManager;
+        eventManager = gmMainPhase.EventManager;
         
         if (rollDiceButton)
             rollDiceButton.onClick.AddListener(OnRollDiceClicked);

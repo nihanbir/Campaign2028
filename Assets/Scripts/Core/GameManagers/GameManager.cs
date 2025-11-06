@@ -1,25 +1,18 @@
+using System;
 using UnityEngine;
 
 public class GameManager : GameManagerBase
 {
     public static GameManager Instance { get; private set; }
-
-    [HideInInspector] public SetupPhaseGameManager setupPhase;
-    [HideInInspector] public MainPhaseGameManager mainPhase;
     
-    private GamePhase _currentPhase = GamePhase.CivilWar;
-    public GamePhase CurrentPhase
-    {
-        get => _currentPhase;
-        set
-        {
-            if (_currentPhase != value)
-            {
-                _currentPhase = value;
-                TransitionToPhase(value);
-            }
-        }
-    }
+    [HideInInspector] public GM_SetupPhase setupPhase;
+    [HideInInspector] public GM_MainPhase mainPhase;
+
+    private GM_BasePhase _currentPhaseManager;
+
+    public GM_BasePhase CurrentPhaseManager => _currentPhaseManager;
+
+    public event Action<GM_BasePhase> OnPhaseChanged;
 
     protected override void Awake()
     {
@@ -32,55 +25,36 @@ public class GameManager : GameManagerBase
     {
         LoadDecks();
         InitializePhases();
-        CurrentPhase = GamePhase.Setup;
+        SetPhase(setupPhase);
+    }
+    
+    public void SetPhase(GM_BasePhase newPhase)
+    {
+        if (_currentPhaseManager == newPhase) return;
+
+        Debug.Log($"=== Transitioning to {newPhase.GetType().Name} ===");
+
+        _currentPhaseManager = newPhase;
+        OnPhaseChanged?.Invoke(newPhase);
     }
     
     private void InitializePhases()
     {
-        setupPhase = new SetupPhaseGameManager(this);
-        mainPhase = new MainPhaseGameManager(this);
+        setupPhase = new GM_SetupPhase();
+        mainPhase = new GM_MainPhase();
     }
     
-    private void TransitionToPhase(GamePhase newPhase)
+    public T CurrentPhaseAs<T>() where T : GM_BasePhase
     {
-        Debug.Log($"=== Transitioning to {newPhase} stage ===");
-        
-        GameUIManager.Instance.OnTransitionToPhase(newPhase);
-        
-        switch (newPhase)
-        {
-            case GamePhase.Setup:
-                BeginSetupPhase();
-                break;
-            
-            case GamePhase.MainGame:
-                BeginMainGamePhase();
-                break;
-            
-            case GamePhase.CivilWar:
-                break;
-            
-            case GamePhase.GameOver:
-                break;
-        }
-        
+        return _currentPhaseManager as T;
     }
     
-    private void BeginSetupPhase()
-    {
-        Debug.Log("Begin setup phase");
-        setupPhase.InitializePhase();
-    }
     
-    private void BeginMainGamePhase()
-    {
-        Debug.Log("Begin main phase");
-        mainPhase.InitializePhase();
-    }
+    
 }
-
 public enum GamePhase
 {
+    None,
     Setup,
     MainGame,
     CivilWar,
