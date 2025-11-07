@@ -23,8 +23,8 @@ public class GM_SetupPhase : GM_BasePhase
 
     public GM_SetupPhase()
     {
-        _unassignedActors = game.actorDeck;
-        _unassignedPlayers = game.players;
+        _unassignedActors = new List<ActorCard>(game.actorDeck);
+        _unassignedPlayers = new List<Player>(game.players);
         
     }
     
@@ -116,10 +116,10 @@ public class GM_SetupPhase : GM_BasePhase
         _playersToRoll.Remove(game.CurrentPlayer);
         
         Debug.Log($"Player {game.CurrentPlayer.playerID} rolled {roll}");
-        EndPlayerTurn();
         
         if (AllPlayersHaveRolled())
         {
+            EndPlayerTurn();
             ProcessRollResults();
         }
         else
@@ -232,6 +232,8 @@ public class GM_SetupPhase : GM_BasePhase
 
     public override void MoveToNextPlayer()
     {
+        EndPlayerTurn();
+        
         switch (CurrentStage)
         {
             case SetupStage.Roll:
