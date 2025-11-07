@@ -65,6 +65,7 @@ public class GM_MainPhase : GM_BasePhase
 #region Turn Sequence
     public override void StartPlayerTurn()
     {
+        base.StartPlayerTurn();
         if (_eventDeck.Count == 0)
         {
             Debug.Log("No more event cards!");

@@ -46,6 +46,8 @@ public class UM_MainPhase : UM_BasePhase
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         
         base.OnPhaseEnabled();
+        
+        //TODO: dont forget to remove
         InitializePlayersForTesting();
     }
 
@@ -112,12 +114,12 @@ public class UM_MainPhase : UM_BasePhase
 #endregion Player Management
 
 #region Turn Flow
-
+    
     protected override void OnPlayerTurnEnded(Player player)
     {
        base.OnPlayerTurnEnded(player);
        player.PlayerDisplayCard.ShowDice(false);
-        ClearEventCard();
+       ClearEventCard();
     }
 
     public override void OnRollDiceClicked()
@@ -170,6 +172,8 @@ public class UM_MainPhase : UM_BasePhase
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
         _currentEventDisplayCard?.SetCard(card);
+
+        Debug.Log($"{isPlayerAI}");
         
         if (_currentEventDisplayCard)
             _currentEventDisplayCard.SetButtonsVisible(!isPlayerAI);

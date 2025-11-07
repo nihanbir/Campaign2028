@@ -69,7 +69,10 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
+        Debug.Log("is it ever here");
         isPlayerAI = AIManager.Instance.IsAIPlayer(player);
+        
+        EnableDiceButton(true);
 
         player.PlayerDisplayCard.Highlight();
     }

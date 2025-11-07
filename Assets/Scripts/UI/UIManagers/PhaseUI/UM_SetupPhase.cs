@@ -46,6 +46,8 @@ public class UM_SetupPhase : UM_BasePhase
     protected override void UnsubscribeToPhaseEvents()
     {
         base.UnsubscribeToPhaseEvents();
+        if (_setupPhase == null) _setupPhase = game.setupPhase;
+        
         _setupPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _setupPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _setupPhase.OnAllPlayersRolled -= HideDiceResults;
@@ -141,7 +143,6 @@ public class UM_SetupPhase : UM_BasePhase
         // Show/hide appropriate UI elements
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
-        EnableDiceButton(!isPlayerAI);
     }
 
     public override void OnRollDiceClicked()

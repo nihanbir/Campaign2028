@@ -24,7 +24,7 @@ public class GameManager : GameManagerBase
     private void Start()
     {
         InitializePhases();
-        SetPhase(setupPhase);
+        SetPhase(mainPhase);
     }
     
     public void SetPhase(GM_BasePhase newPhase)
