@@ -52,15 +52,6 @@ public class GM_SetupPhase : GM_BasePhase
         CurrentStage = SetupStage.Roll;
     }
 
-    protected override void EndPhase()
-    {
-        base.EndPhase();
-        CurrentStage = SetupStage.None;
-        
-        // game.CurrentPhase = GamePhase.MainGame;
-        
-    }
-
     #region Stage Transitions
 
     private void TransitionToStage(SetupStage newStage)
@@ -132,8 +123,8 @@ public class GM_SetupPhase : GM_BasePhase
     {
         return _playersToRoll.Count == 0;
     }
-    
-    public void ProcessRollResults()
+
+    private void ProcessRollResults()
     {
         Debug.Log("=== Processing roll results ===");
         
@@ -270,7 +261,8 @@ public class GM_SetupPhase : GM_BasePhase
     
         return true;
     }
-    
+
+   
     public bool TryAssignActorToPlayer(Player player, ActorCard actorToAssign)
     {
         if (!CanAssignActor(player))
@@ -278,37 +270,36 @@ public class GM_SetupPhase : GM_BasePhase
             return false;
         }
         
-        player.assignedActor = actorToAssign;
-        Debug.Log($"Assigned {actorToAssign.cardName} to Player {player.playerID}");
-        
-        _unassignedActors.Remove(actorToAssign);
-        _unassignedPlayers.Remove(player);
+        AssignActorToPlayer(player, actorToAssign);
 
         EndPlayerTurn();
-        
-        //TODO: something else
-        // OnActorAssignedToPlayer?.Invoke(displayCard);
         
         //TODO: call from ui
         // Check if only one player remains without an actor
         if (ShouldAutoAssignLastActor())
         {
             AutoAssignLastActor();
+            return false;
         }
-        else
-        {
-            CurrentStage = SetupStage.Roll;
-        }
+       
+        CurrentStage = SetupStage.Roll;
         
         return true;
+    }
+    
+    private void AssignActorToPlayer(Player player, ActorCard actorToAssign)
+    {
+        player.assignedActor = actorToAssign;
+        Debug.Log($"Assigned {actorToAssign.cardName} to Player {player.playerID}");
+        
+        _unassignedActors.Remove(actorToAssign);
+        _unassignedPlayers.Remove(player);
     }
     
     private bool ShouldAutoAssignLastActor()
     {
         //TODO: add an event for this and invoke it in ui and listen in autoassignlastactor
-        // Debug.Log("Remaining actor count is: " + GameUIManager.Instance.setupUI.unassignedActorCards.Count);
-        return _unassignedActors.Count == 0;
-        // return GameUIManager.Instance.setupUI.unassignedActorCards.Count == 1;
+        return _unassignedActors.Count == 1;
     }
     
     private void AutoAssignLastActor()
@@ -316,7 +307,7 @@ public class GM_SetupPhase : GM_BasePhase
         // Notify UI to update visuals
         
         //TODO: ui
-        // GameUIManager.Instance.setupUI.AutoAssignLastActor();
+        AssignActorToPlayer(_unassignedPlayers[0], _unassignedActors[0]);
         
         OnAllActorsAssigned();
     }
@@ -325,7 +316,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
         //TODO: ui
-       EndPhase();
+        game.SetPhase(GamePhase.MainGame);
     }
 
     #endregion

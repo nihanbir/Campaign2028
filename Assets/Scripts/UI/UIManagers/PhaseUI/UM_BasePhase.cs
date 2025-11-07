@@ -27,12 +27,12 @@ public abstract class UM_BasePhase : MonoBehaviour
             game.OnPhaseChanged -= OnPhaseChanged;
     }
     
-    private void OnPhaseChanged(GM_BasePhase newPhase)
+    private void OnPhaseChanged(GamePhase newPhase)
     {
-        if (newPhase.PhaseType == PhaseType)
-            OnPhaseEnabled();
-        else
+        if (PhaseType != newPhase)
             OnPhaseDisabled();
+        else
+            OnPhaseEnabled();
     }
 
     protected virtual void OnPhaseEnabled()

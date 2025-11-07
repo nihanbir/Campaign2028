@@ -5,20 +5,20 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class MainPhaseAIManager
+public class AM_MainPhase
 {
     private readonly AIManager _aiManager;
-    private GM_MainPhase _gmMainPhase;
+    private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
 
-    public MainPhaseAIManager(AIManager manager)
+    public AM_MainPhase(AIManager manager)
     {
         _aiManager = manager;
     }
 
     public void InitializeAIManager()
     {
-        _eventManager = _gmMainPhase.EventManager;
+        _eventManager = _mainPhase.EventManager;
     }
 
 #region Regular Turn Execution
@@ -58,9 +58,9 @@ public class MainPhaseAIManager
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
-        if (!(ShouldSaveEvent(aiPlayer, card) && _gmMainPhase.TrySaveEvent(card)))
+        if (!(ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card)))
         {
-            _gmMainPhase.EventManager.ApplyEvent(aiPlayer, card);
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
         }
         else
         {
@@ -93,7 +93,7 @@ public class MainPhaseAIManager
             
             case EventConditions.IfInstitutionCaptured:
                 // If none captured the institution yet, save for later
-                _gmMainPhase.FindHeldInstitution(card.requiredInstitution, out var found);
+                _mainPhase.FindHeldInstitution(card.requiredInstitution, out var found);
                 return !found;
 
             case EventConditions.None:
@@ -116,7 +116,7 @@ public class MainPhaseAIManager
 
     private bool AreOtherPlayersHoldingStates(AIPlayer aiPlayer)
     {
-        var stateOwners = _gmMainPhase.GetStateOwners();
+        var stateOwners = _mainPhase.GetStateOwners();
     
         // Return true if there are any held states and not all are by the given aiPlayer
         return stateOwners.Count > 0 && stateOwners.Values.Any(player => player != aiPlayer);

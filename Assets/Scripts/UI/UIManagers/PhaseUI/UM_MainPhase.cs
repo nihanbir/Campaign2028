@@ -30,7 +30,7 @@ public class UM_MainPhase : UM_BasePhase
     
     protected override void OnPhaseEnabled()
     {
-        _mainPhase = game.GetCurrentPhaseAs<GM_MainPhase>();
+        _mainPhase = game.mainPhase;
         
         if (_mainPhase == null)
         {

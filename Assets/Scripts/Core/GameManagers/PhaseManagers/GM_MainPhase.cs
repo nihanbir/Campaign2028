@@ -21,7 +21,7 @@ public class GM_MainPhase : GM_BasePhase
     private readonly List<EventCard> _eventDeck = new();
 
     public EventManager EventManager { get; private set; }
-    private MainPhaseAIManager _aiManager;
+    private AM_MainPhase _aiManager;
 
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;

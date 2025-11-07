@@ -12,8 +12,8 @@ public class AIManager : MonoBehaviour
     [HideInInspector] public List<AIPlayer> aiPlayers = new List<AIPlayer>();
 
     // Phase managers (plain C# classes)
-    public SetupPhaseAIManager setupAI;
-    public MainPhaseAIManager mainAI;
+    public AM_SetupPhase setupAI;
+    public AM_MainPhase mainAI;
 
     public GameManager game;
 
@@ -24,8 +24,8 @@ public class AIManager : MonoBehaviour
 
         game = GameManager.Instance;
         
-        setupAI = new SetupPhaseAIManager(this);
-        mainAI = new MainPhaseAIManager(this);
+        setupAI = new AM_SetupPhase(this);
+        mainAI = new AM_MainPhase(this);
         
     }
 

@@ -20,12 +20,12 @@ public abstract class GM_BasePhase
         game.OnPhaseChanged += OnPhaseChanged;
     }
     
-    private void OnPhaseChanged(GM_BasePhase newPhase)
+    private void OnPhaseChanged(GamePhase newPhase)
     {
-        if (newPhase.PhaseType == PhaseType)
-            BeginPhase();
-        else
+        if (PhaseType != newPhase)
             EndPhase();
+        else
+            BeginPhase();
     }
 
     protected virtual void BeginPhase()

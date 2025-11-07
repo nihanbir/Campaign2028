@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SetupPhaseAIManager
+public class AM_SetupPhase
 {
     private readonly AIManager aiManager;
     private GM_SetupPhase _setupPhase;
     private UM_SetupPhase _setupUI;
 
-    public SetupPhaseAIManager(AIManager manager)
+    public AM_SetupPhase(AIManager manager)
     {
         aiManager = manager;
         _setupPhase = aiManager.game.setupPhase;

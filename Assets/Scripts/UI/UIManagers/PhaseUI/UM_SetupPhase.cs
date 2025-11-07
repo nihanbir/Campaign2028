@@ -17,7 +17,6 @@ public class UM_SetupPhase : UM_BasePhase
     private List<PlayerDisplayCard> _playerDisplayCards = new();
     
     private PlayerDisplayCard _selectedActorCard;
-    private CanvasGroup _canvasGroup;
     
     private GM_SetupPhase _setupPhase;
     
@@ -25,12 +24,7 @@ public class UM_SetupPhase : UM_BasePhase
 
     protected override void OnPhaseEnabled()
     {
-        _setupPhase = game.GetCurrentPhaseAs<GM_SetupPhase>();
-        
-        // _phase.OnPlayerTurnStarted +=
-        if (!_canvasGroup)
-            _canvasGroup = gameObject.GetComponent<CanvasGroup>() 
-                           ?? gameObject.AddComponent<CanvasGroup>();
+        _setupPhase = game.setupPhase;
 
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
@@ -58,7 +52,6 @@ public class UM_SetupPhase : UM_BasePhase
         // StartCoroutine(WaitForVisuals());
         foreach (var card in _playerDisplayCards)
         {
-            Debug.Log("lllllllllllllllllllllllllllllllllllllllllllllllll");
             card.ShowDice(false);
         }
     }
@@ -137,15 +130,6 @@ public class UM_SetupPhase : UM_BasePhase
         rollDiceButton.gameObject.SetActive(!isAssignStage);
         
         EnableDiceButton(!isPlayerAI);
-        EnableCanvasGroup(!isPlayerAI);
-    }
-
-    private void EnableCanvasGroup(bool enable)
-    {
-        if (!_canvasGroup) _canvasGroup = gameObject.GetComponent<CanvasGroup>();
-        
-        _canvasGroup.interactable = enable;
-        _canvasGroup.blocksRaycasts = enable;
     }
 
     public override void OnRollDiceClicked()
