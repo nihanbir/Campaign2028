@@ -45,6 +45,7 @@ public class GM_SetupPhase : GM_BasePhase
 
     public event Action OnAllPlayersRolled;
     public event Action OnActorAssignStage;
+    public event Action<Player, ActorCard> OnLastActorAssigned;
 
     protected override void BeginPhase()
     {
@@ -279,10 +280,11 @@ public class GM_SetupPhase : GM_BasePhase
         if (ShouldAutoAssignLastActor())
         {
             AutoAssignLastActor();
-            return false;
         }
-       
-        CurrentStage = SetupStage.Roll;
+        else
+        {
+            CurrentStage = SetupStage.Roll;
+        }
         
         return true;
     }
@@ -305,9 +307,13 @@ public class GM_SetupPhase : GM_BasePhase
     private void AutoAssignLastActor()
     {
         // Notify UI to update visuals
-        
+
+        var lastPlayer = _unassignedPlayers[0];
+        var lastActor = _unassignedActors[0];
         //TODO: ui
-        AssignActorToPlayer(_unassignedPlayers[0], _unassignedActors[0]);
+        AssignActorToPlayer(lastPlayer, lastActor);
+        
+        OnLastActorAssigned?.Invoke(lastPlayer, lastActor);
         
         OnAllActorsAssigned();
     }

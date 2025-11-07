@@ -9,22 +9,24 @@ public class AM_MainPhase
 {
     private readonly AIManager _aiManager;
     private GM_MainPhase _mainPhase;
+    private UM_MainPhase _mainUI;
     private EventManager _eventManager;
 
     public AM_MainPhase(AIManager manager)
     {
         _aiManager = manager;
-    }
-
-    public void InitializeAIManager()
-    {
-        _eventManager = _mainPhase.EventManager;
+        _mainPhase = _aiManager.game.mainPhase;
+        _mainUI = GameUIManager.Instance.mainUI;
     }
 
 #region Regular Turn Execution
 
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer, EventCard card)
     {
+        if (_mainPhase == null) _mainPhase = GameManager.Instance.mainPhase;
+        if (_mainUI == null) _mainUI = GameUIManager.Instance.mainUI;
+        if (_eventManager == null) _eventManager = _mainPhase.EventManager;
+        
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         //TODO: Think delay or future logic (use saved events, modifiers, etc.)

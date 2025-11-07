@@ -39,6 +39,18 @@ public class UM_SetupPhase : UM_BasePhase
         _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _setupPhase.OnAllPlayersRolled += HideDiceResults;
         _setupPhase.OnActorAssignStage += OnActorAssignStage;
+        _setupPhase.OnLastActorAssigned += UpdatePlayerUIWithActor;
+        
+    }
+
+    protected override void UnsubscribeToPhaseEvents()
+    {
+        base.UnsubscribeToPhaseEvents();
+        _setupPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        _setupPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        _setupPhase.OnAllPlayersRolled -= HideDiceResults;
+        _setupPhase.OnActorAssignStage -= OnActorAssignStage;
+        _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
     }
 
     private void OnActorAssignStage()
@@ -186,9 +198,10 @@ public class UM_SetupPhase : UM_BasePhase
         
         PlayerDisplayCard.OnCardSelected -= SelectActorCard;
         PlayerDisplayCard.OnPlayerCardClicked -= AssignSelectedActorToPlayer;
+        
     }
     
-    public void AutoAssignLastActor(Player lastPlayer, ActorCard lastActor)
+    public void UpdatePlayerUIWithActor(Player lastPlayer, ActorCard lastActor)
     { 
         Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
     
@@ -198,6 +211,8 @@ public class UM_SetupPhase : UM_BasePhase
         // Update UI
         RemoveCard(lastActorCard);
         lastPlayerCard.ConvertToAssignedActor(lastActor);
+
+        _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
     }
     
     private void RemoveCard(PlayerDisplayCard card)

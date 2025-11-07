@@ -5,21 +5,21 @@ using UnityEngine;
 
 public class AM_SetupPhase
 {
-    private readonly AIManager aiManager;
+    private readonly AIManager _aiManager;
     private GM_SetupPhase _setupPhase;
     private UM_SetupPhase _setupUI;
 
     public AM_SetupPhase(AIManager manager)
     {
-        aiManager = manager;
-        _setupPhase = aiManager.game.setupPhase;
+        _aiManager = manager;
+        _setupPhase = _aiManager.game.setupPhase;
         _setupUI = GameUIManager.Instance.setupUI;
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
         //Make sure they're assigned
-        if (_setupPhase == null) _setupPhase = aiManager.game.setupPhase;
+        if (_setupPhase == null) _setupPhase = _aiManager.game.setupPhase;
         if (_setupUI == null) _setupUI = GameUIManager.Instance.setupUI;
         
         // Simulate thinking
@@ -28,11 +28,11 @@ public class AM_SetupPhase
         if (_setupPhase.CurrentStage == SetupStage.Roll ||
             _setupPhase.CurrentStage == SetupStage.Reroll)
         {
-            yield return aiManager.StartCoroutine(RollDice(aiPlayer));
+            yield return _aiManager.StartCoroutine(RollDice(aiPlayer));
         }
         else
         {
-            yield return aiManager.StartCoroutine(AssignActorToAnotherPlayer(aiPlayer));
+            yield return _aiManager.StartCoroutine(AssignActorToAnotherPlayer(aiPlayer));
         }
     }
 

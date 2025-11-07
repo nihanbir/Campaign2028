@@ -49,7 +49,10 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
+        rollDiceButton.onClick.RemoveAllListeners();
+        
         UnsubscribeToPhaseEvents();
+        
         gameObject.SetActive(false);
     }
 
