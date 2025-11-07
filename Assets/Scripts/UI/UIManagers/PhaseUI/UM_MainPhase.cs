@@ -43,10 +43,10 @@ public class UM_MainPhase : UM_BasePhase
         challengeUI.InitializeEventUI();
         altStateUI.InitializeEventUI();
         
-        RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         
         base.OnPhaseEnabled();
-        // InitializePlayersForTesting();
+        InitializePlayersForTesting();
     }
 
     protected override void SubscribeToPhaseEvents()
@@ -124,6 +124,9 @@ public class UM_MainPhase : UM_BasePhase
     {
         base.OnRollDiceClicked();
 
+        int roll = GameUIManager.Instance.DiceRoll;
+        _mainPhase.PlayerRolledDice(roll);
+        
         EnableDiceButton(GameManager.Instance.CurrentPlayer.CanRoll());
         
     }

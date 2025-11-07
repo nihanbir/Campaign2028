@@ -8,11 +8,11 @@ public class GameManager : GameManagerBase
     [HideInInspector] public GM_SetupPhase setupPhase;
     [HideInInspector] public GM_MainPhase mainPhase;
 
-    private GamePhase _currentPhase = GamePhase.None;
+    private GM_BasePhase _currentPhaseManager;
     
-    public GamePhase CurrentPhase => _currentPhase;
+    public GamePhase CurrentPhase =>  _currentPhaseManager?.PhaseType ?? GamePhase.None;
 
-    public event Action<GamePhase> OnPhaseChanged;
+    public event Action<GM_BasePhase> OnPhaseChanged;
 
     protected override void Awake()
     {
@@ -24,16 +24,16 @@ public class GameManager : GameManagerBase
     private void Start()
     {
         InitializePhases();
-        SetPhase(GamePhase.Setup);
+        SetPhase(setupPhase);
     }
     
-    public void SetPhase(GamePhase newPhase)
+    public void SetPhase(GM_BasePhase newPhase)
     {
-        if (CurrentPhase == newPhase) return;
+        if (CurrentPhase == newPhase.PhaseType) return;
 
         Debug.Log($"=== Transitioning to {newPhase.GetType().Name} ===");
 
-        _currentPhase = newPhase;
+        _currentPhaseManager = newPhase;
         OnPhaseChanged?.Invoke(newPhase);
     }
     

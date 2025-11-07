@@ -322,7 +322,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
         //TODO: ui
-        game.SetPhase(GamePhase.MainGame);
+        game.SetPhase(GameManager.Instance.mainPhase);
     }
 
     #endregion

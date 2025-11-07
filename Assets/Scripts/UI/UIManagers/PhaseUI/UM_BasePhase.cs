@@ -9,13 +9,18 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     [Header("Phase Elements")]     
     public Button rollDiceButton;
+
     public abstract GamePhase PhaseType { get; }
+
+    protected bool isActive = false;
 
     protected bool isPlayerAI;
     
     private void Awake()
     {
         game = GameManager.Instance;
+        
+        gameObject.SetActive(false);
         
         game.OnPhaseChanged += OnPhaseChanged;
         
@@ -27,12 +32,12 @@ public abstract class UM_BasePhase : MonoBehaviour
             game.OnPhaseChanged -= OnPhaseChanged;
     }
     
-    private void OnPhaseChanged(GamePhase newPhase)
+    private void OnPhaseChanged(GM_BasePhase newPhase)
     {
-        if (PhaseType != newPhase)
-            OnPhaseDisabled();
-        else
+        if (PhaseType == newPhase.PhaseType)
             OnPhaseEnabled();
+        else if (PhaseType != newPhase.PhaseType && isActive)
+            OnPhaseDisabled();
     }
 
     protected virtual void OnPhaseEnabled()
@@ -45,6 +50,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         SubscribeToPhaseEvents();
         
         gameObject.SetActive(true);
+        isActive = true;
     }
 
     protected virtual void OnPhaseDisabled()
@@ -54,6 +60,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         UnsubscribeToPhaseEvents();
         
         gameObject.SetActive(false);
+        isActive = false;
     }
 
     protected virtual void SubscribeToPhaseEvents() { }

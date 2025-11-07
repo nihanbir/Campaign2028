@@ -15,7 +15,7 @@ public class AIManager : MonoBehaviour
     public AM_SetupPhase setupAI;
     public AM_MainPhase mainAI;
 
-    public GameManager game;
+    [HideInInspector] public GameManager game;
 
     private void Awake()
     {
