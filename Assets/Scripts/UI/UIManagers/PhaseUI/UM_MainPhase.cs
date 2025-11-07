@@ -232,6 +232,7 @@ public class UM_MainPhase : UM_BasePhase
             return;
         }
 
+        // Remove these
         var allActors = new List<ActorCard>(gm.actorDeck);
         if (allActors.Count == 0)
         {

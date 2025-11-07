@@ -15,13 +15,18 @@ public class AIManager : MonoBehaviour
     public SetupPhaseAIManager setupAI;
     public MainPhaseAIManager mainAI;
 
+    public GameManager game;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
+        game = GameManager.Instance;
+        
         setupAI = new SetupPhaseAIManager(this);
         mainAI = new MainPhaseAIManager(this);
+        
     }
 
     public void CreateAIPlayers(int humanPlayerCount)

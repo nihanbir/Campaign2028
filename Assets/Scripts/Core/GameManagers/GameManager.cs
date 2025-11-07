@@ -24,7 +24,6 @@ public class GameManager : GameManagerBase
 
     private void Start()
     {
-        LoadDecks();
         InitializePhases();
         SetPhase(setupPhase);
     }

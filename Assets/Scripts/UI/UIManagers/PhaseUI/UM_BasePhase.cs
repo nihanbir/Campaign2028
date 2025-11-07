@@ -17,9 +17,6 @@ public abstract class UM_BasePhase : MonoBehaviour
     {
         game = GameManager.Instance;
         
-        if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        
         game.OnPhaseChanged += OnPhaseChanged;
         
     }
@@ -81,7 +78,6 @@ public abstract class UM_BasePhase : MonoBehaviour
         GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
-        // StartCoroutine(WaitForVisuals());
     }
     
     protected IEnumerator WaitForVisuals()

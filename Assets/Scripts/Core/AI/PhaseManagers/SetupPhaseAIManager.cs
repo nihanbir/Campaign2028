@@ -6,68 +6,77 @@ using UnityEngine;
 public class SetupPhaseAIManager
 {
     private readonly AIManager aiManager;
+    private GM_SetupPhase _setupPhase;
+    private UM_SetupPhase _setupUI;
 
     public SetupPhaseAIManager(AIManager manager)
     {
         aiManager = manager;
+        _setupPhase = aiManager.game.setupPhase;
+        _setupUI = GameUIManager.Instance.setupUI;
     }
-
+    
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
+        //Make sure they're assigned
+        if (_setupPhase == null) _setupPhase = aiManager.game.setupPhase;
+        if (_setupUI == null) _setupUI = GameUIManager.Instance.setupUI;
+        
         // Simulate thinking
         yield return new WaitForSeconds(1f);
-
-        var setupPhase = GameManager.Instance.setupPhase;
-        if (setupPhase.CurrentStage == SetupStage.Roll ||
-            setupPhase.CurrentStage == SetupStage.Reroll)
+        
+        if (_setupPhase.CurrentStage == SetupStage.Roll ||
+            _setupPhase.CurrentStage == SetupStage.Reroll)
         {
             yield return aiManager.StartCoroutine(RollDice(aiPlayer));
         }
-        // else
-        // {
-        //     yield return aiManager.StartCoroutine(AssignActorToAnotherPlayer(aiPlayer));
-        // }
+        else
+        {
+            yield return aiManager.StartCoroutine(AssignActorToAnotherPlayer(aiPlayer));
+        }
     }
 
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        GameUIManager.Instance.setupUI.OnRollDiceClicked();
+        _setupUI.OnRollDiceClicked();
     }
 
-    // private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
-    // {
-    //     yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-    //     
-    //     // Get all unassigned players except this AI
-    //     var eligiblePlayers = GameUIManager.Instance.setupUI.unassignedPlayerCards
-    //         .Where(card => card.owningPlayer != aiPlayer)
-    //         .ToList();
-    //         
-    //     if (eligiblePlayers.Count == 0)
-    //     {
-    //         Debug.LogWarning($"AI Player {aiPlayer.playerID}: No eligible players to assign actor to!");
-    //         yield break;
-    //     }
-    //     
-    //     var availableActors = GameUIManager.Instance.setupUI.unassignedActorCards;
-    //     if (availableActors.Count == 0)
-    //     {
-    //         Debug.LogWarning($"AI Player {aiPlayer.playerID}: No available actors to assign!");
-    //         yield break;
-    //     }
-    //     
-    //     int actorIndex = Random.Range(0, availableActors.Count);
-    //     int playerIndex = Random.Range(0, eligiblePlayers.Count);
-    //
-    //     var selectedActor = availableActors[actorIndex];
-    //     var selectedPlayer = eligiblePlayers[playerIndex];
-    //
-    //     Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.GetCard().cardName} to Player {selectedPlayer.owningPlayer.playerID}");
-    //
-    //     //TODO: Clean all this
-    //     GameManager.Instance.setupPhase.OnActorSelected(selectedActor);
-    //     GameManager.Instance.setupPhase.AssignActorToPlayer(selectedPlayer);
-    // }
+    private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
+    {
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        // Get all unassigned players except this AI
+        var eligiblePlayers = _setupPhase.GetUnassignedPlayers()
+            .Where(player => player != aiPlayer)
+            .ToList();
+            
+        if (eligiblePlayers.Count == 0)
+        {
+            Debug.LogWarning($"AI Player {aiPlayer.playerID}: No eligible players to assign actor to!");
+            yield break;
+        }
+        
+        var availableActors = _setupPhase.GetUnassignedActors();
+        if (availableActors.Count == 0)
+        {
+            Debug.LogWarning($"AI Player {aiPlayer.playerID}: No available actors to assign!");
+            yield break;
+        }
+        
+        int actorIndex = Random.Range(0, availableActors.Count);
+        int playerIndex = Random.Range(0, eligiblePlayers.Count);
+    
+        var selectedActor = availableActors[actorIndex];
+        var selectedPlayer = eligiblePlayers[playerIndex];
+
+         var actorDisplay = _setupUI.FindDisplayCardForUnassignedActor(selectedActor);
+         var playerDisplay = _setupUI.FindDisplayCardForPlayer(selectedPlayer);
+    
+        Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.cardName} to Player {selectedPlayer.playerID}");
+    
+        _setupUI.SelectActorCard(actorDisplay);
+        _setupUI.AssignSelectedActorToPlayer(playerDisplay);
+    }
     
 }

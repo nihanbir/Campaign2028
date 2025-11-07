@@ -30,12 +30,12 @@ public abstract class GM_BasePhase
 
     protected virtual void BeginPhase()
     {
-        uiManager.OnRolledDice += PlayerRolledDice;
+        
     }
 
     protected virtual void EndPhase()
     {
-        uiManager.OnRolledDice -= PlayerRolledDice;
+        
     }
 
     public virtual void StartPlayerTurn()

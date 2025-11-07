@@ -22,8 +22,6 @@ public class GameUIManager : MonoBehaviour
     // Add others (CivilWarUI, GameOverUI) as needed
 
     public int DiceRoll { get; private set; }
-    
-    public event Action<int> OnRolledDice;
 
     private void Awake()
     {
@@ -40,7 +38,8 @@ public class GameUIManager : MonoBehaviour
     {
         DiceRoll = Random.Range(1, 7);
         SetDiceSprite(diceButton.image);
-        OnRolledDice?.Invoke(DiceRoll);
+        
+        //TODO: async or something
     }
 
     public void SetDiceSprite(Image diceImage)

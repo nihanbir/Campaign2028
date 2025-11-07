@@ -43,8 +43,8 @@ public class GM_SetupPhase : GM_BasePhase
         }
     }
 
-    // public event Action<Player, PlayerDisplayCard> OnActorAssignedToPlayer; 
     public event Action OnAllPlayersRolled;
+    public event Action OnActorAssignStage;
 
     protected override void BeginPhase()
     {
@@ -85,7 +85,6 @@ public class GM_SetupPhase : GM_BasePhase
     
     private void BeginRollStage()
     {
-        // PlayerDisplayCard.OnPlayerCardClicked -= AssignActorToPlayer;
         
         Debug.Log("All players will roll dice");
         InitializeRollTracking();
@@ -157,8 +156,6 @@ public class GM_SetupPhase : GM_BasePhase
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
             HandleTiedRoll(winnersOfRoll);
         }
-        
-        
     }
 
     private List<Player> GetPlayersWithRoll(int rollValue)
@@ -200,9 +197,9 @@ public class GM_SetupPhase : GM_BasePhase
     
     private void BeginAssignActorStage()
     {
-        // PlayerDisplayCard.OnCardSelected += OnActorSelected;
-        // PlayerDisplayCard.OnPlayerCardClicked += AssignActorToPlayer;
         game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
+        
+        OnActorAssignStage?.Invoke();
 
         StartPlayerTurn();
     }
@@ -254,13 +251,6 @@ public class GM_SetupPhase : GM_BasePhase
     #endregion
 
     #region Actor Assignment Logic
-
-    public void OnActorSelected(ISelectableDisplayCard card)
-    {
-        var playerCard = card as PlayerDisplayCard;
-        if (!playerCard) return;
-        _actorToAssign = playerCard.GetCard();
-    }
     
     private bool CanAssignActor(Player targetPlayer)
     {
@@ -279,20 +269,25 @@ public class GM_SetupPhase : GM_BasePhase
         return true;
     }
     
-    public void AssignActorToPlayer(PlayerDisplayCard displayCard)
+    public bool TryAssignActorToPlayer(Player player, ActorCard actorToAssign)
     {
-        var targetPlayer = displayCard.owningPlayer;
-        
-        if (!CanAssignActor(targetPlayer))
+        if (!CanAssignActor(player))
         {
-            return;
+            return false;
         }
         
-        targetPlayer.assignedActor = _actorToAssign;
-        Debug.Log($"Assigned {_actorToAssign.cardName} to Player {targetPlayer.playerID}");
+        player.assignedActor = actorToAssign;
+        Debug.Log($"Assigned {actorToAssign.cardName} to Player {player.playerID}");
         
+        _unassignedActors.Remove(actorToAssign);
+        _unassignedPlayers.Remove(player);
+
         EndPlayerTurn();
         
+        //TODO: something else
+        // OnActorAssignedToPlayer?.Invoke(displayCard);
+        
+        //TODO: call from ui
         // Check if only one player remains without an actor
         if (ShouldAutoAssignLastActor())
         {
@@ -303,21 +298,21 @@ public class GM_SetupPhase : GM_BasePhase
             CurrentStage = SetupStage.Roll;
         }
         
-        //TODO:
-        // OnActorAssignedToPlayer?.Invoke(displayCard);        
+        return true;
     }
     
     private bool ShouldAutoAssignLastActor()
     {
         //TODO: add an event for this and invoke it in ui and listen in autoassignlastactor
         // Debug.Log("Remaining actor count is: " + GameUIManager.Instance.setupUI.unassignedActorCards.Count);
+        return _unassignedActors.Count == 0;
         // return GameUIManager.Instance.setupUI.unassignedActorCards.Count == 1;
-        return false;
     }
     
     private void AutoAssignLastActor()
     {
         // Notify UI to update visuals
+        
         //TODO: ui
         // GameUIManager.Instance.setupUI.AutoAssignLastActor();
         
