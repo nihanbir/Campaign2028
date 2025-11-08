@@ -160,7 +160,7 @@ MonoBehaviour:
     evScore: 0
     instScore: 0
   decisionDelayMin: 0.5
-  decisionDelayMax: 2
+  decisionDelayMax: 1
 --- !u!4 &172211631
 Transform:
   m_ObjectHideFlags: 0
@@ -217,7 +217,7 @@ MonoBehaviour:
     evScore: 0
     instScore: 0
   decisionDelayMin: 0.5
-  decisionDelayMax: 2
+  decisionDelayMax: 1
 --- !u!4 &210027821
 Transform:
   m_ObjectHideFlags: 0
@@ -544,7 +544,7 @@ MonoBehaviour:
     evScore: 0
     instScore: 0
   decisionDelayMin: 0.5
-  decisionDelayMax: 2
+  decisionDelayMax: 1
 --- !u!4 &920864601
 Transform:
   m_ObjectHideFlags: 0
@@ -601,7 +601,7 @@ MonoBehaviour:
     evScore: 0
     instScore: 0
   decisionDelayMin: 0.5
-  decisionDelayMax: 2
+  decisionDelayMax: 1
 --- !u!4 &1473444821
 Transform:
   m_ObjectHideFlags: 0
@@ -709,6 +709,18 @@ PrefabInstance:
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 2219825510459262288, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3966869978984060823, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5195964978856550199, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.59594727
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x

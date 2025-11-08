@@ -44,7 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50aa4bd3da3f924e90d21447a4fe59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIPlayer
-  playerName: 
   playerID: 1
   assignedActor:
     cardName: 
@@ -56,8 +55,5 @@ MonoBehaviour:
     actorType: 0
     evScore: 0
     instScore: 0
-  displayCard: {fileID: 997089488867944163, guid: 6fed718de8e3bf743a47d5a44d352740, type: 3}
   decisionDelayMin: 0.5
-  decisionDelayMax: 2
-  failedAttempts: 0
-  rolledDice: 0
+  decisionDelayMax: 1
