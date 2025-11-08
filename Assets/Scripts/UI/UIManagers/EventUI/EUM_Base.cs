@@ -38,17 +38,11 @@ public abstract class EUM_Base : MonoBehaviour
             rollDiceButton.onClick.AddListener(OnRollDiceClicked);
     }
 
+    //TODO: need to pass its own dice image
     public virtual void OnRollDiceClicked()
     {
         mainUI.OnRollDiceClicked();
         GameUIManager.Instance.SetDiceSprite(diceImage);
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-        
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
-        
-        roll = GameUIManager.Instance.DiceRoll;
-        Debug.Log($"Player rolled: {roll}");
-        
     }
     
     protected virtual void ReturnToMainPhaseUI()
