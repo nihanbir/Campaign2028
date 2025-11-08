@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -22,6 +23,19 @@ public class UM_SetupPhase : UM_BasePhase
     public float assignDuration = 0.5f;
     public Ease enterEase = Ease.OutBack;
     public Ease exitEase = Ease.InBack;
+    
+    [Header("Dice Animation Settings")]
+    public float dicePopScale = 1.4f;
+    public float dicePopDuration = 0.3f;
+    public Ease dicePopEase = Ease.OutBack;
+
+    [Header("Reroll Animation Settings")]
+    public float rerollPulseDuration = 0.5f;
+    public Ease rerollEase = Ease.InOutSine;
+
+    public bool IsAnimating { get; private set; }
+    
+    public System.Action OnAllPlayersRolledComplete;
 
     #region Initialize Phase UI
 
@@ -54,6 +68,8 @@ public class UM_SetupPhase : UM_BasePhase
         _setupPhase.OnAllPlayersRolled += HideDiceResults;
         _setupPhase.OnActorAssignStage += OnActorAssignStage;
         _setupPhase.OnLastActorAssigned += UpdatePlayerUIWithActor;
+        _setupPhase.OnRerollStageStarted += AnimateRerollPlayers;
+
     }
 
     protected override void UnsubscribeToPhaseEvents()
@@ -66,6 +82,8 @@ public class UM_SetupPhase : UM_BasePhase
         _setupPhase.OnAllPlayersRolled -= HideDiceResults;
         _setupPhase.OnActorAssignStage -= OnActorAssignStage;
         _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
+        _setupPhase.OnRerollStageStarted -= AnimateRerollPlayers;
+
     }
 
     private void OnActorAssignStage()
@@ -76,10 +94,38 @@ public class UM_SetupPhase : UM_BasePhase
 
     private void HideDiceResults()
     {
-        foreach (var card in _playerDisplayCards)
-            card.ShowDice(false);
+        StartCoroutine(AnimateAllDicePopAndThenProcess());
     }
+    
+    private IEnumerator AnimateAllDicePopAndThenProcess()
+    {
+        Debug.Log("🎲 Animating all dice results...");
+        
+        foreach (var card in _playerDisplayCards)
+        {
+            var diceObj = card.GetDiceTransform();
+            if (diceObj != null)
+            {
+                diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack);
+            }
+        }
+        
+        // Wait for the animation + extra pause
+        yield return new WaitForSeconds(1.5f); // 🕒 Longer wait to let results sink in
 
+        //TODO: Hide them after processingrollresults and animating the result
+        foreach (var card in _playerDisplayCards)
+        {
+            card.ShowDice(false);
+        }
+
+        yield return new WaitForSeconds(0.5f); // small breathing room before next phase
+
+        Debug.Log("🎬 Dice animation complete — resuming game logic");
+        _setupPhase.ProcessRollResults();
+        
+    }
+    
     void CreateCardUI(CardDisplayType cardType, Transform parent)
     {
         if (!GameManager.Instance)
@@ -297,6 +343,28 @@ public class UM_SetupPhase : UM_BasePhase
         Sequence s = DOTween.Sequence();
         s.Append(actor.DOMove(targetPos, assignDuration).SetEase(Ease.InBack));
         s.Join(actor.DOScale(1.3f, assignDuration * 0.5f).SetLoops(2, LoopType.Yoyo));
+    }
+    
+    private void AnimateRerollPlayers(List<Player> rerollingPlayers)
+    {
+        foreach (var player in rerollingPlayers)
+        {
+            var card = FindDisplayCardForPlayer(player);
+            if (card == null) continue;
+
+            var t = card.transform;
+
+            // Flash + scale pulse to draw attention
+            Sequence s = DOTween.Sequence();
+            s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
+            s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
+            s.SetLoops(3, LoopType.Yoyo);
+
+            //TODO: wait until animation is done and then do this
+            _setupPhase.BeginRerollStage();
+            // Optional: glowing highlight if you have outline material
+            // card.SetHighlightColor(Color.yellow);
+        }
     }
 
     #endregion

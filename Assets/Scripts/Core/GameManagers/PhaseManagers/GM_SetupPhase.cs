@@ -46,6 +46,8 @@ public class GM_SetupPhase : GM_BasePhase
     public event Action OnAllPlayersRolled;
     public event Action OnActorAssignStage;
     public event Action<Player, ActorCard> OnLastActorAssigned;
+    public event Action<List<Player>> OnRerollStageStarted;
+
 
     protected override void BeginPhase()
     {
@@ -80,7 +82,7 @@ public class GM_SetupPhase : GM_BasePhase
                 break;
             
             case SetupStage.Reroll:
-                BeginRerollStage();
+                OnRerollStageStarted?.Invoke(_playersToRoll); // 🔥 Notify UI
                 break;
             
             case SetupStage.AssignActor:
@@ -105,7 +107,7 @@ public class GM_SetupPhase : GM_BasePhase
         _rolledPlayers.Clear();
     }
 
-    private void BeginRerollStage()
+    public void BeginRerollStage()
     {
         Debug.Log($"Players tied for highest roll will reroll: {_playersToRoll.GetPlayerIDList()}");
         game.currentPlayerIndex = game.players.IndexOf(_playersToRoll[0]);
@@ -126,7 +128,7 @@ public class GM_SetupPhase : GM_BasePhase
         if (AllPlayersHaveRolled())
         {
             EndPlayerTurn();
-            ProcessRollResults();
+            OnAllPlayersRolled?.Invoke();
         }
         else
         {
@@ -139,27 +141,29 @@ public class GM_SetupPhase : GM_BasePhase
         return _playersToRoll.Count == 0;
     }
 
-    private void ProcessRollResults()
+    public void ProcessRollResults()
     {
         Debug.Log("=== Processing roll results ===");
         
-        OnAllPlayersRolled?.Invoke();
-        
-        //TODO: ui work
         int highestRoll = _rolledPlayers.Values.Max();
         List<Player> winnersOfRoll = GetPlayersWithRoll(highestRoll);
         
         if (winnersOfRoll.Count == 1)
         {
-            //TODO: ui work
             Debug.Log($"Player {winnersOfRoll[0].playerID} won with roll {highestRoll}");
-            
+
+            //TODO: do this to show the unique winner with animations in UI
+            // OnUniqueWinner?.Invoke(winnersOfRoll[0]);
+            //TODO: then call this from ui
             HandleUniqueWinner(winnersOfRoll[0]);
         }
         else
         {
-            //TODO: ui work
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
+
+            //TODO: do this to show the rerollers with animations in UI
+            // OnHandleTiedRoll?.Invoke(winnersOfRoll);
+            //TODO: then call this from ui
             HandleTiedRoll(winnersOfRoll);
         }
     }
@@ -174,7 +178,6 @@ public class GM_SetupPhase : GM_BasePhase
 
     private void HandleUniqueWinner(Player winner)
     {
-        //TODO: ui work
         _playerToSelect = winner;
         _rolledPlayers.Clear();
 
@@ -184,7 +187,6 @@ public class GM_SetupPhase : GM_BasePhase
 
     private void HandleTiedRoll(List<Player> tiedPlayers)
     {
-        //TODO: ui work
         _playersToRoll.Clear();
         _playersToRoll.AddRange(tiedPlayers);
         _rolledPlayers.Clear();

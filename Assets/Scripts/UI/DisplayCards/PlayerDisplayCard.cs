@@ -111,6 +111,10 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     }
     
 #endregion Click Handler
+public Transform GetDiceTransform()
+{
+    return diceImage != null ? diceImage.transform : null;
+}
 
 #region Helper Methods
 
