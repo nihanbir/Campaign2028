@@ -1,4 +1,5 @@
 
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,6 +43,8 @@ public abstract class EUM_Base : MonoBehaviour
         mainUI.OnRollDiceClicked();
         GameUIManager.Instance.SetDiceSprite(diceImage);
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
+        
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
         
         roll = GameUIManager.Instance.DiceRoll;
         Debug.Log($"Player rolled: {roll}");
