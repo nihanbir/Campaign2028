@@ -8,7 +8,7 @@ public abstract class UM_BasePhase : MonoBehaviour
 {
     protected GameManager game;
     
-    [Header("Phase Elements")]     
+    [Header("Buttons")]     
     public Button rollDiceButton;
     public Image diceImage;
     
@@ -55,8 +55,6 @@ public abstract class UM_BasePhase : MonoBehaviour
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
-        diceImage.gameObject.SetActive(false);
-        
         EnableDiceButton(false);
         
         SubscribeToPhaseEvents();
@@ -66,6 +64,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         // Animate UI entry
         AnimatePhaseEntry();
+        
     }
 
     protected virtual void OnPhaseDisabled()
@@ -92,6 +91,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         EnableDiceButton(true);
 
         player.PlayerDisplayCard.Highlight();
+        
     }
     
     protected virtual void OnPlayerTurnEnded(Player player)
@@ -110,6 +110,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
+        // Roll button bounce feedback
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
 
     protected virtual void EnableDiceButton(bool enable)
@@ -119,6 +121,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         {
             enable = false;
         }
+
+        Debug.Log($"{enable}");
         rollDiceButton.interactable = enable;
     }
     
@@ -149,6 +153,19 @@ public abstract class UM_BasePhase : MonoBehaviour
             transform.localScale = Vector3.one;
             onComplete?.Invoke();
         });
+    }
+
+    protected virtual void DicePopInAnimation()
+    {
+        if (rollDiceButton.gameObject.activeSelf)
+        {
+            if (!diceImage.gameObject.activeSelf)
+            {
+                diceImage.gameObject.SetActive(true);
+            }
+            diceImage.transform.localScale = Vector3.zero;
+            diceImage.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+        }
     }
     
 }

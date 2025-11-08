@@ -18,7 +18,6 @@ public class UM_SetupPhase : UM_BasePhase
     private GM_SetupPhase _setupPhase;
 
     [Header("UI Animation Settings")]
-    public float cardSpawnDuration = 0.4f;
     public float assignDuration = 0.5f;
     
     [Header("Dice Animation Settings")]
@@ -108,9 +107,6 @@ public class UM_SetupPhase : UM_BasePhase
                     _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
                     _playerDisplayCards.Add(displayCard);
                 }
-
-                //TODO: Use this in main
-                // AnimateCardSpawn(uiInstance.transform, i * 0.05f);
             }
             else
                 Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
@@ -128,25 +124,13 @@ public class UM_SetupPhase : UM_BasePhase
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         rollDiceButton.gameObject.SetActive(!isAssignStage);
 
-        // Dice pop-in animation
-        if (rollDiceButton.gameObject.activeSelf)
-        {
-            if (!diceImage.gameObject.activeSelf)
-            {
-                diceImage.gameObject.SetActive(true);
-            }
-            diceImage.transform.localScale = Vector3.zero;
-            diceImage.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
-        }
+       DicePopInAnimation();
     }
 
     public override void OnRollDiceClicked()
     {
         base.OnRollDiceClicked();
-
-        // Roll button bounce feedback
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
-
+        
         var roll = GameUIManager.Instance.DiceRoll;
         _setupPhase.PlayerRolledDice(roll);
     }
@@ -284,15 +268,6 @@ public class UM_SetupPhase : UM_BasePhase
             _setupPhase.ProcessRollResults();
         });
         
-    }
-
-    private void AnimateCardSpawn(Transform card, float delay)
-    {
-        card.localScale = Vector3.zero;
-        card.DOScale(1f, cardSpawnDuration)
-            .SetEase(Ease.OutBack)
-            .SetDelay(delay)
-            .SetUpdate(true);
     }
 
     private void AnimateActorAssignment(Transform actor, Transform target)
