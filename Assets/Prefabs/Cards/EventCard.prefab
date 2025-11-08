@@ -270,7 +270,7 @@ RectTransform:
   m_GameObject: {fileID: 3247192074034216707}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6752546, y: 0.6752546, z: 0.6752546}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8242925447041125051}
@@ -281,7 +281,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 500}
+  m_SizeDelta: {x: 500, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4228503277309195490
 CanvasRenderer:
@@ -333,11 +333,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00fc562b09d64a9f84010bccd0f08408, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EventDisplayCard
-  displayType: 3
-  cardStatus: 0
+  artworkImage: {fileID: 5554136846635054787}
+  movefrontScale: 1.2
   saveButton: {fileID: 7977867121656417593}
   playButton: {fileID: 2088309406924819656}
-  artworkImage: {fileID: 5554136846635054787}
 --- !u!1 &4614198144987464173
 GameObject:
   m_ObjectHideFlags: 0

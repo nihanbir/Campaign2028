@@ -15,7 +15,6 @@ public class UM_MainPhase : UM_BasePhase
 
     [Header("Players")]
     [SerializeField] private Transform playerUIParent;
-    [SerializeField] private float spacingBetweenPlayerCards = 150f;
     
     [Header("Event UI")]     
     [SerializeField] public ChallengeStateUIManager challengeUI;
@@ -76,7 +75,7 @@ public class UM_MainPhase : UM_BasePhase
     }
 
 #region Player Management
-    private void RelocatePlayerCards(Transform parent, float spacing)
+    private void RelocatePlayerCards(Transform parent)
     {
         var players = GameManager.Instance?.players;
         if (players == null || players.Count == 0)
@@ -84,8 +83,6 @@ public class UM_MainPhase : UM_BasePhase
             Debug.LogError("No players found for relocation.");
             return;
         }
-
-        float totalWidth = (players.Count - 1) * spacing;
 
         for (int i = 0; i < players.Count; i++)
         {
@@ -99,12 +96,6 @@ public class UM_MainPhase : UM_BasePhase
             }
 
             displayCard.transform.SetParent(parent, false);
-
-            if (displayCard.TryGetComponent(out RectTransform rt))
-            {
-                float xPos = i * spacing - totalWidth / 2f;
-                rt.anchoredPosition = new Vector2(xPos, 0);
-            }
 
             displayCard.displayType = CardDisplayType.AssignedActor;
             displayCard.gameObject.SetActive(true);
@@ -266,7 +257,7 @@ public class UM_MainPhase : UM_BasePhase
             }
         }
 
-        RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        // RelocatePlayerCards(playerUIParent);
         Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
     }
 #endregion Testing Helper

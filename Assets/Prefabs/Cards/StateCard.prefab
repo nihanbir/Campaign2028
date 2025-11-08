@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 5834333741464580609}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6752546, y: 0.6752546, z: 0.6752546}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6285293805522555374}
@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 500}
+  m_SizeDelta: {x: 500, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4976761636029325966
 CanvasRenderer:
@@ -90,6 +90,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StateDisplayCard
   artworkImage: {fileID: 8259195411305913387}
+  movefrontScale: 1.2
+  holdDuration: 1
 --- !u!1 &8010221903821559576
 GameObject:
   m_ObjectHideFlags: 0
