@@ -50,7 +50,21 @@ public class GM_SetupPhase : GM_BasePhase
     protected override void BeginPhase()
     {
         base.BeginPhase();
-        CurrentStage = SetupStage.Roll;
+
+        var ui = GameUIManager.Instance.setupUI;
+        if (ui)
+        {
+            ui.OnUIReady = () =>
+            {
+                Debug.Log("🟢 SetupPhase UI Ready — starting player turns");
+                CurrentStage = SetupStage.Roll;
+            };
+        }
+        else
+        {
+            // fallback in case UI not found
+            CurrentStage = SetupStage.Roll;
+        }
     }
 
     #region Stage Transitions

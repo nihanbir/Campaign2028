@@ -16,6 +16,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected bool isPlayerAI;
     
+    public System.Action OnUIReady;
+    
     private void Awake()
     {
         game = GameManager.Instance;
