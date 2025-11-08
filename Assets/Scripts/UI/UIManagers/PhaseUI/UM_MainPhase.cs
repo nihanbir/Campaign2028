@@ -26,8 +26,8 @@ public class UM_MainPhase : UM_BasePhase
     [SerializeField] private OwnedCardsPanel ownedCardsPanel;
     
     [Header("Event UI")]     
-    [SerializeField] public ChallengeStateUIManager challengeUI;
-    [SerializeField] public AlternativeStatesUIManager altStateUI;
+    [SerializeField] public EUM_ChallengeState challengeUI;
+    [SerializeField] public EUM_AlternativeStates altStateUI;
     
     [Header("UI Animation Settings")]
     public float cardSpawnDuration = 0.4f;

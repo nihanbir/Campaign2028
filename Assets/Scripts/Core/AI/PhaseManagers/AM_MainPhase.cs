@@ -135,11 +135,11 @@ public class AM_MainPhase
                 mainUI.OnRollDiceClicked();
                 break;
             
-            case ChallengeStateUIManager challengeUI:
+            case EUM_ChallengeState challengeUI:
                 challengeUI.OnRollDiceClicked();
                 break;
             
-            case AlternativeStatesUIManager altUI:
+            case EUM_AlternativeStates altUI:
                 altUI.OnRollDiceClicked();
                 break;
         }

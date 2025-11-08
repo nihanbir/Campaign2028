@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class BaseEventUI : MonoBehaviour
+public abstract class EUM_Base : MonoBehaviour
 {
     [SerializeField] protected GameObject eventScreen;
     [SerializeField] protected Button rollDiceButton;

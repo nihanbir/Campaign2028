@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AlternativeStatesUIManager : BaseEventUI
+public class EUM_AlternativeStates : EUM_Base
 {
     [SerializeField] private Transform playerUI;
     [SerializeField] private Transform leftCardUI;
