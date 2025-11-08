@@ -10,8 +10,6 @@ public class UM_SetupPhase : UM_BasePhase
     public GameObject cardDisplayPrefab;
     public Transform playerUIParent;
     public Transform actorUIParent;
-    public float spacingBetweenPlayerCards = 150f;
-    public float spacingBetweenActorCards = 300f;
     
     private PlayerDisplayCard _highlightedCard;
     private List<PlayerDisplayCard> _playerDisplayCards = new();
@@ -26,8 +24,8 @@ public class UM_SetupPhase : UM_BasePhase
     {
         _setupPhase = game.setupPhase;
 
-        CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent, spacingBetweenActorCards);
-        CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent, spacingBetweenPlayerCards);
+        CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent);
+        CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
         
         base.OnPhaseEnabled();
         
@@ -70,7 +68,7 @@ public class UM_SetupPhase : UM_BasePhase
         }
     }
 
-    void CreateCardUI(CardDisplayType cardType, Transform parent, float spacing)
+    void CreateCardUI(CardDisplayType cardType, Transform parent)
     {
         if (!GameManager.Instance)
         {
@@ -94,9 +92,7 @@ public class UM_SetupPhase : UM_BasePhase
                 Debug.LogError($"Invalid card type for creation: {cardType}");
                 return;
         }
-
-        float totalWidth = (count - 1) * spacing;
-
+        
         for (int i = 0; i < count; i++)
         {
             GameObject uiInstance = Instantiate(cardDisplayPrefab, parent);
@@ -114,13 +110,6 @@ public class UM_SetupPhase : UM_BasePhase
                 {
                     _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
                     _playerDisplayCards.Add(displayCard);
-                }
-                
-                RectTransform rt = uiInstance.GetComponent<RectTransform>();
-                if (rt)
-                {
-                    float xPos = i * spacing - totalWidth / 2f;
-                    rt.anchoredPosition = new Vector2(xPos, 0);
                 }
             }
             else

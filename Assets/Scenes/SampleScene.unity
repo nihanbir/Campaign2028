@@ -706,21 +706,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1051492886948652404, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_ReferenceResolution.x
-      value: 1920
-      objectReference: {fileID: 0}
-    - target: {fileID: 1051492886948652404, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_ReferenceResolution.y
-      value: 1080
-      objectReference: {fileID: 0}
     - target: {fileID: 1996305020619661639, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Name
       value: GameCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 2787361660308409141, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0.77090454
       objectReference: {fileID: 0}
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_Pivot.x
@@ -801,26 +789,6 @@ PrefabInstance:
     - target: {fileID: 5428860093183374431, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5544439552543579108, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: spacingBetweenPlayerCards
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8466703657781398189, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_Spacing
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8466703657781398189, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_ChildAlignment
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 8466703657781398189, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_Padding.m_Left
-      value: 300
-      objectReference: {fileID: 0}
-    - target: {fileID: 8466703657781398189, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: m_Padding.m_Right
-      value: 300
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

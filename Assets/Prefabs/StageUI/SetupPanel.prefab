@@ -33,10 +33,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 590234058828219355}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.54700005}
-  m_AnchorMax: {x: 1, y: 0.8578724}
-  m_AnchoredPosition: {x: 0, y: -0.67245483}
-  m_SizeDelta: {x: 0, y: -2.200902}
+  m_AnchorMin: {x: 0, y: 0.59250486}
+  m_AnchorMax: {x: 1, y: 0.90800005}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2466159150987846918
 CanvasRenderer:
@@ -287,8 +287,6 @@ MonoBehaviour:
   cardDisplayPrefab: {fileID: 4549318587885212283, guid: 7696ae11b4ae6f14582a6f4228c8b064, type: 3}
   playerUIParent: {fileID: 7431674135243233640}
   actorUIParent: {fileID: 9010180728352839122}
-  spacingBetweenPlayerCards: 150
-  spacingBetweenActorCards: 200
 --- !u!1 &2778742110003720283
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,10 +396,10 @@ RectTransform:
   m_Father: {fileID: 590234058828219355}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0.32700002}
-  m_AnchoredPosition: {x: 0, y: -0.6599121}
-  m_SizeDelta: {x: 311.59998, y: -1.31604}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 311.6, y: 167.27617}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &4565204680858257469
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -594,10 +592,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 590234058828219355}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.32700002}
-  m_AnchorMax: {x: 1, y: 0.54700005}
-  m_AnchoredPosition: {x: 0.00012207031, y: 0.6463165}
-  m_SizeDelta: {x: 0, y: -0.4361601}
+  m_AnchorMin: {x: 0, y: 0.277}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8076223613518087619
 CanvasRenderer:

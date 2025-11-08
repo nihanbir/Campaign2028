@@ -811,6 +811,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: SetupPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 2902101436756539929, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_ChildAlignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902101436756539929, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_Padding.m_Left
+      value: 325
+      objectReference: {fileID: 0}
+    - target: {fileID: 2902101436756539929, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_Padding.m_Right
+      value: 325
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129350527774937912, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_ChildAlignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129350527774937912, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_Padding.m_Left
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129350527774937912, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
+      propertyPath: m_Padding.m_Right
+      value: 350
+      objectReference: {fileID: 0}
     - target: {fileID: 7431674135243233640, guid: 248dbcd0f91bbe945a3384bbe536a057, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0.00024414062
@@ -1075,6 +1099,22 @@ PrefabInstance:
       propertyPath: challengeUI
       value: 
       objectReference: {fileID: 4420054567724687799}
+    - target: {fileID: 2535211725244805025, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_Spacing
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2535211725244805025, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_ChildAlignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2535211725244805025, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_Padding.m_Left
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 2535211725244805025, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_Padding.m_Right
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       propertyPath: m_Name
       value: MainGamePanel
@@ -1158,6 +1198,10 @@ PrefabInstance:
     - target: {fileID: 4799507147203409464, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8142390577227984441, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.77090454
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
