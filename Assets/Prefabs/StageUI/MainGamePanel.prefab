@@ -407,7 +407,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb67b8a0c57d4f84b1730a0836e490d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainPhaseUIManager
-  self: {fileID: 4403753703118668355}
   rollDiceButton: {fileID: 6707833643135122698}
   stateCardPrefab: {fileID: 5834333741464580609, guid: 4f2a106012446084b9307b767b226251, type: 3}
   institutionCardPrefab: {fileID: 5440763519769647416, guid: 9b42aa2c5e1cfd046a404255dc2641e6, type: 3}
