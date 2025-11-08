@@ -10,6 +10,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     [Header("Phase Elements")]     
     public Button rollDiceButton;
+    public Image diceImage;
     
     [Header("UI Animation Settings")]
     public float enterDuration = 0.6f;
@@ -54,6 +55,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
+        diceImage.gameObject.SetActive(false);
+        
         EnableDiceButton(false);
         
         SubscribeToPhaseEvents();
@@ -67,13 +70,13 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
+        isActive = false;
+        
         AnimatePhaseExit(() =>
         {
             // 🔥 Only run this AFTER animation is done
-            rollDiceButton.onClick.RemoveAllListeners();
             UnsubscribeToPhaseEvents();
             gameObject.SetActive(false);
-            isActive = false;
         });
     }
 
@@ -102,7 +105,9 @@ public abstract class UM_BasePhase : MonoBehaviour
     {
         var currentPlayer = GameManager.Instance.CurrentPlayer;
         
-        GameUIManager.Instance.OnRollDiceClicked(rollDiceButton);
+        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
+        GameUIManager.Instance.SetDiceSprite(diceImage);
+        
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
     }

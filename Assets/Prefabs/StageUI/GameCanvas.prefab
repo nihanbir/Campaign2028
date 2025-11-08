@@ -1115,6 +1115,14 @@ PrefabInstance:
       propertyPath: m_Padding.m_Right
       value: 300
       objectReference: {fileID: 0}
+    - target: {fileID: 3343863275301302216, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 3.0272217
+      objectReference: {fileID: 0}
+    - target: {fileID: 3343863275301302216, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.0025024414
+      objectReference: {fileID: 0}
     - target: {fileID: 4403753703118668355, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       propertyPath: m_Name
       value: MainGamePanel

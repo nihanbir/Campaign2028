@@ -15,6 +15,10 @@ public class UM_MainPhase : UM_BasePhase
 
     [Header("Players")]
     [SerializeField] private Transform playerUIParent;
+
+    [Header("PlayerPanel")] 
+    [SerializeField] private Button playerPanelButton;
+    [SerializeField] private OwnedCardsPanel ownedCardsPanel;
     
     [Header("Event UI")]     
     [SerializeField] public ChallengeStateUIManager challengeUI;
@@ -44,14 +48,17 @@ public class UM_MainPhase : UM_BasePhase
         
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         
-        base.OnPhaseEnabled();
-        
         //TODO: dont forget to remove
         InitializePlayersForTesting();
+        
+        base.OnPhaseEnabled();
     }
 
     protected override void SubscribeToPhaseEvents()
     {
+        base.SubscribeToPhaseEvents();
+        
+        playerPanelButton.onClick.AddListener(TogglePlayerPanel);
         _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
@@ -61,17 +68,25 @@ public class UM_MainPhase : UM_BasePhase
         
     }
 
-
     protected override void UnsubscribeToPhaseEvents()
     {
-        if (_mainPhase == null) return;
+        base.UnsubscribeToPhaseEvents();
         
+        if (_mainPhase == null) _mainPhase = game.mainPhase;
+        if (_eventManager == null) _eventManager = _mainPhase.EventManager;
+        
+        playerPanelButton.onClick.RemoveAllListeners();
         _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured -= OnCardCaptured;
         _mainPhase.OnCardSaved -= _ => OnEventSaved();
         _mainPhase.OnStateDiscarded -= _ => ClearTargetCard();
         _eventManager.OnEventApplied -= _ => OnEventApplied();
+    }
+    
+    private void TogglePlayerPanel()
+    {
+        ownedCardsPanel.TogglePanel();
     }
 
 #region Player Management
@@ -163,8 +178,6 @@ public class UM_MainPhase : UM_BasePhase
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
         _currentEventDisplayCard?.SetCard(card);
-
-        Debug.Log($"{isPlayerAI}");
         
         if (_currentEventDisplayCard)
             _currentEventDisplayCard.SetButtonsVisible(!isPlayerAI);

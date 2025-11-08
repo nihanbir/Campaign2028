@@ -7,9 +7,6 @@ public class UM_SetupPhase : UM_BasePhase
 {
     public override GamePhase PhaseType => GamePhase.Setup;
     
-    [Header("Root Animation")]
-    public RectTransform phaseRoot; // Assign your SetupPhase root (or Canvas) here
-    
     [Header("Card Display")]
     public GameObject cardDisplayPrefab;
     public Transform playerUIParent;
@@ -38,7 +35,7 @@ public class UM_SetupPhase : UM_BasePhase
     protected override void OnPhaseEnabled()
     {
         _setupPhase = game.setupPhase;
-
+        
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
         
@@ -131,11 +128,15 @@ public class UM_SetupPhase : UM_BasePhase
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         rollDiceButton.gameObject.SetActive(!isAssignStage);
 
-        // Button pop-in animation
+        // Dice pop-in animation
         if (rollDiceButton.gameObject.activeSelf)
         {
-            rollDiceButton.transform.localScale = Vector3.zero;
-            rollDiceButton.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
+            if (!diceImage.gameObject.activeSelf)
+            {
+                diceImage.gameObject.SetActive(true);
+            }
+            diceImage.transform.localScale = Vector3.zero;
+            diceImage.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
         }
     }
 
@@ -144,7 +145,7 @@ public class UM_SetupPhase : UM_BasePhase
         base.OnRollDiceClicked();
 
         // Roll button bounce feedback
-        rollDiceButton.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
 
         var roll = GameUIManager.Instance.DiceRoll;
         _setupPhase.PlayerRolledDice(roll);
