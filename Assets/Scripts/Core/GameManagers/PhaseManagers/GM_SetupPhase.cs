@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 
 public class GM_SetupPhase : GM_BasePhase
@@ -46,7 +47,8 @@ public class GM_SetupPhase : GM_BasePhase
     public event Action OnAllPlayersRolled;
     public event Action OnActorAssignStage;
     public event Action<Player, ActorCard> OnLastActorAssigned;
-    public event Action<List<Player>> OnRerollStageStarted;
+    public event Action<List<Player>> OnTiedRoll;
+    public event Action<Player> OnUniqueWinner;
 
 
     protected override void BeginPhase()
@@ -82,7 +84,7 @@ public class GM_SetupPhase : GM_BasePhase
                 break;
             
             case SetupStage.Reroll:
-                OnRerollStageStarted?.Invoke(_playersToRoll); // 🔥 Notify UI
+                BeginRerollStage();
                 break;
             
             case SetupStage.AssignActor:
@@ -151,20 +153,12 @@ public class GM_SetupPhase : GM_BasePhase
         if (winnersOfRoll.Count == 1)
         {
             Debug.Log($"Player {winnersOfRoll[0].playerID} won with roll {highestRoll}");
-
-            //TODO: do this to show the unique winner with animations in UI
-            // OnUniqueWinner?.Invoke(winnersOfRoll[0]);
-            //TODO: then call this from ui
-            HandleUniqueWinner(winnersOfRoll[0]);
+            OnUniqueWinner?.Invoke(winnersOfRoll[0]);
         }
         else
         {
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
-
-            //TODO: do this to show the rerollers with animations in UI
-            // OnHandleTiedRoll?.Invoke(winnersOfRoll);
-            //TODO: then call this from ui
-            HandleTiedRoll(winnersOfRoll);
+            OnTiedRoll?.Invoke(winnersOfRoll);
         }
     }
 
@@ -176,7 +170,7 @@ public class GM_SetupPhase : GM_BasePhase
             .ToList();
     }
 
-    private void HandleUniqueWinner(Player winner)
+    public void HandleUniqueWinner(Player winner)
     {
         _playerToSelect = winner;
         _rolledPlayers.Clear();
@@ -185,7 +179,7 @@ public class GM_SetupPhase : GM_BasePhase
         
     }
 
-    private void HandleTiedRoll(List<Player> tiedPlayers)
+    public void HandleTiedRoll(List<Player> tiedPlayers)
     {
         _playersToRoll.Clear();
         _playersToRoll.AddRange(tiedPlayers);
@@ -295,7 +289,7 @@ public class GM_SetupPhase : GM_BasePhase
         // Check if only one player remains without an actor
         if (ShouldAutoAssignLastActor())
         {
-            AutoAssignLastActor();
+            DOVirtual.DelayedCall(0.8f, AutoAssignLastActor);
         }
         else
         {
@@ -316,25 +310,23 @@ public class GM_SetupPhase : GM_BasePhase
     
     private bool ShouldAutoAssignLastActor()
     {
-        //TODO: add an event for this and invoke it in ui and listen in autoassignlastactor
         return _unassignedActors.Count == 1;
     }
     
     private void AutoAssignLastActor()
     {
-        // Notify UI to update visuals
-
         var lastPlayer = _unassignedPlayers[0];
         var lastActor = _unassignedActors[0];
-        //TODO: ui
+
         AssignActorToPlayer(lastPlayer, lastActor);
         
+        // Notify UI to update visuals
         OnLastActorAssigned?.Invoke(lastPlayer, lastActor);
         
-        OnAllActorsAssigned();
+        // OnAllActorsAssigned();
     }
     
-    private void OnAllActorsAssigned()
+    public void OnAllActorsAssigned()
     {
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
         //TODO: ui

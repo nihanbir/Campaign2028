@@ -33,10 +33,6 @@ public class UM_SetupPhase : UM_BasePhase
     public float rerollPulseDuration = 0.5f;
     public Ease rerollEase = Ease.InOutSine;
 
-    public bool IsAnimating { get; private set; }
-    
-    public System.Action OnAllPlayersRolledComplete;
-
     #region Initialize Phase UI
 
     protected override void OnPhaseEnabled()
@@ -65,11 +61,12 @@ public class UM_SetupPhase : UM_BasePhase
     {
         _setupPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
-        _setupPhase.OnAllPlayersRolled += HideDiceResults;
+        _setupPhase.OnAllPlayersRolled += AnimateAllDicePopAndThenProcess;
         _setupPhase.OnActorAssignStage += OnActorAssignStage;
         _setupPhase.OnLastActorAssigned += UpdatePlayerUIWithActor;
-        _setupPhase.OnRerollStageStarted += AnimateRerollPlayers;
-
+        _setupPhase.OnTiedRoll += AnimateRerollPlayers;
+        _setupPhase.OnUniqueWinner += AnimateWinner;
+        
     }
 
     protected override void UnsubscribeToPhaseEvents()
@@ -79,10 +76,11 @@ public class UM_SetupPhase : UM_BasePhase
         
         _setupPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _setupPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
-        _setupPhase.OnAllPlayersRolled -= HideDiceResults;
+        _setupPhase.OnAllPlayersRolled -= AnimateAllDicePopAndThenProcess;
         _setupPhase.OnActorAssignStage -= OnActorAssignStage;
         _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
-        _setupPhase.OnRerollStageStarted -= AnimateRerollPlayers;
+        _setupPhase.OnTiedRoll -= AnimateRerollPlayers;
+        _setupPhase.OnUniqueWinner -= AnimateWinner;
 
     }
 
@@ -91,38 +89,32 @@ public class UM_SetupPhase : UM_BasePhase
         PlayerDisplayCard.OnCardSelected += SelectActorCard;
         PlayerDisplayCard.OnPlayerCardClicked += AssignSelectedActorToPlayer;
     }
-
-    private void HideDiceResults()
-    {
-        StartCoroutine(AnimateAllDicePopAndThenProcess());
-    }
     
-    private IEnumerator AnimateAllDicePopAndThenProcess()
+    private void AnimateAllDicePopAndThenProcess()
     {
         Debug.Log("🎲 Animating all dice results...");
         
+        Sequence group = DOTween.Sequence();
+        
         foreach (var card in _playerDisplayCards)
         {
+            // Each card gets its own looping pulse sequence
             var diceObj = card.GetDiceTransform();
             if (diceObj != null)
             {
-                diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack);
+                Sequence pulse = DOTween.Sequence();
+                pulse.Append(diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack));
+                
+                group.Join(pulse);
+                
             }
         }
         
-        // Wait for the animation + extra pause
-        yield return new WaitForSeconds(1.5f); // 🕒 Longer wait to let results sink in
-
-        //TODO: Hide them after processingrollresults and animating the result
-        foreach (var card in _playerDisplayCards)
+        group.OnComplete(() =>
         {
-            card.ShowDice(false);
-        }
-
-        yield return new WaitForSeconds(0.5f); // small breathing room before next phase
-
-        Debug.Log("🎬 Dice animation complete — resuming game logic");
-        _setupPhase.ProcessRollResults();
+            Debug.Log("🎬 Dice animation complete — resuming game logic");
+            _setupPhase.ProcessRollResults();
+        });
         
     }
     
@@ -160,7 +152,8 @@ public class UM_SetupPhase : UM_BasePhase
                     _playerDisplayCards.Add(displayCard);
                 }
 
-                AnimateCardSpawn(uiInstance.transform, i * 0.05f);
+                //TODO: Use this in main
+                // AnimateCardSpawn(uiInstance.transform, i * 0.05f);
             }
             else
                 Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
@@ -253,7 +246,7 @@ public class UM_SetupPhase : UM_BasePhase
         });
     }
     
-    public void UpdatePlayerUIWithActor(Player lastPlayer, ActorCard lastActor)
+    private void UpdatePlayerUIWithActor(Player lastPlayer, ActorCard lastActor)
     { 
         Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
     
@@ -267,6 +260,7 @@ public class UM_SetupPhase : UM_BasePhase
             RemoveCard(lastActorCard);
             lastPlayerCard.ConvertToAssignedActor(lastActor);
             _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
+            _setupPhase.OnAllActorsAssigned();
         });
     }
     
@@ -347,6 +341,9 @@ public class UM_SetupPhase : UM_BasePhase
     
     private void AnimateRerollPlayers(List<Player> rerollingPlayers)
     {
+        // Create a master sequence
+        Sequence group = DOTween.Sequence();
+
         foreach (var player in rerollingPlayers)
         {
             var card = FindDisplayCardForPlayer(player);
@@ -354,18 +351,55 @@ public class UM_SetupPhase : UM_BasePhase
 
             var t = card.transform;
 
-            // Flash + scale pulse to draw attention
-            Sequence s = DOTween.Sequence();
-            s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
-            s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
-            s.SetLoops(3, LoopType.Yoyo);
+            // Each card gets its own looping pulse sequence
+            Sequence pulse = DOTween.Sequence();
+            pulse.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
+            pulse.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
+            pulse.SetLoops(3, LoopType.Yoyo);
 
-            //TODO: wait until animation is done and then do this
-            _setupPhase.BeginRerollStage();
-            // Optional: glowing highlight if you have outline material
-            // card.SetHighlightColor(Color.yellow);
+            // Add this sequence to the group so they play in parallel
+            group.Join(pulse);
+        }
+        
+        // 🔥 When all pulses are done, handle tied roll
+        group.OnComplete(() =>
+        {
+            Debug.Log("All reroll animations done");
+            HideCardDices(true);
+            _setupPhase.HandleTiedRoll(rerollingPlayers);
+        });
+    }
+
+    private void AnimateWinner(Player winner)
+    {
+        var card = FindDisplayCardForPlayer(winner);
+        if (card == null) return;
+
+        var t = card.transform;
+
+        // Flash + scale pulse to draw attention
+        Sequence s = DOTween.Sequence();
+        s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
+        s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
+        s.SetLoops(3, LoopType.Yoyo);
+        
+        // 🔥 Wait until the animation is fully done
+        s.OnComplete(() =>
+        {
+            HideCardDices(true);
+            _setupPhase.HandleUniqueWinner(winner);
+        });
+    }
+
+    private void HideCardDices(bool hide)
+    {
+        foreach (var card in _playerDisplayCards)
+        {
+            card.ShowDice(!hide);
         }
     }
+    
+    
 
     #endregion
 }
