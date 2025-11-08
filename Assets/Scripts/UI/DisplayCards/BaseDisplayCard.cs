@@ -50,11 +50,9 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
         isResized = true;
         
         originalScale = transform.localScale;
-        originalSiblingIndex = transform.GetSiblingIndex();
+        
         
         // Move to front
-        transform.SetAsLastSibling();
-        
         transform.localScale = originalScale * movefrontScale;
     }
     
@@ -62,9 +60,6 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
     {
         if (!isResized) return;
         isResized = false;
-        
-        // Restore original sibling index
-        transform.SetSiblingIndex(originalSiblingIndex);
         
         transform.localScale = originalScale;
     }
