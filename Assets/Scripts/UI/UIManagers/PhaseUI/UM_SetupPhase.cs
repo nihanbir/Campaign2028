@@ -7,6 +7,9 @@ public class UM_SetupPhase : UM_BasePhase
 {
     public override GamePhase PhaseType => GamePhase.Setup;
     
+    [Header("Root Animation")]
+    public RectTransform phaseRoot; // Assign your SetupPhase root (or Canvas) here
+    
     [Header("Card Display")]
     public GameObject cardDisplayPrefab;
     public Transform playerUIParent;
@@ -18,11 +21,8 @@ public class UM_SetupPhase : UM_BasePhase
     private GM_SetupPhase _setupPhase;
 
     [Header("UI Animation Settings")]
-    public float enterDuration = 0.6f;
     public float cardSpawnDuration = 0.4f;
     public float assignDuration = 0.5f;
-    public Ease enterEase = Ease.OutBack;
-    public Ease exitEase = Ease.InBack;
     
     [Header("Dice Animation Settings")]
     public float dicePopScale = 1.4f;
@@ -39,22 +39,10 @@ public class UM_SetupPhase : UM_BasePhase
     {
         _setupPhase = game.setupPhase;
 
-        // Animate UI entry
-        AnimatePhaseEntry();
-
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
         
         base.OnPhaseEnabled();
-    }
-
-    protected override void OnPhaseDisabled()
-    {
-        DOTween.Kill(actorUIParent);
-        DOTween.Kill(playerUIParent);
-        DOTween.Kill(rollDiceButton.transform);
-
-        AnimatePhaseExit(() => base.OnPhaseDisabled());
     }
 
     protected override void SubscribeToPhaseEvents()
@@ -88,34 +76,6 @@ public class UM_SetupPhase : UM_BasePhase
     {
         PlayerDisplayCard.OnCardSelected += SelectActorCard;
         PlayerDisplayCard.OnPlayerCardClicked += AssignSelectedActorToPlayer;
-    }
-    
-    private void AnimateAllDicePopAndThenProcess()
-    {
-        Debug.Log("🎲 Animating all dice results...");
-        
-        Sequence group = DOTween.Sequence();
-        
-        foreach (var card in _playerDisplayCards)
-        {
-            // Each card gets its own looping pulse sequence
-            var diceObj = card.GetDiceTransform();
-            if (diceObj != null)
-            {
-                Sequence pulse = DOTween.Sequence();
-                pulse.Append(diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack));
-                
-                group.Join(pulse);
-                
-            }
-        }
-        
-        group.OnComplete(() =>
-        {
-            Debug.Log("🎬 Dice animation complete — resuming game logic");
-            _setupPhase.ProcessRollResults();
-        });
-        
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent)
@@ -296,30 +256,33 @@ public class UM_SetupPhase : UM_BasePhase
     #endregion
 
     #region Animations
-
-    private void AnimatePhaseEntry()
+    
+    private void AnimateAllDicePopAndThenProcess()
     {
-        actorUIParent.localPosition += new Vector3(-600f, 0, 0);
-        playerUIParent.localPosition += new Vector3(600f, 0, 0);
-
-        Sequence seq = DOTween.Sequence();
-        seq.Join(actorUIParent.DOLocalMoveX(0f, enterDuration).SetEase(enterEase));
-        seq.Join(playerUIParent.DOLocalMoveX(0f, enterDuration).SetEase(enterEase).SetDelay(0.1f));
-        seq.Join(rollDiceButton.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack).SetDelay(0.3f));
+        Debug.Log("🎲 Animating all dice results...");
         
-        seq.OnComplete(() =>
+        Sequence group = DOTween.Sequence();
+        
+        foreach (var card in _playerDisplayCards)
         {
-            Debug.Log("✅ UI ready for SetupPhase");
-            OnUIReady?.Invoke(); // <-- tell game logic we're done
+            // Each card gets its own looping pulse sequence
+            var diceObj = card.GetDiceTransform();
+            if (diceObj != null)
+            {
+                Sequence pulse = DOTween.Sequence();
+                pulse.Append(diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack));
+                
+                group.Join(pulse);
+                
+            }
+        }
+        
+        group.OnComplete(() =>
+        {
+            Debug.Log("🎬 Dice animation complete — resuming game logic");
+            _setupPhase.ProcessRollResults();
         });
-    }
-
-    private void AnimatePhaseExit(System.Action onComplete)
-    {
-        Sequence s = DOTween.Sequence();
-        s.Join(actorUIParent.DOLocalMoveX(-600f, 0.4f).SetEase(exitEase));
-        s.Join(playerUIParent.DOLocalMoveX(600f, 0.4f).SetEase(exitEase));
-        s.OnComplete(() => onComplete?.Invoke());
+        
     }
 
     private void AnimateCardSpawn(Transform card, float delay)
@@ -349,13 +312,7 @@ public class UM_SetupPhase : UM_BasePhase
             var card = FindDisplayCardForPlayer(player);
             if (card == null) continue;
 
-            var t = card.transform;
-
-            // Each card gets its own looping pulse sequence
-            Sequence pulse = DOTween.Sequence();
-            pulse.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
-            pulse.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
-            pulse.SetLoops(3, LoopType.Yoyo);
+            var pulse = PulsateCardDice(card);
 
             // Add this sequence to the group so they play in parallel
             group.Join(pulse);
@@ -375,13 +332,7 @@ public class UM_SetupPhase : UM_BasePhase
         var card = FindDisplayCardForPlayer(winner);
         if (card == null) return;
 
-        var t = card.transform;
-
-        // Flash + scale pulse to draw attention
-        Sequence s = DOTween.Sequence();
-        s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
-        s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
-        s.SetLoops(3, LoopType.Yoyo);
+        var s = PulsateCardDice(card);
         
         // 🔥 Wait until the animation is fully done
         s.OnComplete(() =>
@@ -389,6 +340,19 @@ public class UM_SetupPhase : UM_BasePhase
             HideCardDices(true);
             _setupPhase.HandleUniqueWinner(winner);
         });
+    }
+
+    private Sequence PulsateCardDice(PlayerDisplayCard card)
+    {
+        var t = card.transform;
+
+        // Flash + scale pulse to draw attention
+        Sequence s = DOTween.Sequence();
+        s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
+        s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));
+        s.SetLoops(3, LoopType.Yoyo);
+
+        return s;
     }
 
     private void HideCardDices(bool hide)

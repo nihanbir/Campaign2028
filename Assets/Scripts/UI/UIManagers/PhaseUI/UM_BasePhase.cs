@@ -1,5 +1,6 @@
 
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,12 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     [Header("Phase Elements")]     
     public Button rollDiceButton;
+    
+    [Header("UI Animation Settings")]
+    public float enterDuration = 0.6f;
+    public Ease enterEase = Ease.OutBack;
+    public Ease exitEase = Ease.InBack;
+    
 
     public abstract GamePhase PhaseType { get; }
 
@@ -53,16 +60,21 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         gameObject.SetActive(true);
         isActive = true;
+        
+        // Animate UI entry
+        AnimatePhaseEntry();
     }
 
     protected virtual void OnPhaseDisabled()
     {
-        rollDiceButton.onClick.RemoveAllListeners();
-        
-        UnsubscribeToPhaseEvents();
-        
-        gameObject.SetActive(false);
-        isActive = false;
+        AnimatePhaseExit(() =>
+        {
+            // 🔥 Only run this AFTER animation is done
+            rollDiceButton.onClick.RemoveAllListeners();
+            UnsubscribeToPhaseEvents();
+            gameObject.SetActive(false);
+            isActive = false;
+        });
     }
 
     protected virtual void SubscribeToPhaseEvents() { }
@@ -94,12 +106,6 @@ public abstract class UM_BasePhase : MonoBehaviour
         currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
         
     }
-    
-    protected IEnumerator WaitForVisuals()
-    {
-        yield return new WaitForSeconds(0.5f); // small delay ensures rolled dices being visible
-        // GameManager.Instance.setupPhase.PlayerRolledDice();
-    }
 
     protected virtual void EnableDiceButton(bool enable)
     {
@@ -109,6 +115,35 @@ public abstract class UM_BasePhase : MonoBehaviour
             enable = false;
         }
         rollDiceButton.interactable = enable;
+    }
+    
+    protected virtual void AnimatePhaseEntry()
+    {
+        transform.localPosition += new Vector3(-1200f, 0f, 0f);
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(transform.DOLocalMoveX(0f, enterDuration).SetEase(enterEase));
+        seq.Join(transform.DOScale(1.02f, 0.3f).SetLoops(2, LoopType.Yoyo));
+
+        seq.OnComplete(() => OnUIReady?.Invoke());
+
+    }
+    
+    protected virtual void AnimatePhaseExit(System.Action onComplete)
+    {
+        Sequence s = DOTween.Sequence();
+        s.Append(transform.DOLocalMoveX(1200f, 0.5f).SetEase(exitEase));
+
+        // Optional fade-out if CanvasGroup is present
+        var cg = GetComponent<CanvasGroup>();
+        if (cg) s.Join(cg.DOFade(0f, 0.4f));
+
+        s.OnComplete(() =>
+        {
+            if (cg) cg.alpha = 1f;
+            transform.localScale = Vector3.one;
+            onComplete?.Invoke();
+        });
     }
     
 }
