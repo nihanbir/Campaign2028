@@ -71,8 +71,7 @@ public class AM_MainPhase
         //TODO: call from UI button
         if (!(ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card)))
         {
-            //TODO: call from ui button
-            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+            _mainUI.OnClickEventApply();
         }
         else
         {

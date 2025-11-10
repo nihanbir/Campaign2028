@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -42,6 +43,8 @@ public class UM_MainPhase : UM_BasePhase
     private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
     
+    private Action<StateCard> _stateDiscardedHandler;
+    
     protected override void OnPhaseEnabled()
     {
         _mainPhase = game.mainPhase;
@@ -84,7 +87,9 @@ public class UM_MainPhase : UM_BasePhase
         _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
-        _mainPhase.OnStateDiscarded += _ => ClearTargetCard();
+        
+        _stateDiscardedHandler = _ => ClearTargetCard();
+        _mainPhase.OnStateDiscarded += _stateDiscardedHandler;
         
     }
 
@@ -105,7 +110,9 @@ public class UM_MainPhase : UM_BasePhase
         _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured -= OnCardCaptured;
-        _mainPhase.OnStateDiscarded -= _ => ClearTargetCard();
+        
+        if (_stateDiscardedHandler != null)
+            _mainPhase.OnStateDiscarded -= _stateDiscardedHandler;
     }
     
     private void TogglePlayerPanel()
@@ -190,6 +197,8 @@ public class UM_MainPhase : UM_BasePhase
         if (_currentTargetGO) Destroy(_currentTargetGO);
         
         var card = _mainPhase.DrawTargetCard();
+        
+        if (card == null) return;
         
         GameObject prefab = card switch
         {
@@ -277,7 +286,7 @@ public class UM_MainPhase : UM_BasePhase
         }
     }
 
-    private void OnClickEventApply()
+    public void OnClickEventApply()
     {
         AnimateEventApplied(_currentEventGO, out var anim);
 

@@ -26,6 +26,7 @@ public class GM_MainPhase : GM_BasePhase
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;
     public event Action<StateCard> OnStateDiscarded;
+    private Action<EventCard> _eventAppliedHandler;
 
     public GM_MainPhase()
     {
@@ -37,7 +38,8 @@ public class GM_MainPhase : GM_BasePhase
     protected override void BeginPhase()
     {
         base.BeginPhase();
-        EventManager.OnEventApplied += _ => ClearEventCard();
+        _eventAppliedHandler = _ => ClearEventCard();
+        EventManager.OnEventApplied += _eventAppliedHandler;
         game.currentPlayerIndex = 0;
         
         var ui = GameUIManager.Instance.mainUI;
@@ -53,9 +55,9 @@ public class GM_MainPhase : GM_BasePhase
 
     protected override void EndPhase()
     {
-        //TODO:Clear all event listeners
         base.EndPhase();
-        EventManager.OnEventApplied -= _ => ClearEventCard();
+        if (_eventAppliedHandler != null)
+            EventManager.OnEventApplied -= _eventAppliedHandler;
     }
 
     private void BuildAndShuffleDecks()
