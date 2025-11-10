@@ -438,7 +438,7 @@ private void UpdateRollButtonState()
         var eventManager = _eventManager ?? _mainPhase.EventManager;
 
         bool eventInactive = !eventManager.IsEventActive;
-        bool playerHasResolvedEvent = _currentTargetGO == null;
+        bool playerHasResolvedEvent = _currentEventGO == null;
         bool canRoll = currentPlayer.CanRoll();
 
         enable = eventInactive && playerHasResolvedEvent && canRoll;
