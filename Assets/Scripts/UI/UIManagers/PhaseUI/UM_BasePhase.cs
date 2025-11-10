@@ -85,11 +85,8 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
-        Debug.Log("is it ever here");
         isPlayerAI = AIManager.Instance.IsAIPlayer(player);
         
-        EnableDiceButton(true);
-
         player.PlayerDisplayCard.Highlight();
         
     }
@@ -122,6 +119,7 @@ public abstract class UM_BasePhase : MonoBehaviour
             enable = false;
         }
 
+        //TODO: called 3 times when player turn ends
         Debug.Log($"{enable}");
         rollDiceButton.interactable = enable;
     }

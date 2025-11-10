@@ -20,6 +20,9 @@ public class UM_MainPhase : UM_BasePhase
     [Header("Buttons")]
     [SerializeField] private Button playEventButton;
     [SerializeField] private Button saveEventButton;
+    [SerializeField] private Button drawEventButton;
+    [SerializeField] private Button drawTargetButton;
+    
 
     [Header("PlayerPanel")] 
     [SerializeField] private Button playerPanelButton;
@@ -42,6 +45,11 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPhaseEnabled()
     {
         _mainPhase = game.mainPhase;
+        
+        ClearTargetCard();
+        ClearEventCard();
+        
+        SetEventButtonsInteractable(false);
         
         if (_mainPhase == null)
         {
@@ -67,19 +75,16 @@ public class UM_MainPhase : UM_BasePhase
         base.SubscribeToPhaseEvents();
         
         playerPanelButton.onClick.AddListener(TogglePlayerPanel);
+        drawEventButton.onClick.AddListener(OnSpawnEventClicked);
+        drawTargetButton.onClick.AddListener(OnSpawnTargetClicked);
         
-        //TODO: fix
         saveEventButton.onClick.AddListener(OnClickEventSave);
         playEventButton.onClick.AddListener(OnClickEventApply);
-        _eventManager.OnEventApplied += _ => OnEventApplied();
-        _mainPhase.OnCardSaved += _ => OnEventSaved();
-        
         
         _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
         _mainPhase.OnStateDiscarded += _ => ClearTargetCard();
-        
         
     }
 
@@ -91,14 +96,11 @@ public class UM_MainPhase : UM_BasePhase
         if (_eventManager == null) _eventManager = _mainPhase.EventManager;
         
         playerPanelButton.onClick.RemoveAllListeners();
+        drawEventButton.onClick.RemoveAllListeners();
+        drawTargetButton.onClick.RemoveAllListeners();
         
-        //TODO: fix
         saveEventButton.onClick.RemoveAllListeners();
         playEventButton.onClick.RemoveAllListeners();
-        _eventManager.OnEventApplied -= _ => OnEventApplied();
-        _mainPhase.OnCardSaved -= _ => OnEventSaved();
-        
-        
         
         _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
         _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
@@ -148,6 +150,15 @@ public class UM_MainPhase : UM_BasePhase
         base.OnPlayerTurnStarted(player);
         
         EnableDiceButton(false);
+        
+        if (!isPlayerAI)
+        {
+            
+            if (!_currentTargetGO)
+                drawTargetButton.interactable = true;
+            
+            drawEventButton.interactable = true;
+        }
     }
 
     protected override void OnPlayerTurnEnded(Player player)
@@ -155,7 +166,6 @@ public class UM_MainPhase : UM_BasePhase
        base.OnPlayerTurnEnded(player);
        
        player.PlayerDisplayCard.ShowDice(false);
-       ClearEventCard();
     }
 
     public override void OnRollDiceClicked()
@@ -165,7 +175,7 @@ public class UM_MainPhase : UM_BasePhase
         int roll = GameUIManager.Instance.DiceRoll;
         _mainPhase.PlayerRolledDice(roll);
         
-        EnableDiceButton(GameManager.Instance.CurrentPlayer.CanRoll());
+        UpdateRollButtonState();
         
     }
 
@@ -173,10 +183,14 @@ public class UM_MainPhase : UM_BasePhase
     
 #region Card Spawning
 
-    public void SpawnTargetCard(Card card)
+    public void OnSpawnTargetClicked()
     {
+        drawTargetButton.interactable = false;
+        
         if (_currentTargetGO) Destroy(_currentTargetGO);
-
+        
+        var card = _mainPhase.DrawTargetCard();
+        
         GameObject prefab = card switch
         {
             InstitutionCard => institutionCardPrefab,
@@ -201,13 +215,16 @@ public class UM_MainPhase : UM_BasePhase
         }
         
         AnimateCardSpawn(_currentTargetGO.transform, 0.1f);
-        
     }
 
-    public void SpawnEventCard(EventCard card)
+    public void OnSpawnEventClicked()
     {
+        drawEventButton.interactable = false;
+        
         if (_currentEventGO) Destroy(_currentEventGO);
-
+        
+        EventCard card = _mainPhase.DrawEventCard();
+        
         _currentEventGO = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = _currentEventGO.GetComponent<EventDisplayCard>();
         _currentEventDisplayCard?.SetCard(card);
@@ -221,9 +238,10 @@ public class UM_MainPhase : UM_BasePhase
     {
         playEventButton.interactable = interactable;
 
-        var cardIsSaveable = _currentEventDisplayCard.GetCard().canSave;
-        
-        var canSave = cardIsSaveable && interactable;
+        bool canSave = false;
+        if (_currentEventDisplayCard && _currentEventDisplayCard.GetCard() != null)
+            canSave = _currentEventDisplayCard.GetCard().canSave && interactable;
+
         saveEventButton.interactable = canSave;
         
     }
@@ -232,9 +250,10 @@ public class UM_MainPhase : UM_BasePhase
     
 #region Card Feedback
 
+//TODO: animation
     private void OnCardCaptured(Player player, Card card)
     {
-        if (_currentTargetGO) Destroy(_currentTargetGO);
+        ClearTargetCard();
     }
 
     private void ClearEventCard()
@@ -246,43 +265,51 @@ public class UM_MainPhase : UM_BasePhase
         _currentEventDisplayCard = null;
         
         Destroy(_currentEventGO);
+        _currentEventGO = null;
     }
     
     private void ClearTargetCard()
     {
-        if (_currentTargetGO) Destroy(_currentTargetGO);
+        if (_currentTargetGO)
+        {
+            Destroy(_currentTargetGO);
+            _currentTargetGO = null;
+        }
     }
 
     private void OnClickEventApply()
     {
-        _eventManager.ApplyEvent(GameManager.Instance.CurrentPlayer, _currentEventDisplayCard.GetCard());
-    }
-    private void OnEventApplied()
-    {
-        ClearEventCard();
-        
-        if (!_eventManager.IsEventActive && GameManager.Instance.CurrentPlayer.CanRoll())
+        AnimateEventApplied(_currentEventGO, out var anim);
+
+        if (anim != null)
         {
-            EnableDiceButton(true);
+            anim.OnComplete(() =>
+            {
+                _eventManager.ApplyEvent(GameManager.Instance.CurrentPlayer, _currentEventDisplayCard.GetCard());
         
-            DicePopInAnimation();
+                ClearEventCard();
+
+                if (!isPlayerAI)
+                    UpdateRollButtonState();
+            });
         }
+        
     }
 
     private void OnClickEventSave()
     {
-        _mainPhase.TrySaveEvent(_currentEventDisplayCard.GetCard());
-    }
-    
-    private void OnEventSaved()
-    {
-        ClearEventCard();
-     
-        //TODO: UI work
-        
-        if (GameManager.Instance.CurrentPlayer.CanRoll())
+        if (_mainPhase.TrySaveEvent(_currentEventDisplayCard.GetCard()))
         {
-            EnableDiceButton(true);
+            AnimateEventSaved(_currentEventGO, out var saveAnim);
+            if (saveAnim != null)
+            {
+                saveAnim.OnComplete(() =>
+                {
+                    ClearEventCard();
+                    if (!isPlayerAI)
+                        UpdateRollButtonState();
+                });
+            }
         }
     }
     
@@ -297,6 +324,46 @@ public class UM_MainPhase : UM_BasePhase
             .SetEase(Ease.OutBack)
             .SetDelay(delay)
             .SetUpdate(true);
+    }
+    
+    private void AnimateEventApplied(GameObject eventGO, out Sequence seq)
+    {
+        seq = null;
+        if (!eventGO) return;
+
+        var t = eventGO.transform;
+        t.DOKill();
+        
+        seq = DOTween.Sequence();
+        seq.Append(t.DOShakePosition(0.3f, 15f, 10, 90, false, true));
+        seq.Join(t.DOScale(1.2f, 0.15f).SetLoops(2, LoopType.Yoyo));
+        seq.Append(t.DOScale(0f, 0.25f).SetEase(Ease.InBack));
+    }
+
+    private void AnimateCardCaptured(GameObject cardGO, out Sequence seq)
+    {
+        seq = null;
+        if (!cardGO) return;
+
+        var t = cardGO.transform;
+        t.DOKill();
+
+        seq = DOTween.Sequence();
+        seq.Append(t.DOScale(1.2f, 0.25f).SetEase(Ease.OutBack));
+        seq.Join(t.DOPunchRotation(new Vector3(0, 0, 10f), 0.3f, 6, 0.8f));
+        seq.Append(t.DOScale(0f, 0.3f).SetEase(Ease.InBack));
+    }
+
+    private void AnimateEventSaved(GameObject eventGO, out Sequence seq)
+    {
+        seq = null;
+        if (!eventGO) return;
+
+        var t = eventGO.transform;
+        t.DOKill();
+
+        seq = DOTween.Sequence();
+        seq.Append(t.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.8f));
     }
 
     #endregion
@@ -345,5 +412,31 @@ public class UM_MainPhase : UM_BasePhase
         Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
     }
 #endregion Testing Helper
+
+private void UpdateRollButtonState()
+{
+    var currentPlayer = GameManager.Instance.CurrentPlayer;
+
+    // 🔒 Disable by default
+    bool enable = false;
+
+    // Conditions:
+    // - Not AI
+    // - Not while an event is active
+    // - Player has either played or saved their event
+    if (!isPlayerAI)
+    {
+        var eventManager = _eventManager ?? _mainPhase.EventManager;
+
+        bool eventInactive = !eventManager.IsEventActive;
+        bool playerHasResolvedEvent = _currentTargetGO == null;
+        bool canRoll = currentPlayer.CanRoll();
+
+        enable = eventInactive && playerHasResolvedEvent && canRoll;
+    }
+
+    EnableDiceButton(enable);
+}
+
     
 }

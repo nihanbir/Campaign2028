@@ -121,8 +121,11 @@ public class UM_SetupPhase : UM_BasePhase
     {
         base.OnPlayerTurnStarted(player);
         
+        EnableDiceButton(true);
+        
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         rollDiceButton.gameObject.SetActive(!isAssignStage);
+        
 
        DicePopInAnimation();
     }

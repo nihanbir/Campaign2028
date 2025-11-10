@@ -21,19 +21,27 @@ public class AM_MainPhase
 
 #region Regular Turn Execution
 
-    public IEnumerator ExecuteAITurn(AIPlayer aiPlayer, EventCard card)
+    public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
         if (_mainPhase == null) _mainPhase = GameManager.Instance.mainPhase;
         if (_mainUI == null) _mainUI = GameUIManager.Instance.mainUI;
         if (_eventManager == null) _eventManager = _mainPhase.EventManager;
         
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         //TODO: Think delay or future logic (use saved events, modifiers, etc.)
 
-        if (card != null)
+        if (_mainPhase.CurrentTargetCard == null)
         {
-            yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, card));
+            _mainUI.OnSpawnTargetClicked();
+        }
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        _mainUI.OnSpawnEventClicked();
+        
+        if (_mainPhase.CurrentEventCard != null)
+        {
+            yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, _mainPhase.CurrentEventCard));
         }
         
         if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
@@ -60,8 +68,10 @@ public class AM_MainPhase
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
+        //TODO: call from UI button
         if (!(ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card)))
         {
+            //TODO: call from ui button
             _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
         }
         else

@@ -7,8 +7,8 @@ public class GM_MainPhase : GM_BasePhase
 {
     public override GamePhase PhaseType => GamePhase.MainGame;
     
-    private Card _currentTargetCard;
-    private EventCard _currentEventCard;
+    public Card CurrentTargetCard { get; private set; }
+    public EventCard CurrentEventCard { get; private set; }
 
     private readonly Dictionary<Player, EventCard> _heldEvents = new();
     private readonly Dictionary<Card, Player> _cardOwners = new();
@@ -25,7 +25,6 @@ public class GM_MainPhase : GM_BasePhase
 
     // === Events for UI or external systems ===
     public event Action<Player, Card> OnCardCaptured;
-    public event Action<EventCard> OnCardSaved;
     public event Action<StateCard> OnStateDiscarded;
 
     public GM_MainPhase()
@@ -34,13 +33,22 @@ public class GM_MainPhase : GM_BasePhase
         
         BuildAndShuffleDecks();
     }
-
+    
     protected override void BeginPhase()
     {
         base.BeginPhase();
         EventManager.OnEventApplied += _ => ClearEventCard();
         game.currentPlayerIndex = 0;
-        StartPlayerTurn();
+        
+        var ui = GameUIManager.Instance.mainUI;
+        if (ui)
+        {
+            ui.OnUIReady = () =>
+            {
+                Debug.Log("🟢 Mainphase UI Ready — starting player turns");
+                StartPlayerTurn();
+            };
+        }
     }
 
     protected override void EndPhase()
@@ -75,17 +83,10 @@ public class GM_MainPhase : GM_BasePhase
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn started. Player team: {current.assignedActor.team}---");
         
-        //This needs to be invoked before drawing a card to set _isPlayerAI correctly in UImanager
-
-        _currentTargetCard ??= DrawTargetCard();
-
-        _currentEventCard ??= DrawEventCard();
-        
-        //TODO: ai can do this
         if (aiManager.IsAIPlayer(current))
         {
             var aiPlayer = aiManager.GetAIPlayer(current);
-            game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+            game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer));
         }
     }
 
@@ -129,11 +130,13 @@ public class GM_MainPhase : GM_BasePhase
 
     public void CheckStateCardConditions(int roll, out bool stateDiscarded)
     {
-        if (_currentTargetCard is StateCard state)
+        if (CurrentTargetCard is StateCard state)
         {
             if (state.hasSecession && roll == 1)
             {
-                Debug.Log($"Player {game.CurrentPlayer.playerID} rolled: {roll} and {_currentTargetCard.cardName} had secession");
+                Debug.Log($"Player {game.CurrentPlayer.playerID} rolled: {roll} and {CurrentTargetCard.cardName} had secession");
+                
+                //TODO: Fire an event for UI and then call this from UI
                 DiscardState(state);
                 stateDiscarded = true;
                 return;
@@ -141,6 +144,7 @@ public class GM_MainPhase : GM_BasePhase
 
             if (state.hasRollAgain && roll == 4)
             {
+                //TODO: move add extraroll logic to here and fire event for UI to indicate
                 game.CurrentPlayer.AddExtraRoll();
             }
         }
@@ -166,7 +170,7 @@ public class GM_MainPhase : GM_BasePhase
         }
         else
         {
-            success = _currentTargetCard switch
+            success = CurrentTargetCard switch
             {
                 StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
                 InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
@@ -176,10 +180,12 @@ public class GM_MainPhase : GM_BasePhase
 
         if (success)
         {
-            CaptureCard(player, _currentTargetCard);
+            //TODO: call this from UI
+            CaptureCard(player, CurrentTargetCard);
             
-            OnCardCaptured?.Invoke(player, _currentTargetCard);
-            _currentTargetCard = null;
+            OnCardCaptured?.Invoke(player, CurrentTargetCard);
+            
+            CurrentTargetCard = null;
             EndPlayerTurn();
         }
         else if (player.CanRoll())
@@ -189,12 +195,12 @@ public class GM_MainPhase : GM_BasePhase
             if (aiManager.IsAIPlayer(player))
             {
                 var aiPlayer = aiManager.GetAIPlayer(player);
-                game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer, _currentEventCard));
+                game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer));
             }
         }
         else
         {
-            Debug.Log($"Player {player.playerID} failed to capture {_currentTargetCard.cardName}");
+            Debug.Log($"Player {player.playerID} failed to capture {CurrentTargetCard.cardName}");
             EndPlayerTurn();
         }
     }
@@ -209,7 +215,7 @@ public class GM_MainPhase : GM_BasePhase
             Debug.LogWarning($"Attempted to capture {card.cardName}, but it's already held by {GetCardHolder(card)?.playerID}.");
             return;
         }
-
+        
         card.isCaptured = true;
 
         // Add to the correct collection
@@ -271,25 +277,30 @@ public class GM_MainPhase : GM_BasePhase
     }
     
     public void UpdateCardOwnership(Player newOwner, Card card)
-        {
-            // Remove card from its current owner first
-            UncaptureCard(card);
-    
-            // Add to new owner's list
-            CaptureCard(newOwner, card);
-        }
+    {
+        
+        //TODO:indicate this in UI
+        
+        // Remove card from its current owner first
+        UncaptureCard(card);
+
+        // Add to new owner's list
+        CaptureCard(newOwner, card);
+    }
 
     public void DiscardState(StateCard stateToDiscard)
     {
+        //TODO:indicate this in UI
+        
         if (_mainDeck.Contains(stateToDiscard))
         {
             Debug.Log($"{stateToDiscard.cardName} was discarded");
             _mainDeck.Remove(stateToDiscard);
         }
-        else if (_currentTargetCard == stateToDiscard)
+        else if (CurrentTargetCard == stateToDiscard)
         {
             OnStateDiscarded?.Invoke(stateToDiscard);
-            _currentTargetCard = null;
+            CurrentTargetCard = null;
         }
         
     }
@@ -297,16 +308,16 @@ public class GM_MainPhase : GM_BasePhase
 #endregion    
 
 #region Event Card
-    private EventCard DrawEventCard()
+    public EventCard DrawEventCard()
     {
         if (_eventDeck.Count == 0) return null;
 
         EventCard card = _eventDeck.PopFront();
         
         Debug.Log($"Draw event card: {card.cardName}");
+
+        CurrentEventCard = card;
         
-        //TODO: add event
-        GameUIManager.Instance.mainUI.SpawnEventCard(card);
         return card;
     }
 
@@ -320,38 +331,38 @@ public class GM_MainPhase : GM_BasePhase
         _heldEvents[player] = card;
         player.SaveEvent(card);
         Debug.Log($"Saved {card.cardName}");
-        OnCardSaved?.Invoke(card);
+        
         ClearEventCard();
         
         return true;
     }
     
     private void ClearEventCard()
-        {
-            _currentEventCard = null;
-        }
+    {
+        CurrentEventCard = null;
+    }
     
     
 #endregion
     
 #region Target Card
 
-    private Card DrawTargetCard()
+    public Card DrawTargetCard()
+    {
+        if (_mainDeck.Count == 0)
         {
-            if (_mainDeck.Count == 0)
-            {
-                Debug.LogWarning("Main deck empty!");
-                return null;
-            }
-    
-            Card drawn = _mainDeck.PopFront();
-            
-            Debug.Log($"Draw target card: {drawn.cardName}");
-            
-            //TODO: add event
-            GameUIManager.Instance.mainUI.SpawnTargetCard(drawn);
-            return drawn;
+            Debug.LogWarning("Main deck empty!");
+            return null;
         }
+
+        Card drawn = _mainDeck.PopFront();
+        
+        Debug.Log($"Draw target card: {drawn.cardName}");
+
+        CurrentTargetCard = drawn;
+        
+        return drawn;
+    }
 
     public void ReturnCardToDeck(Card card)
     {

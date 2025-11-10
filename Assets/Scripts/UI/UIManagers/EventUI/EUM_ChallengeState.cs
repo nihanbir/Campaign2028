@@ -115,6 +115,8 @@ public class EUM_ChallengeState : EUM_Base
         
         duelScreen.SetActive(true);
         
+        //TODO: roll dice for ai?
+        
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
