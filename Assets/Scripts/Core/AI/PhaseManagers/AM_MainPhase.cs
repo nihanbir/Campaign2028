@@ -5,6 +5,10 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// AI controller for Main Phase, refactored to listen to GameEventBus for event resolution,
+/// while still using your existing UI hooks for spawning/rolling to preserve animations.
+/// </summary>
 public class AM_MainPhase
 {
     private readonly AIManager _aiManager;
@@ -12,25 +16,37 @@ public class AM_MainPhase
     private UM_MainPhase _mainUI;
     private EventManager _eventManager;
 
+    private bool _eventResolvedWait;
+
     public AM_MainPhase(AIManager manager)
     {
-        _aiManager = manager;
-        _mainPhase = _aiManager.game.mainPhase;
-        _mainUI = GameUIManager.Instance.mainUI;
+        _aiManager  = manager;
+        _mainPhase  = _aiManager.game.mainPhase;
+        _mainUI     = GameUIManager.Instance.mainUI;
+
+        GameEventBus.Instance.OnEvent += OnBusEvent;
     }
 
-#region Regular Turn Execution
+    private void OnBusEvent(GameEvent e)
+    {
+        if (e.Type == GameEventType.EventCompleted)
+        {
+            _eventResolvedWait = true;
+        }
+    }
 
+    #region Regular Turn Execution
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
-        if (_mainPhase == null) _mainPhase = GameManager.Instance.mainPhase;
-        if (_mainUI == null) _mainUI = GameUIManager.Instance.mainUI;
+        if (_mainPhase == null)  _mainPhase  = GameManager.Instance.mainPhase;
+        if (_mainUI == null)     _mainUI     = GameUIManager.Instance.mainUI;
         if (_eventManager == null) _eventManager = _mainPhase.EventManager;
 
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
         if (_mainPhase.CurrentTargetCard == null)
         {
+            // Keep UI animation/flow you already have
             _mainUI.OnSpawnTargetClicked();
         }
         
@@ -56,72 +72,48 @@ public class AM_MainPhase
     private IEnumerator HandleEventCard(AIPlayer aiPlayer, EventCard card)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
-        bool resolved = false;
-        void OnApplied(EventCard appliedCard)
-        {
-            if (appliedCard == card)
-                resolved = true;
-        }
 
-        _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
-        
+        _eventResolvedWait = false;
+
+        // Decide to save or apply; keep UI calls to preserve your animations
         if (ShouldSaveEvent(aiPlayer, card))
         {
             _mainUI.OnClickEventSave();
-            resolved = true;
+            _eventResolvedWait = true; // saving resolves immediately for AI flow
         }
         else
         {
             _mainUI.OnClickEventApply();
-            
         }
-        
-        // Wait until UI and game logic both finish
-        yield return new WaitUntil(() => resolved);
 
-        _eventManager.OnEventApplied -= OnApplied;
+        // Wait until the EventManager broadcasts completion (or save resolved)
+        yield return new WaitUntil(() => _eventResolvedWait);
     }
-    
-    /// <summary>
-    /// Determines if the AI should save or play the event card.
-    /// </summary>
+
     private bool ShouldSaveEvent(AIPlayer aiPlayer, EventCard card)
     {
-        // Example logic:
-        // 🔹 Save cards that can provide extra rolls or depend on conditions not yet met.
-        // 🔹 Use cards that can apply immediate benefits.
-        if (!card.canSave) 
-            return false;
+        if (!card.canSave) return false;
+        if (aiPlayer.HeldEvent != null) return false;
 
-        if (aiPlayer.HeldEvent != null)
-            return false;
-        
         switch (card.eventConditions)
         {
             case EventConditions.IfOwnsInstitution:
-                // If AI doesn't have the required institution, save for later
                 return !aiPlayer.HasInstitution(card.requiredInstitution);
             
             case EventConditions.IfInstitutionCaptured:
-                // If none captured the institution yet, save for later
                 _mainPhase.FindHeldInstitution(card.requiredInstitution, out var found);
                 return !found;
 
             case EventConditions.None:
-                // Always beneficial now
                 return false;
             
             case EventConditions.TeamConditions:
-                // If AI doesn't have the beneficial team, save for later
                 return card.benefitingTeam != aiPlayer.assignedActor.team;
             
             case EventConditions.Any:
-                // If other players don't have states, save for later
                 return !AreOtherPlayersHoldingStates(aiPlayer);
 
             default:
-                // Randomized fallback to keep behavior less predictable
                 return Random.value > 0.7f;
         }
     }
@@ -129,46 +121,37 @@ public class AM_MainPhase
     private bool AreOtherPlayersHoldingStates(AIPlayer aiPlayer)
     {
         var stateOwners = _mainPhase.GetStateOwners();
-    
-        // Return true if there are any held states and not all are by the given aiPlayer
         return stateOwners.Count > 0 && stateOwners.Values.Any(player => player != aiPlayer);
     }
     
     public IEnumerator RollDice(AIPlayer aiPlayer)
     {
-        Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
         _mainUI.OnRollDiceClicked();
     }
     
     public IEnumerator RollEventDice(AIPlayer aiPlayer)
     {
-        Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         EUM_ChallengeEvent eventUI = _mainUI.challengeEvent;
-        
         eventUI.OnRollDiceClicked();
     }
-    
-#endregion Regular Turn Execution
-    
-    
-#region Challenge Any State
+    #endregion
+
+    #region Challenge Any State (AI choice)
     public IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
-        
-        _eventManager.HandleStateChosen(chosenState);
 
+        // Feed the choice back to logic; UI will have been opened by bus already
+        _mainPhase.EventManager.HandleStateChosen(chosenState);
     }
 
     private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
-        // Collect beneficial states
         List<StateCard> beneficialStates = new();
         foreach (var state in statesToChooseFrom)
         {
@@ -176,26 +159,20 @@ public class AM_MainPhase
                 beneficialStates.Add(state);
         }
 
-        // Pick the pool to choose from
-        List<StateCard> selectionPool = beneficialStates.Count > 0 ? beneficialStates : statesToChooseFrom;
+        var pool = beneficialStates.Count > 0 ? beneficialStates : statesToChooseFrom;
 
-        // Select the one with the highest electoral votes
-        StateCard chosenState = null;
-        int highestVotes = 0;
-
-        for (int i = 0; i < selectionPool.Count; i++)
+        StateCard chosen = null;
+        int highestVotes = -1;
+        for (int i = 0; i < pool.Count; i++)
         {
-            var state = selectionPool[i];
-            
-            if (state.electoralVotes <= highestVotes) continue;
-            
-            highestVotes = state.electoralVotes;
-            chosenState = state;
+            var s = pool[i];
+            if (s.electoralVotes > highestVotes)
+            {
+                highestVotes = s.electoralVotes;
+                chosen = s;
+            }
         }
-
-        return chosenState;
+        return chosen;
     }
-    
-#endregion Challenge Any State
-    
+    #endregion
 }

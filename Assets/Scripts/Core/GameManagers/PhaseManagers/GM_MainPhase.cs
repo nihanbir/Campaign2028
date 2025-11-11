@@ -38,8 +38,8 @@ public class GM_MainPhase : GM_BasePhase
     protected override void BeginPhase()
     {
         base.BeginPhase();
-        _eventAppliedHandler = _ => ClearEventCard();
-        EventManager.OnEventApplied += _eventAppliedHandler;
+        // _eventAppliedHandler = _ => ClearEventCard();
+        // EventManager.OnEventApplied += _eventAppliedHandler;
         game.currentPlayerIndex = 0;
         
         var ui = GameUIManager.Instance.mainUI;
@@ -57,8 +57,8 @@ public class GM_MainPhase : GM_BasePhase
     protected override void EndPhase()
     {
         base.EndPhase();
-        if (_eventAppliedHandler != null)
-            EventManager.OnEventApplied -= _eventAppliedHandler;
+        // if (_eventAppliedHandler != null)
+            // EventManager.OnEventApplied -= _eventAppliedHandler;
     }
 
     private void BuildAndShuffleDecks()
