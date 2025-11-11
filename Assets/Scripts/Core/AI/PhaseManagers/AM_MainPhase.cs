@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +16,7 @@ public class AM_MainPhase
     private EventManager _eventManager;
 
     private bool _eventResolvedWait;
+    
 
     public AM_MainPhase(AIManager manager)
     {
@@ -29,9 +29,47 @@ public class AM_MainPhase
 
     private void OnBusEvent(GameEvent e)
     {
-        if (e.Type == GameEventType.EventCompleted)
+        switch (e.Type)
         {
-            _eventResolvedWait = true;
+            case GameEventType.EventCompleted:
+                _eventResolvedWait = true;
+                break;
+            
+            case GameEventType.ChallengeStateShown:
+            {
+                var data = (ChallengeStatesData)e.Payload;
+                // if AI is the current player, choose a state
+                if (AIManager.Instance.IsAIPlayer(data.Player))
+                {
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                    _aiManager.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
+                }
+                break;
+            }
+
+            case GameEventType.DuelStarted:
+            {
+                var data = (DuelData)e.Payload;
+                // if AI is the attacker, roll dice
+                if (AIManager.Instance.IsAIPlayer(data.Attacker))
+                {
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
+                    _aiManager.StartCoroutine(RollDice(aiPlayer));
+                }
+                break;
+            }
+
+            case GameEventType.AltStatesShown:
+            {
+                var data = (AltStatesData)e.Payload;
+                // if AI is the player, roll dice for alternative states
+                if (AIManager.Instance.IsAIPlayer(data.Player))
+                {
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                    _aiManager.StartCoroutine(RollDice(aiPlayer));
+                }
+                break;
+            }
         }
     }
 
@@ -78,12 +116,14 @@ public class AM_MainPhase
         // Decide to save or apply; keep UI calls to preserve your animations
         if (ShouldSaveEvent(aiPlayer, card))
         {
-            _mainUI.OnClickEventSave();
-            _eventResolvedWait = true; // saving resolves immediately for AI flow
+            if (_mainPhase.TrySaveEvent(card))
+            {
+                _eventResolvedWait = true; // saving resolves immediately for AI flow
+            }
         }
         else
         {
-            _mainUI.OnClickEventApply();
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, _mainPhase.CurrentEventCard);
         }
 
         // Wait until the EventManager broadcasts completion (or save resolved)
@@ -127,16 +167,27 @@ public class AM_MainPhase
     public IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        _mainUI.OnRollDiceClicked();
+
+        int roll = Random.Range(1, 7);
+        GameUIManager.Instance.DiceRoll = roll;
+
+        GameEventBus.Instance.Raise(
+            new GameEvent(GameEventType.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
+        );
     }
     
-    public IEnumerator RollEventDice(AIPlayer aiPlayer)
-    {
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-
-        EUM_ChallengeEvent eventUI = _mainUI.challengeEvent;
-        eventUI.OnRollDiceClicked();
-    }
+    // public IEnumerator RollEventDice(AIPlayer aiPlayer)
+    // {
+    //     _animationDone = false;
+    //     
+    //     // 🧠 Wait for both animation and event logic to finish
+    //     yield return new WaitUntil(() => _animationDone);
+    //     
+    //     yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+    //
+    //     EUM_ChallengeEvent eventUI = _mainUI.challengeEvent;
+    //     eventUI.OnRollDiceClicked();
+    // }
     #endregion
 
     #region Challenge Any State (AI choice)

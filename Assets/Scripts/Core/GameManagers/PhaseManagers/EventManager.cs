@@ -45,6 +45,9 @@ public class EventManager
             { EventType.NoImpact, (p, c) => {} },
             { EventType.TeamBased, (p, c) => HandleTeamBased(p, c) }
         };
+        
+        GameEventBus.Instance.OnEvent += OnGameEvent;
+
     }
     
     public void ApplyEvent(Player player, EventCard card)
@@ -62,7 +65,6 @@ public class EventManager
             Debug.Log($"EventManager ApplyEvent: {card.cardName} resolved type={_effectiveType}, handlers count={_handlers.Count}");
 
             // Legacy callback + bus fire (applied does NOT mean resolved)
-            // OnEventApplied?.Invoke(card);
             GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventApplied, new EventAppliedData(card, player)));
         }
         else
@@ -124,6 +126,7 @@ public class EventManager
         // Broadcast start so UI can show small feedback if desired
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventStarted, new EventStartedData(_effectiveType, player, card)));
 
+        //TODO: how to do this better
         // Small delay to let any UI coroutines/animations breathe; then end turn
         GameManager.Instance.StartCoroutine(EndTurnAfterDelay(0.1f));
     }
@@ -133,10 +136,10 @@ public class EventManager
         yield return new WaitForSeconds(seconds);
         _eventActive = false;
 
+        _mainPhase.EndPlayerTurn();
         // Inform systems that this event completed
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
 
-        _mainPhase.EndPlayerTurn();
         NullifyEventLocals();
     }
     #endregion
@@ -188,13 +191,10 @@ public class EventManager
             Debug.Log($"Player {_currentPlayer.playerID} didn't discard any states!");
         }
 
-        // Legacy notify (UI may close screens)
-        // OnDuelCompleted?.Invoke();
-
         // Bus notify
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelCompleted, null));
 
-        // End turn after brief delay to allow UI anims if needed
+        //TODO: do this better
         GameManager.Instance.StartCoroutine(EndTurnAfterDelay(0.1f));
     }
     #endregion
@@ -238,13 +238,12 @@ public class EventManager
             _mainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
-
-        // Legacy + bus: duel done
-        // OnDuelCompleted?.Invoke();
+        
+        //TODO: listen to this duelcompleted here in eventmanager too
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelCompleted, null));
 
         _eventActive = false;
-        _mainPhase.EndPlayerTurn();
+        
         NullifyEventLocals();
     }
     #endregion
@@ -277,10 +276,8 @@ public class EventManager
         _eventActive = true;
 
         // Legacy + bus
-        // OnDuelActive?.Invoke(_defender, _chosenCard);
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelStarted, new DuelData(player, _defender, _chosenCard, _currentEventCard)));
-
-        // UI/AI will roll later and call back into OnPlayerRolledDice()
+        
     }
     #endregion
 
@@ -298,7 +295,7 @@ public class EventManager
         _eventActive   = true;
 
         // Legacy + bus
-        // OnChallengeState?.Invoke(availableStates);
+        
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
     }
 
@@ -331,7 +328,7 @@ public class EventManager
         }
 
         // Legacy + bus
-        // OnDuelActive?.Invoke(_defender, _chosenCard);
+        
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelStarted, new DuelData(_currentPlayer, _defender, _chosenCard, _currentEventCard)));
     }
     #endregion
@@ -343,6 +340,7 @@ public class EventManager
         if (card != null && card.canReturnToDeck)
             _mainPhase.ReturnCardToDeck(card);
 
+        //TODO: raise event canceled instead
         // Let listeners know the event ended without duel/alt flow if they care
         GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
@@ -368,16 +366,7 @@ public class EventManager
         _eventActive = false;
     }
 
-    public void RollDiceForAI()
-    {
-        if (_currentPlayer == null) return;
-        if (!AIManager.Instance.IsAIPlayer(_currentPlayer)) return;
-
-        var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
-        GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.RollEventDice(aiPlayer));
-    }
-
-    public void OnPlayerRolledDice(int roll)
+    private void OnPlayerRolledDice(int roll)
     {
         if (!_eventActive) return;
 
@@ -400,6 +389,20 @@ public class EventManager
         Debug.LogWarning("TeamBased handler should not execute directly.");
     }
     #endregion
+    
+    private void OnGameEvent(GameEvent e)
+    {
+        if (e.Type != GameEventType.RollDiceRequest)
+            return;
+
+        var data = (PlayerRolledData)e.Payload;
+        // 🔹 This is the exact same logic as before, but now triggered by bus
+        if (_currentPlayer == data.Player)
+        {
+            OnPlayerRolledDice(data.Roll);
+        }
+    }
+
 }
 
 /// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
@@ -444,7 +447,10 @@ public enum GameEventType
     DuelStarted,           // Attacker vs Defender with chosen card
     DuelCompleted,         // Duel done
     AltStatesShown,        // Alt states UI should appear
-    PlayerRolled           // Player rolled value (for UI dice feedback)
+    PlayerRolled,           // Player rolled value (for UI dice feedback)
+    ClientAnimationCompleted,
+    RollDiceRequest,
+
 }
 
 // Strongly-typed payloads (class for clarity, can be structs if you want)

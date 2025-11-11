@@ -117,6 +117,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     public void OnRollDiceClicked()
     {
+        
+        //TODO: bus to update ui only
         GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
         var roll = GameUIManager.Instance.DiceRoll;
         
@@ -127,8 +129,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
 
-        // Route result to logic (decides whether alt-states or duel uses it)
-        _eventManager.OnPlayerRolledDice(roll);
+        // 🔹 Instead of calling EventManager directly, announce intent on the bus
+        GameEventBus.Instance.Raise(
+            new GameEvent(GameEventType.RollDiceRequest, new PlayerRolledData(currentPlayer, roll))
+        );
     }
 
     #region AltStates
@@ -147,8 +151,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         {
             anim.OnComplete(() =>
             {
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
+                // Signal UI finished animating
+                GameEventBus.Instance.Raise(new GameEvent(GameEventType.ClientAnimationCompleted, null));
             });
         }
     }
@@ -260,8 +264,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
         {
             anim.OnComplete(() =>
             {
+                // Tell everyone (especially AI) that visuals are done
+                GameEventBus.Instance.Raise(new GameEvent(GameEventType.ClientAnimationCompleted, null));
+
                 rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
             });
         }
     }
@@ -351,6 +357,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void ReturnToMainPhaseUI()
     {
+        //TODO: animate then continue
+        
         _mainUI.gameObject.SetActive(true);
         eventScreen.SetActive(false);
 

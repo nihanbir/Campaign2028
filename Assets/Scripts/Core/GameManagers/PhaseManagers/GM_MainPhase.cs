@@ -54,13 +54,6 @@ public class GM_MainPhase : GM_BasePhase
         }
     }
 
-    protected override void EndPhase()
-    {
-        base.EndPhase();
-        // if (_eventAppliedHandler != null)
-            // EventManager.OnEventApplied -= _eventAppliedHandler;
-    }
-
     private void BuildAndShuffleDecks()
     {
         _mainDeck.Clear();
@@ -388,6 +381,7 @@ public class GM_MainPhase : GM_BasePhase
                 break;
         }
         
+        //TODO: raise bus event
         Debug.Log($"Returned to deck {card.cardName}");
         
     }
