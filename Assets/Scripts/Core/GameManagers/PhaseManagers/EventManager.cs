@@ -211,14 +211,17 @@ public class EventManager
            
         if (success)
         {
+            //TODO: anims
             _mainPhase.UpdateCardOwnership(_currentPlayer, _chosenCard);
         }
         else
         {
+            //TODO: anims
             _mainPhase.ReturnCardToDeck(_currentEventCard);
             Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
         
+        //TODO: anims
         OnDuelCompleted?.Invoke();
         
         NullifyVariables();
@@ -257,9 +260,10 @@ public class EventManager
         
         _eventActive = true;
         
+        //TODO: anims
         OnDuelActive?.Invoke(player, _chosenCard);
         
-        //TODO:called from ui
+        //TODO: when anims are done
         RollDiceForAI();
         
     }
