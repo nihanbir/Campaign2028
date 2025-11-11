@@ -101,8 +101,6 @@ public class GM_MainPhase : GM_BasePhase
         
         base.EndPlayerTurn();
         
-        Debug.Log("ellu");
-        
         ClearEventCard();
         
         MoveToNextPlayer();
@@ -196,7 +194,6 @@ public class GM_MainPhase : GM_BasePhase
             //wait for player to roll again
             if (aiManager.IsAIPlayer(player))
             {
-                //TODO: make an enum to know what stage
                 var aiPlayer = aiManager.GetAIPlayer(player);
                 game.StartCoroutine(aiManager.mainAI.RollDice(aiPlayer));
             }
