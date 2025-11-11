@@ -63,10 +63,10 @@ public class UM_MainPhase : UM_BasePhase
         
         //TODO: maybe SOLID
         challengeEvent.Initialize();
-        // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
+        RelocatePlayerCards(playerUIParent);
         
         //TODO: dont forget to remove
-        InitializePlayersForTesting();
+        // InitializePlayersForTesting();
         
         base.OnPhaseEnabled();
     }

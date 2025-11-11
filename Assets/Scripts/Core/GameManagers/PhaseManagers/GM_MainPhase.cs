@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using System;
 
@@ -38,8 +37,7 @@ public class GM_MainPhase : GM_BasePhase
     protected override void BeginPhase()
     {
         base.BeginPhase();
-        // _eventAppliedHandler = _ => ClearEventCard();
-        // EventManager.OnEventApplied += _eventAppliedHandler;
+        
         game.currentPlayerIndex = 0;
         
         var ui = GameUIManager.Instance.mainUI;
@@ -47,7 +45,7 @@ public class GM_MainPhase : GM_BasePhase
         {
             ui.OnUIReady = () =>
             {
-                AssignTestCardsToPlayers(_mainDeck);
+                // AssignTestCardsToPlayers(_mainDeck);
                 Debug.Log("🟢 Mainphase UI Ready — starting player turns");
                 StartPlayerTurn();
             };
