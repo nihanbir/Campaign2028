@@ -119,7 +119,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             anim.OnComplete(() =>
             {
                 rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                _eventManager.RollDiceForAI();
+                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
             });
         }
     }
@@ -168,12 +168,15 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 if (AIManager.Instance.IsAIPlayer(_currentPlayer))
                 {
                     var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
-                    GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, statesToDisplay));
+                    DOVirtual.DelayedCall(1.2f, () =>
+                    {
+                        GameManager.Instance.StartCoroutine(
+                            AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, statesToDisplay)
+                        );
+                    });
                 }
             });
         }
-        
-        
     }
 
     private void OnCardSelected(ISelectableDisplayCard card)
@@ -237,7 +240,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             anim.OnComplete(() =>
             {
                 rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                _eventManager.RollDiceForAI();
+                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
             });
         }
        

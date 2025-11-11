@@ -129,8 +129,7 @@ public class EventManager
             OnAltStatesActive?.Invoke(player, _altState1, _altState2);
             
             Debug.Log("alt states active called");
-            //called from ui
-            // RollDiceForAI();
+            
         }
         else
         {
@@ -167,12 +166,14 @@ public class EventManager
             Debug.Log($"Player {_currentPlayer.playerID} didn't discard any states!");
         }
 
+        //TODO: change this to the correct one
         OnDuelCompleted?.Invoke();
         
         NullifyVariables();
         
         //TODO: call from ui after animations completed
-        _mainPhase.EndPlayerTurn();   
+        GameManager.Instance.StartCoroutine(EndTurnAfterDelay());
+
     }
 
 #endregion
@@ -361,13 +362,19 @@ public class EventManager
 
     public void RollDiceForAI()
     {
-        Debug.Log("supposed to roll");
-        
         if (!AIManager.Instance.IsAIPlayer(_currentPlayer)) return;
 
-        Debug.Log("supposed to roll");
         var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
         GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.RollEventDice(aiPlayer));
+    }
+
+    public void ChooseStateForAI()
+    {
+         // if (AIManager.Instance.IsAIPlayer(player))
+        // {
+        //     var aiPlayer = AIManager.Instance.GetAIPlayer(player);
+        //     GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, availableStates));
+        // }
     }
 
     public void OnPlayerRolledDice(int roll)
@@ -382,28 +389,7 @@ public class EventManager
             EvaluateChallengeCapture(roll);
         }
     }
-    
-    public void NotifyUIReady()
-    {
-        if (!_eventActive)
-        {
-            Debug.LogWarning("[EventManager] Tried to notify UI ready, but no active event.");
-            return;
-        }
-
-        Debug.Log("[EventManager] Challenge or AltStates UI is ready.");
-        // This is where AI or future systems can react to UI readiness
-    }
 
 #endregion
-   
 
-}
-
-public enum EventStage
-{
-    None,
-    ChallengeSelectState,
-    Duel,
-    AltStates
 }
