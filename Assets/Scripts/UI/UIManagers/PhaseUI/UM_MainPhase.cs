@@ -23,15 +23,13 @@ public class UM_MainPhase : UM_BasePhase
     [SerializeField] private Button saveEventButton;
     [SerializeField] private Button drawEventButton;
     [SerializeField] private Button drawTargetButton;
-    
 
     [Header("PlayerPanel")] 
     [SerializeField] private Button playerPanelButton;
     [SerializeField] private OwnedCardsPanel ownedCardsPanel;
     
-    [Header("Event UI")]     
-    [SerializeField] public EUM_ChallengeState challengeUI;
-    [SerializeField] public EUM_AlternativeStates altStateUI;
+    [Header("Event UIs")]
+    [SerializeField] public EUM_ChallengeEvent challengeEvent;
     
     [Header("UI Animation Settings")]
     public float cardSpawnDuration = 0.4f;
@@ -63,9 +61,8 @@ public class UM_MainPhase : UM_BasePhase
         
         _eventManager = _mainPhase.EventManager;
         
-        challengeUI.InitializeEventUI();
-        altStateUI.InitializeEventUI();
-        
+        //TODO: maybe SOLID
+        challengeEvent.Initialize();
         // RelocatePlayerCards(playerUIParent, spacingBetweenPlayerCards);
         
         //TODO: dont forget to remove
@@ -271,6 +268,7 @@ public class UM_MainPhase : UM_BasePhase
         {
             _mainPhase.CaptureCard(player, card);
             ClearTargetCard();
+            _mainPhase.EndPlayerTurn();
         });
         
     }

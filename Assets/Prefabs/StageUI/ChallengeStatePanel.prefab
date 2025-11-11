@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 3753719586433489799}
   - component: {fileID: 4217174397206709889}
   m_Layer: 5
-  m_Name: Attacker
+  m_Name: LeftCardUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -408,15 +408,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
-  eventScreen: {fileID: 5789861288748144512}
-  rollDiceButton: {fileID: 4016181547966507740}
-  diceImage: {fileID: 4190949239517227204}
   stateCardsUIParent: {fileID: 3967855992564129598}
   spacingBetweenStateCards: 150
   duelScreen: {fileID: 3298725457486808726}
-  defenderUI: {fileID: 1033362522861206300}
-  attackerUI: {fileID: 6746398929419256253}
-  chosenCardUI: {fileID: 6196279243546758843}
+  rightCardUI: {fileID: 1033362522861206300}
+  leftCardUI: {fileID: 6746398929419256253}
+  midCardUI: {fileID: 6196279243546758843}
+  eventScreen: {fileID: 5789861288748144512}
+  rollDiceButton: {fileID: 4016181547966507740}
+  diceImage: {fileID: 4190949239517227204}
 --- !u!1 &6141832280865122820
 GameObject:
   m_ObjectHideFlags: 0
@@ -429,7 +429,7 @@ GameObject:
   - component: {fileID: 4353871659650362551}
   - component: {fileID: 6774592290789403750}
   m_Layer: 5
-  m_Name: Card
+  m_Name: MidCardUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -504,7 +504,7 @@ GameObject:
   - component: {fileID: 4961543174109195113}
   - component: {fileID: 686679993616697063}
   m_Layer: 5
-  m_Name: Defender
+  m_Name: RightCardUi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

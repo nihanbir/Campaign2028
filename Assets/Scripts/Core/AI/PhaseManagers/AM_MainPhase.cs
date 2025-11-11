@@ -45,8 +45,7 @@ public class AM_MainPhase
         
         if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
         {
-            UM_MainPhase mainUI = GameUIManager.Instance.mainUI;
-            yield return _aiManager.StartCoroutine(RollDice(aiPlayer, mainUI));
+            yield return _aiManager.StartCoroutine(RollDice(aiPlayer));
         }
         else
         {
@@ -135,25 +134,22 @@ public class AM_MainPhase
         return stateOwners.Count > 0 && stateOwners.Values.Any(player => player != aiPlayer);
     }
     
-    public IEnumerator RollDice(AIPlayer aiPlayer, MonoBehaviour uiManager)
+    public IEnumerator RollDice(AIPlayer aiPlayer)
+    {
+        Debug.Log("Ai is rolling");
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        _mainUI.OnRollDiceClicked();
+    }
+    
+    public IEnumerator RollEventDice(AIPlayer aiPlayer)
     {
         Debug.Log("Ai is rolling");
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
-        switch (uiManager)
-        {
-            case UM_MainPhase mainUI:
-                mainUI.OnRollDiceClicked();
-                break;
-            
-            case EUM_ChallengeState challengeUI:
-                challengeUI.OnRollDiceClicked();
-                break;
-            
-            case EUM_AlternativeStates altUI:
-                altUI.OnRollDiceClicked();
-                break;
-        }
+        EUM_ChallengeEvent eventUI = _mainUI.challengeEvent;
+        
+        eventUI.OnRollDiceClicked();
     }
     
 #endregion Regular Turn Execution

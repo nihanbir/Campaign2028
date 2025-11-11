@@ -9,11 +9,12 @@ public class EventManager
     private readonly GM_MainPhase _mainPhase;
     private readonly Dictionary<EventType, Action<Player, EventCard>> _handlers;
     public event Action<EventCard> OnEventApplied;
-    public MonoBehaviour activeEventUI;
 
     private bool _needTwoActive = false;
     private bool _eventActive = false;
     public bool IsEventActive => _eventActive;
+
+    private EventType _effectiveType;
     
     private EventCard _currentEventCard;
 
@@ -35,23 +36,23 @@ public class EventManager
     public void ApplyEvent(Player player, EventCard card)
     {
         Debug.Log($"Applying event {card.cardName}");
-        EventType effectiveType = card.eventType;
+        _effectiveType = card.eventType;
 
         _currentPlayer = player;
         if (card.eventType == EventType.TeamBased)
         {
-            effectiveType = player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
-            Debug.Log($"-------------------------------------------------------------{effectiveType}");
+            _effectiveType = player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
+            Debug.Log($"-------------------------------------------------------------{_effectiveType}");
         }
 
-        if (_handlers.TryGetValue(effectiveType, out var handler))
+        if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
             _currentEventCard = card;
             handler(player, card);
             OnEventApplied?.Invoke(card);
         }
         else
-            Debug.LogWarning($"Unhandled event type: {effectiveType}");
+            Debug.LogWarning($"Unhandled event type: {_effectiveType}");
     }
 #region Extra Roll
 
@@ -92,6 +93,8 @@ public class EventManager
     private void HandleLoseTurn(Player player, EventCard card)
     {
         _eventActive = true;
+        
+        //TODO: anim instead
         GameManager.Instance.StartCoroutine(EndTurnAfterDelay());
     }
     
@@ -117,13 +120,16 @@ public class EventManager
         _altState1 = _mainPhase.FindStateFromDeck(card.altState1, out var found1);
         _altState2 = _mainPhase.FindStateFromDeck(card.altState1, out var found2);
 
+        //TODO: if theyre captured then take it away from the player/s?
+        
         if (found1 || found2)
         {
             _eventActive = true;
             _currentPlayer = player;
             _currentEventCard = card;
             OnAltStatesActive?.Invoke(player, _altState1, _altState2);
-            
+            Debug.Log("alt states active called");
+            //called from ui
             RollDiceForAI();
         }
         else
@@ -253,6 +259,7 @@ public class EventManager
         
         OnDuelActive?.Invoke(player, _chosenCard);
         
+        //TODO:called from ui
         RollDiceForAI();
         
     }
@@ -272,17 +279,19 @@ public class EventManager
             
         _currentPlayer = player;
             
+        StateDisplayCard.OnCardHeld += HandleStateChosen;
+
+        _eventActive = true;
+        
         OnChallengeState?.Invoke(availableStates);
-            
+        Debug.Log($"Challenge Any State");
+        
         if (AIManager.Instance.IsAIPlayer(player))
         {
             var aiPlayer = AIManager.Instance.GetAIPlayer(player);
             GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, availableStates));
         }
-            
-        StateDisplayCard.OnCardHeld += HandleStateChosen;
-
-        _eventActive = true;
+        
     }
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
@@ -315,6 +324,7 @@ public class EventManager
         
         OnDuelActive?.Invoke(_defender, _chosenCard);
         
+        RollDiceForAI();
         
     }
 
@@ -338,17 +348,32 @@ public class EventManager
         _altState1 = null;
         _altState2 = null;
         _currentPlayer = null;
-        activeEventUI = null;
         
         _eventActive = false;
     }
 
     private void RollDiceForAI()
     {
-        if (!AIManager.Instance.IsAIPlayer(_currentPlayer)) return;
+        Debug.Log("supposed to roll");
         
+        if (!AIManager.Instance.IsAIPlayer(_currentPlayer)) return;
+
+        Debug.Log("supposed to roll");
         var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
-        GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.RollDice(aiPlayer, activeEventUI));
+        GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.RollEventDice(aiPlayer));
+    }
+
+    public void OnPlayerRolledDice(int roll)
+    {
+        if (!_eventActive) return;
+        if (_effectiveType == EventType.AlternativeStates)
+        {
+            EvaluateStateDiscard(roll);
+        }
+        else 
+        {
+            EvaluateChallengeCapture(roll);
+        }
     }
 
 #endregion

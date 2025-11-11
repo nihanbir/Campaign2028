@@ -47,6 +47,7 @@ public class GM_MainPhase : GM_BasePhase
         {
             ui.OnUIReady = () =>
             {
+                AssignTestCardsToPlayers(_mainDeck);
                 Debug.Log("🟢 Mainphase UI Ready — starting player turns");
                 StartPlayerTurn();
             };
@@ -185,6 +186,9 @@ public class GM_MainPhase : GM_BasePhase
         if (success)
         {
             OnCardCaptured?.Invoke(player, CurrentTargetCard);
+            
+            //TODO: take a look at this
+            // EndPlayerTurn();
         }
         else if (player.CanRoll())
         {
@@ -194,7 +198,7 @@ public class GM_MainPhase : GM_BasePhase
             {
                 //TODO: make an enum to know what stage
                 var aiPlayer = aiManager.GetAIPlayer(player);
-                game.StartCoroutine(aiManager.mainAI.RollDice(aiPlayer, GameUIManager.Instance.mainUI));
+                game.StartCoroutine(aiManager.mainAI.RollDice(aiPlayer));
             }
         }
         else
@@ -241,7 +245,6 @@ public class GM_MainPhase : GM_BasePhase
         Debug.Log($"Player {player.playerID} captured {card.cardName}");
         
         CurrentTargetCard = null;
-        EndPlayerTurn();
     }
     
     private void UncaptureCard(Card card, bool returnToDeck = false)

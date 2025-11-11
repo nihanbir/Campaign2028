@@ -19,6 +19,7 @@ public class GameManager : GameManagerBase
         base.Awake();
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+        
     }
 
     private void Start()

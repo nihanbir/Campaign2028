@@ -17,7 +17,7 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] public UM_SetupPhase setupUI;
     [SerializeField] public UM_MainPhase mainUI;
     
-    private UM_BasePhase _currentPhaseManager;
+    
     
     // Add others (CivilWarUI, GameOverUI) as needed
 
@@ -30,6 +30,8 @@ public class GameUIManager : MonoBehaviour
         
     }
 
+    //TODO: have one button available at a time and connect that button to here
+    
     //TODO: add an event for roll dice clicked
 
     #region Dice & Actions
