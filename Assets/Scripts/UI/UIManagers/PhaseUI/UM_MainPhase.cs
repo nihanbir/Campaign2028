@@ -180,9 +180,10 @@ public class UM_MainPhase : UM_BasePhase
         base.OnRollDiceClicked();
 
         int roll = GameUIManager.Instance.DiceRoll;
-        _mainPhase.PlayerRolledDice(roll);
         
         UpdateRollButtonState();
+        
+        _mainPhase.PlayerRolledDice(roll);
         
     }
 
@@ -444,6 +445,7 @@ private void UpdateRollButtonState()
         enable = eventInactive && playerHasResolvedEvent && canRoll;
     }
 
+    Debug.Log($"{enable}");
     EnableDiceButton(enable);
 }
 

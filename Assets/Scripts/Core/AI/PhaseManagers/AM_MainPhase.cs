@@ -26,10 +26,9 @@ public class AM_MainPhase
         if (_mainPhase == null) _mainPhase = GameManager.Instance.mainPhase;
         if (_mainUI == null) _mainUI = GameUIManager.Instance.mainUI;
         if (_eventManager == null) _eventManager = _mainPhase.EventManager;
+
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
-
-        //TODO: Think delay or future logic (use saved events, modifiers, etc.)
-
         if (_mainPhase.CurrentTargetCard == null)
         {
             _mainUI.OnSpawnTargetClicked();

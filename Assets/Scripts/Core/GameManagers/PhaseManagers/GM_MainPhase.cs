@@ -169,6 +169,7 @@ public class GM_MainPhase : GM_BasePhase
         {
             success = (roll == 2);
             Debug.Log($"'Need2' active — success = {success}");
+            player.RegisterRoll();
         }
         else
         {
