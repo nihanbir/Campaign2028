@@ -320,7 +320,7 @@ GameObject:
   - component: {fileID: 4583404886209649554}
   - component: {fileID: 3381758312561441647}
   m_Layer: 5
-  m_Name: ChallengeStatePanel
+  m_Name: EventPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

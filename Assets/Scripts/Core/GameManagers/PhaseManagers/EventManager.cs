@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EventManager
@@ -128,9 +127,10 @@ public class EventManager
             _currentPlayer = player;
             _currentEventCard = card;
             OnAltStatesActive?.Invoke(player, _altState1, _altState2);
+            
             Debug.Log("alt states active called");
             //called from ui
-            RollDiceForAI();
+            // RollDiceForAI();
         }
         else
         {
@@ -167,9 +167,11 @@ public class EventManager
             Debug.Log($"Player {_currentPlayer.playerID} didn't discard any states!");
         }
 
-        OnAltStatesCompleted?.Invoke();
+        OnDuelCompleted?.Invoke();
         
         NullifyVariables();
+        
+        //TODO: call from ui after animations completed
         _mainPhase.EndPlayerTurn();   
     }
 
@@ -260,11 +262,10 @@ public class EventManager
         
         _eventActive = true;
         
-        //TODO: anims
         OnDuelActive?.Invoke(player, _chosenCard);
         
         //TODO: when anims are done
-        RollDiceForAI();
+        // RollDiceForAI();
         
     }
 
@@ -290,11 +291,12 @@ public class EventManager
         OnChallengeState?.Invoke(availableStates);
         Debug.Log($"Challenge Any State");
         
-        if (AIManager.Instance.IsAIPlayer(player))
-        {
-            var aiPlayer = AIManager.Instance.GetAIPlayer(player);
-            GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, availableStates));
-        }
+        //TODO:
+        // if (AIManager.Instance.IsAIPlayer(player))
+        // {
+        //     var aiPlayer = AIManager.Instance.GetAIPlayer(player);
+        //     GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, availableStates));
+        // }
         
     }
     
@@ -328,7 +330,8 @@ public class EventManager
         
         OnDuelActive?.Invoke(_defender, _chosenCard);
         
-        RollDiceForAI();
+        //TODO:
+        // RollDiceForAI();
         
     }
 
@@ -356,7 +359,7 @@ public class EventManager
         _eventActive = false;
     }
 
-    private void RollDiceForAI()
+    public void RollDiceForAI()
     {
         Debug.Log("supposed to roll");
         
@@ -379,8 +382,28 @@ public class EventManager
             EvaluateChallengeCapture(roll);
         }
     }
+    
+    public void NotifyUIReady()
+    {
+        if (!_eventActive)
+        {
+            Debug.LogWarning("[EventManager] Tried to notify UI ready, but no active event.");
+            return;
+        }
+
+        Debug.Log("[EventManager] Challenge or AltStates UI is ready.");
+        // This is where AI or future systems can react to UI readiness
+    }
 
 #endregion
    
 
+}
+
+public enum EventStage
+{
+    None,
+    ChallengeSelectState,
+    Duel,
+    AltStates
 }

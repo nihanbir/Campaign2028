@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -58,12 +59,24 @@ public class EUM_ChallengeEvent : MonoBehaviour
         _eventManager.OnDuelCompleted += ReturnToMainPhaseUI;
         _eventManager.OnAltStatesActive += ShowAltStates;
     }
-
-    //TODO: animations
-    private void AnimateEventUI()
+    
+    private void AnimateEventUI(out Sequence seq)
     {
         _mainUI.gameObject.SetActive(false);
+
+        seq = null;
+        
+        CanvasGroup cg = eventScreen.GetComponent<CanvasGroup>();
+        if (!cg) cg = eventScreen.AddComponent<CanvasGroup>();
+
+        cg.alpha = 0f;
+        eventScreen.transform.localScale = Vector3.one * 0.85f;
+
+        seq = DOTween.Sequence();
+        seq.Append(cg.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
+        seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
     }
+
 
     public void OnRollDiceClicked()
     {
@@ -82,9 +95,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         _eventManager.OnPlayerRolledDice(roll);
         
-        //TODO: evaluate in manager
-        // _eventManager.EvaluateChallengeCapture(roll);
-        
     }
 
     #region AltStates
@@ -102,11 +112,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         eventScreen.SetActive(true);
         
-        AnimateEventUI();
-        
-        //TODO: on animation completed
-        //TODO: the entire ui should be not interactable
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+        AnimateEventUI(out var anim);
+
+        if (anim != null)
+        {
+            anim.OnComplete(() =>
+            {
+                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+                _eventManager.RollDiceForAI();
+            });
+        }
     }
     
     #endregion
@@ -135,10 +150,30 @@ public class EUM_ChallengeEvent : MonoBehaviour
         duelScreen.SetActive(false);
         stateCardsUIParent.gameObject.SetActive(true);
         
+        _currentPlayer = GameManager.Instance.CurrentPlayer;
+        
         StateDisplayCard.OnCardSelected += OnCardSelected;
         StateDisplayCard.OnCardHeld += _ => HandleCardHeld();
         
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
+        
+        AnimateEventUI(out var anim);
+
+        //TODO:fix a bit
+        if (anim != null)
+        {
+            anim.OnComplete(() =>
+            {
+                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+                if (AIManager.Instance.IsAIPlayer(_currentPlayer))
+                {
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
+                    GameManager.Instance.StartCoroutine(AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, statesToDisplay));
+                }
+            });
+        }
+        
+        
     }
 
     private void OnCardSelected(ISelectableDisplayCard card)
@@ -193,12 +228,19 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         Debug.Log($"[ChallengeUI] Showing duel between attacker {_currentPlayer.playerID} and defender {defender.playerID} for state {chosenCard.cardName}");
 
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
         
         duelScreen.SetActive(true);
-        
-        //TODO: animations
-        
+        AnimateEventUI(out var anim);
+
+        if (anim != null)
+        {
+            anim.OnComplete(() =>
+            {
+                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+                _eventManager.RollDiceForAI();
+            });
+        }
+       
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
@@ -293,8 +335,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 cardIndex++;
             }
         }
-
-        //TODO: animations
+        
         Debug.Log($"[ChallengeUI] Placed {count} state cards in {rowCount} rows × {cardsPerRow} max columns (centered rows, scale={scaleFactor:F2}).");
     }
 
@@ -351,5 +392,4 @@ public class EUM_ChallengeEvent : MonoBehaviour
             rt.anchoredPosition = Vector2.zero;
         }
     }
-    
 }
