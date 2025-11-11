@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,6 +22,11 @@ public class Player : MonoBehaviour
 
     // === Roll System ===
     private int _remainingRolls = 1;
+
+    private void Start()
+    {
+        HeldEvent = null;
+    }
 
     public void SetDisplayCard(PlayerDisplayCard displayCard)
     {

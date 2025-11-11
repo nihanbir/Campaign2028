@@ -100,6 +100,8 @@ public class GM_MainPhase : GM_BasePhase
         
         base.EndPlayerTurn();
         
+        Debug.Log("ellu");
+        
         ClearEventCard();
         
         MoveToNextPlayer();
@@ -169,7 +171,6 @@ public class GM_MainPhase : GM_BasePhase
         {
             success = (roll == 2);
             Debug.Log($"'Need2' active — success = {success}");
-            player.RegisterRoll();
         }
         else
         {
@@ -183,13 +184,7 @@ public class GM_MainPhase : GM_BasePhase
 
         if (success)
         {
-            //TODO: call this from UI
-            CaptureCard(player, CurrentTargetCard);
-            
             OnCardCaptured?.Invoke(player, CurrentTargetCard);
-            
-            CurrentTargetCard = null;
-            EndPlayerTurn();
         }
         else if (player.CanRoll())
         {
@@ -197,8 +192,9 @@ public class GM_MainPhase : GM_BasePhase
             //wait for player to roll again
             if (aiManager.IsAIPlayer(player))
             {
+                //TODO: make an enum to know what stage
                 var aiPlayer = aiManager.GetAIPlayer(player);
-                game.StartCoroutine(aiManager.mainAI.ExecuteAITurn(aiPlayer));
+                game.StartCoroutine(aiManager.mainAI.RollDice(aiPlayer, GameUIManager.Instance.mainUI));
             }
         }
         else
@@ -243,6 +239,9 @@ public class GM_MainPhase : GM_BasePhase
         player.CaptureCard(card);
 
         Debug.Log($"Player {player.playerID} captured {card.cardName}");
+        
+        CurrentTargetCard = null;
+        EndPlayerTurn();
     }
     
     private void UncaptureCard(Card card, bool returnToDeck = false)

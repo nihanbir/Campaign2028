@@ -42,6 +42,7 @@ public class UM_MainPhase : UM_BasePhase
 
     private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
+    private PlayerDisplayCard _currentPlayerDisplayCard;
     
     private Action<StateCard> _stateDiscardedHandler;
     
@@ -155,6 +156,8 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
+
+        _currentPlayerDisplayCard = player.PlayerDisplayCard;
         
         EnableDiceButton(false);
         
@@ -260,10 +263,16 @@ public class UM_MainPhase : UM_BasePhase
     
 #region Card Feedback
 
-//TODO: animation
     private void OnCardCaptured(Player player, Card card)
     {
-        ClearTargetCard();
+        AnimateCardCaptured(_currentTargetGO, player.PlayerDisplayCard.transform, out var anim);
+        
+        anim.OnComplete(() =>
+        {
+            _mainPhase.CaptureCard(player, card);
+            ClearTargetCard();
+        });
+        
     }
 
     private void ClearEventCard()
@@ -306,11 +315,11 @@ public class UM_MainPhase : UM_BasePhase
         
     }
 
-    private void OnClickEventSave()
+    public void OnClickEventSave()
     {
         if (_mainPhase.TrySaveEvent(_currentEventDisplayCard.GetCard()))
         {
-            AnimateEventSaved(_currentEventGO, out var saveAnim);
+            AnimateEventSaved(_currentEventGO, _currentPlayerDisplayCard.transform, out var saveAnim);
             if (saveAnim != null)
             {
                 saveAnim.OnComplete(() =>
@@ -350,7 +359,7 @@ public class UM_MainPhase : UM_BasePhase
         seq.Append(t.DOScale(0f, 0.25f).SetEase(Ease.InBack));
     }
 
-    private void AnimateCardCaptured(GameObject cardGO, out Sequence seq)
+    private void AnimateCardCaptured(GameObject cardGO, Transform target, out Sequence seq)
     {
         seq = null;
         if (!cardGO) return;
@@ -359,12 +368,12 @@ public class UM_MainPhase : UM_BasePhase
         t.DOKill();
 
         seq = DOTween.Sequence();
-        seq.Append(t.DOScale(1.2f, 0.25f).SetEase(Ease.OutBack));
-        seq.Join(t.DOPunchRotation(new Vector3(0, 0, 10f), 0.3f, 6, 0.8f));
-        seq.Append(t.DOScale(0f, 0.3f).SetEase(Ease.InBack));
+        Vector3 targetPos = target.position;
+        seq.Append(t.DOMove(targetPos, 0.5f).SetEase(Ease.InBack));
+        seq.Join(t.DOScale(1.3f, 0.5f * 0.5f).SetLoops(2, LoopType.Yoyo));
     }
 
-    private void AnimateEventSaved(GameObject eventGO, out Sequence seq)
+    private void AnimateEventSaved(GameObject eventGO, Transform target, out Sequence seq)
     {
         seq = null;
         if (!eventGO) return;
@@ -373,9 +382,12 @@ public class UM_MainPhase : UM_BasePhase
         t.DOKill();
 
         seq = DOTween.Sequence();
-        seq.Append(t.DOPunchScale(Vector3.one * 0.15f, 0.3f, 6, 0.8f));
+        
+        Vector3 targetPos = target.position;
+        seq.Append(t.DOMove(targetPos, 0.5f).SetEase(Ease.InBack));
+        seq.Join(t.DOScale(1.3f, 0.5f * 0.5f).SetLoops(2, LoopType.Yoyo));
     }
-
+    
     #endregion
 
 #region Testing Helper
@@ -423,31 +435,29 @@ public class UM_MainPhase : UM_BasePhase
     }
 #endregion Testing Helper
 
-private void UpdateRollButtonState()
-{
-    var currentPlayer = GameManager.Instance.CurrentPlayer;
-
-    // 🔒 Disable by default
-    bool enable = false;
-
-    // Conditions:
-    // - Not AI
-    // - Not while an event is active
-    // - Player has either played or saved their event
-    if (!isPlayerAI)
+    private void UpdateRollButtonState()
     {
-        var eventManager = _eventManager ?? _mainPhase.EventManager;
+        var currentPlayer = GameManager.Instance.CurrentPlayer;
 
-        bool eventInactive = !eventManager.IsEventActive;
-        bool playerHasResolvedEvent = _currentEventGO == null;
-        bool canRoll = currentPlayer.CanRoll();
+        // 🔒 Disable by default
+        bool enable = false;
 
-        enable = eventInactive && playerHasResolvedEvent && canRoll;
+        // Conditions:
+        // - Not AI
+        // - Not while an event is active
+        // - Player has either played or saved their event
+        if (!isPlayerAI)
+        {
+            var eventManager = _eventManager ?? _mainPhase.EventManager;
+
+            bool eventInactive = !eventManager.IsEventActive;
+            bool playerHasResolvedEvent = _currentEventGO == null;
+            bool canRoll = currentPlayer.CanRoll();
+
+            enable = eventInactive && playerHasResolvedEvent && canRoll;
+        }
+
+        Debug.Log($"{enable}");
+        EnableDiceButton(enable);
     }
-
-    Debug.Log($"{enable}");
-    EnableDiceButton(enable);
-}
-
-    
 }

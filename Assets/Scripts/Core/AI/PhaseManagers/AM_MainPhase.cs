@@ -67,14 +67,15 @@ public class AM_MainPhase
 
         _eventManager.OnEventApplied += OnApplied; // 🔹 subscribe BEFORE ApplyEvent
         
-        //TODO: call from UI button
-        if (!(ShouldSaveEvent(aiPlayer, card) && _mainPhase.TrySaveEvent(card)))
+        if (ShouldSaveEvent(aiPlayer, card))
         {
-            _mainUI.OnClickEventApply();
+            _mainUI.OnClickEventSave();
+            resolved = true;
         }
         else
         {
-            resolved = true;
+            _mainUI.OnClickEventApply();
+            
         }
         
         // Wait until UI and game logic both finish
@@ -93,7 +94,9 @@ public class AM_MainPhase
         // 🔹 Use cards that can apply immediate benefits.
         if (!card.canSave) 
             return false;
-        
+
+        if (aiPlayer.HeldEvent != null)
+            return false;
         
         switch (card.eventConditions)
         {
