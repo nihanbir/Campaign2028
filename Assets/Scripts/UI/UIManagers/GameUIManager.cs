@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,6 +13,7 @@ public class GameUIManager : MonoBehaviour
     [Header("Dice & Actions")]
     [SerializeField] private Sprite[] diceFaces;
     [SerializeField] private TextMeshProUGUI phaseText;
+    [SerializeField] private Image diceImage;
     
     [Header("Phase UIs")]
     [SerializeField] public UM_SetupPhase setupUI;
@@ -19,38 +21,53 @@ public class GameUIManager : MonoBehaviour
     
     // Add others (CivilWarUI, GameOverUI) as needed
 
-    public int DiceRoll { get; set; }
-
+    private Button _currentRollButton;
+    
+    
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
         
-    }
-
-    //TODO: have one button available at a time and connect that button to here
-    
-    //TODO: add an event for roll dice clicked
-
-    #region Dice & Actions
-
-    public void OnRollDiceClicked(Button diceButton)
-    {
-        //TODO: make this generic instead of event stage
-        EventCardBus.Instance.Raise(
-            new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
-        );
+        TurnFlowBus.Instance.OnEvent += OnTurnEvent;
         
     }
-    
-    public void PlayerRolled(Image diceImage)
+
+    private void OnTurnEvent(TurnEvent e)
     {
-        diceImage.sprite = diceFaces[DiceRoll - 1];
+        if (e.stage == TurnStage.PlayerRolled)
+        {
+            var data = (PlayerRolledData)e.Payload;
+            OnPlayerRolledDice(data.Player, data.Roll);
+        }
     }
+
+    #region Dice & Actions
     
-    public void SetDiceSprite(Image diceImage)
+    public void RegisterRollButtonAndDiceImage(Button button, Image diceIMG)
     {
-        diceImage.sprite = diceFaces[DiceRoll - 1];
+        if (_currentRollButton != null)
+            _currentRollButton.onClick.RemoveListener(OnRollDiceClicked);
+
+        _currentRollButton = button;
+        _currentRollButton.onClick.AddListener(OnRollDiceClicked);
+
+        diceImage = diceIMG;
+    }
+
+    private void OnRollDiceClicked()
+    {
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest, new RollDiceRequest()));
+    }
+
+    private void OnPlayerRolledDice(Player player, int roll)
+    {
+        
+        player.PlayerDisplayCard.SetRolledDiceImage(diceFaces[roll - 1]);
+        
+        diceImage.sprite = diceFaces[roll - 1];
+        
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
 
     #endregion

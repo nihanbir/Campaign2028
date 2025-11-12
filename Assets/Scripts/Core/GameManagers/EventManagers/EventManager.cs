@@ -119,12 +119,10 @@ public class EventManager
     private void OnPlayerRequestedRoll()
     {
         if (!IsEventActive) return;
-
-        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
-        var roll = GameUIManager.Instance.DiceRoll;
         
+        //TODO: should we?
         // Broadcast the roll (useful for UI dice feedback)
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
+        // EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
     }
     #endregion
 }
@@ -229,14 +227,4 @@ public sealed class EventCompletedData
     public EventCompletedData(EventType t, Player p, EventCard c) { Type = t; Player = p; Card = c; }
 }
 
-public sealed class PlayerRolledData
-{
-    public Player Player;
-    public int    Roll;
-    public PlayerRolledData(Player p, int r) { Player = p; Roll = r; }
-}
 
-public sealed class RollDiceRequest
-{
-    
-}

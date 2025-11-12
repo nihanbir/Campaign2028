@@ -81,12 +81,12 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     {
         if (diceImage) diceImage.gameObject.SetActive(show);
     }
-    public void SetRolledDiceImage()
+    public void SetRolledDiceImage(Sprite roll)
     {
         if (diceImage)
         {
             ShowDice(true);
-            GameUIManager.Instance.SetDiceSprite(diceImage);
+            diceImage.sprite = roll;
         }
     }
     

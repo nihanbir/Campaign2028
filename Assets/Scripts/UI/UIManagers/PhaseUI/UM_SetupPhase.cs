@@ -13,7 +13,7 @@ public class UM_SetupPhase : UM_BasePhase
     public Transform actorUIParent;
     
     private PlayerDisplayCard _highlightedCard;
-    private List<PlayerDisplayCard> _playerDisplayCards = new();
+    private readonly List<PlayerDisplayCard> _playerDisplayCards = new();
     private PlayerDisplayCard _selectedActorCard;
     private GM_SetupPhase _setupPhase;
 
@@ -130,12 +130,10 @@ public class UM_SetupPhase : UM_BasePhase
        DicePopInAnimation();
     }
 
-    public override void OnRollDiceClicked()
+    protected override void OnPlayerRolledDice(Player player, int roll)
     {
-        base.OnRollDiceClicked();
+        base.OnPlayerRolledDice(player, roll);
         
-        var roll = GameUIManager.Instance.DiceRoll;
-        _setupPhase.PlayerRolledDice(roll);
     }
 
     #endregion

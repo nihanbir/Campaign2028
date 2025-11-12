@@ -39,7 +39,7 @@ public class AM_SetupPhase
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        _setupUI.OnRollDiceClicked();
+        // _setupUI.OnPlayerRolledDice();
     }
 
     private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)

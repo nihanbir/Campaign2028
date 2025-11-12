@@ -23,6 +23,14 @@ public class GameManager : GameManagerBase
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
         
+        TurnFlowBus.Instance.OnEvent += OnTurnEvent;
+        
+    }
+
+    private void OnTurnEvent(TurnEvent e)
+    {
+        if (e.stage == TurnStage.RollDiceRequest)
+            OnPlayerRequestedRoll(CurrentPlayer);
     }
 
     private void Start()
@@ -52,15 +60,13 @@ public class GameManager : GameManagerBase
     //     return _currentPhaseManager as T;
     // }
     
-    // In GameManager
-    public void HandleRollRequest(Player player)
+    private void OnPlayerRequestedRoll(Player player)
     {
         if (_currentPhaseManager == null) return;
         
         DiceRoll = Random.Range(1, 7);
         
-        //TODO: make this generic instead of event stage
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(player, DiceRoll)));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(player, DiceRoll)));
         
     }
     
@@ -74,43 +80,54 @@ public enum GamePhase
     GameOver
 }
 
+public sealed class TurnFlowBus
+{
+    private static TurnFlowBus _instance;
+    public static TurnFlowBus Instance => _instance ??= new TurnFlowBus();
 
+    public event Action<TurnEvent> OnEvent;
 
-// public sealed class GamePhaseBus
-// {
-//     private static GamePhaseBus _instance;
-//     public static GamePhaseBus Instance => _instance ??= new GamePhaseBus();
-//
-//     public event Action<GameEvent> OnEvent;
-//
-//     public void Raise(GameEvent e)
-//     {
-// #if UNITY_EDITOR
-//         Debug.Log($"[EventBus] {e.stage}");
-// #endif
-//         OnEvent?.Invoke(e);
-//     }
-//
-//     public void Clear() => OnEvent = null;
-// }
-//
-// public readonly struct GameEvent
-// {
-//     public readonly EventStage stage;
-//     public readonly object Payload; // keep generic for flexibility
-//
-//     public GameEvent(EventStage stage, object payload)
-//     {
-//         this.stage = stage;
-//         Payload = payload;
-//     }
-// }
+    public void Raise(TurnEvent e)
+    {
+#if UNITY_EDITOR
+        Debug.Log($"[EventBus] {e.stage}");
+#endif
+        OnEvent?.Invoke(e);
+    }
 
-public enum PhaseStage
+    public void Clear() => OnEvent = null;
+}
+
+public readonly struct TurnEvent
+{
+    public readonly TurnStage stage;
+    public readonly object Payload; // keep generic for flexibility
+
+    public TurnEvent(TurnStage stage, object payload)
+    {
+        this.stage = stage;
+        Payload = payload;
+    }
+}
+
+public enum TurnStage
 {
     None,
+    PlayerTurnStarted,
+    PlayerTurnEnded,
     RollDiceRequest,
-    PlayerRolled,           // Player rolled value (for UI dice feedback)
-    ClientAnimationCompleted,
+    PlayerRolled,
+    AnimationCompleted
 
+}
+
+public sealed class PlayerRolledData
+{
+    public Player Player;
+    public int    Roll;
+    public PlayerRolledData(Player p, int r) { Player = p; Roll = r; }
+}
+
+public sealed class RollDiceRequest
+{
 }

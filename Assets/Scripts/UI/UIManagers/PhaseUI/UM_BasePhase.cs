@@ -52,8 +52,7 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseEnabled()
     {
-        rollDiceButton.onClick.RemoveAllListeners();
-        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
         
         EnableDiceButton(false);
         
@@ -98,18 +97,11 @@ public abstract class UM_BasePhase : MonoBehaviour
         player.PlayerDisplayCard.RemoveHighlight();
     }
     
-    public virtual void OnRollDiceClicked()
+    protected virtual void OnPlayerRolledDice(Player player, int roll)
     {
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
         
-        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
-        GameUIManager.Instance.SetDiceSprite(diceImage);
-        
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-        
-        // Roll button bounce feedback
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
+    
 
     protected virtual void EnableDiceButton(bool enable)
     {

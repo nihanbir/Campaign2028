@@ -118,7 +118,7 @@ public class UM_MainPhase : UM_BasePhase
         ownedCardsPanel.TogglePanel();
     }
 
-#region Player Management
+    #region Player Management
     private void RelocatePlayerCards(Transform parent)
     {
         var players = GameManager.Instance?.players;
@@ -146,9 +146,9 @@ public class UM_MainPhase : UM_BasePhase
         }
     }
 
-#endregion Player Management
+    #endregion Player Management
 
-#region Turn Flow
+    #region Turn Flow
 
     protected override void OnPlayerTurnStarted(Player player)
     {
@@ -175,21 +175,18 @@ public class UM_MainPhase : UM_BasePhase
        player.PlayerDisplayCard.ShowDice(false);
     }
 
-    public override void OnRollDiceClicked()
+    //TODO: register to bus
+    protected override void OnPlayerRolledDice(Player player, int roll)
     {
-        base.OnRollDiceClicked();
-
-        int roll = GameUIManager.Instance.DiceRoll;
+        // base.OnPlayerRolledDice(player, roll);
         
         UpdateRollButtonState();
         
-        _mainPhase.PlayerRolledDice(roll);
-        
     }
 
-#endregion Turn Flow
+    #endregion Turn Flow
     
-#region Card Spawning
+    #region Card Spawning
 
     public void OnSpawnTargetClicked()
     {
@@ -258,7 +255,7 @@ public class UM_MainPhase : UM_BasePhase
 
 #endregion Card Spawning
     
-#region Card Feedback
+    #region Card Feedback
 
     private void OnCardCaptured(Player player, Card card)
     {
@@ -388,7 +385,7 @@ public class UM_MainPhase : UM_BasePhase
     
     #endregion
 
-#region Testing Helper
+    #region Testing Helper
 
     public void InitializePlayersForTesting()
     {

@@ -171,12 +171,12 @@ public class AM_MainPhase
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
-        int roll = Random.Range(1, 7);
-        GameUIManager.Instance.DiceRoll = roll;
-
-        EventCardBus.Instance.Raise(
-            new CardEvent(EventStage.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
-        );
+        // int roll = Random.Range(1, 7);
+        // GameUIManager.Instance.DiceRoll = roll;
+        //
+        // EventCardBus.Instance.Raise(
+        //     new CardEvent(EventStage.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
+        // );
     }
     #endregion
 

@@ -55,8 +55,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         if (rollDiceButton)
         {
-            rollDiceButton.onClick.RemoveAllListeners();
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+            GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
         }
     }
 
@@ -114,21 +113,21 @@ public class EUM_ChallengeEvent : MonoBehaviour
         seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
     }
 
-    private void OnRollDiceClicked()
-    {
-        // 🔹 Instead of calling EventManager directly, announce intent on the bus
-        EventCardBus.Instance.Raise(
-            new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
-        );
-    }
+    //TODO:
+    // private void OnRollDiceClicked()
+    // {
+    //     // 🔹 Instead of calling EventManager directly, announce intent on the bus
+    //     EventCardBus.Instance.Raise(
+    //         new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
+    //     );
+    // }
 
+    //TODO:bus
     private void OnPlayerRolled(Player player, int roll)
     {
-        GameUIManager.Instance.SetDiceSprite(diceImage);
-        
-        player.PlayerDisplayCard.SetRolledDiceImage();
+        // GameUIManager.Instance.SetDiceSprite(diceImage);
 
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
+        // diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
     
 
