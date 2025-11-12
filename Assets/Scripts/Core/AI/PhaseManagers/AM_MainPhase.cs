@@ -189,7 +189,9 @@ public class AM_MainPhase
 
         Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
         // Feed the choice back to logic; UI will have been opened by bus already
-        _mainPhase.EventManager.HandleStateChosen(chosenState);
+        
+        //TODO: how do we do this now?
+        // _mainPhase.EventManager.HandleStateChosen(chosenState);
     }
 
     private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)

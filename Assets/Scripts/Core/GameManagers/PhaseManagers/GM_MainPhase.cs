@@ -160,21 +160,22 @@ public class GM_MainPhase : GM_BasePhase
         }
         
         bool success;
-            
-        if (EventManager.ConsumeNeedTwo())
-        {
-            success = (roll == 2);
-            Debug.Log($"'Need2' active — success = {success}");
-        }
-        else
-        {
+        
+        //TODO: evaluate capture should be a part of that event instead
+        // if (EventManager.ConsumeNeedTwo())
+        // {
+        //     success = (roll == 2);
+        //     Debug.Log($"'Need2' active — success = {success}");
+        // }
+        // else
+        // {
             success = CurrentTargetCard switch
             {
                 StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
                 InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
                 _ => false
             };
-        }
+        // }
 
         if (success)
         {

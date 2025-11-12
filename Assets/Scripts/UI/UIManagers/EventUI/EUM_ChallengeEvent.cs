@@ -182,7 +182,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         HandleCardHeld();
 
         // forward the actual choice to logic
-        _eventManager.HandleStateChosen(chosen);
+        //TODO: bus
+        // _eventManager.HandleStateChosen(chosen);
     }
 
     private void ShowStateCards(Player attacker, List<StateCard> statesToDisplay)
