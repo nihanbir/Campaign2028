@@ -69,7 +69,8 @@ public class GM_MainPhase : GM_BasePhase
     }
 
 #region Turn Sequence
-    public override void StartPlayerTurn()
+
+protected override void StartPlayerTurn()
     {
         base.StartPlayerTurn();
         if (_eventDeck.Count == 0)
@@ -88,7 +89,7 @@ public class GM_MainPhase : GM_BasePhase
         }
     }
 
-    public override void EndPlayerTurn()
+    protected override void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn ended ---");
@@ -101,25 +102,24 @@ public class GM_MainPhase : GM_BasePhase
         MoveToNextPlayer();
     }
 
-    public override void MoveToNextPlayer()
+    protected override void MoveToNextPlayer()
     {
         game.currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.Count;
         StartPlayerTurn();
     }
 
-    public override void PlayerRolledDice(int roll)
+    protected override void PlayerRolledDice(Player player, int roll)
     {
-        Player current = game.CurrentPlayer;
-        if (!current.CanRoll())
+        if (!player.CanRoll())
         {
             Debug.Log("Player already rolled.");
             return;
         }
 
-        current.RegisterRoll();
+        player.RegisterRoll();
         
         Debug.Log($"Rolled: {roll}");
-        EvaluateCapture(current, roll);
+        EvaluateCapture(player, roll);
     }
     
 #endregion

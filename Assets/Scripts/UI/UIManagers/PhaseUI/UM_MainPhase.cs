@@ -265,7 +265,9 @@ public class UM_MainPhase : UM_BasePhase
         {
             _mainPhase.CaptureCard(player, card);
             ClearTargetCard();
-            _mainPhase.EndPlayerTurn();
+            
+            //TODO
+            // _mainPhase.EndPlayerTurn();
         });
         
     }

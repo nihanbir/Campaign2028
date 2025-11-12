@@ -18,9 +18,23 @@ public abstract class GM_BasePhase
         uiManager = GameUIManager.Instance;
         aiManager = AIManager.Instance;
         game.OnPhaseChanged += OnPhaseChanged;
+        
     }
 
     protected bool isActive = false;
+    
+    private void HandleTurnEvent(TurnEvent e)
+    {
+        if (!isActive) return;
+
+        switch (e.stage)
+        {
+            case TurnStage.PlayerRolled:
+                var data = (PlayerRolledData)e.Payload;
+                PlayerRolledDice(data.Player, data.Roll);
+                break;
+        }
+    }
     
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
@@ -33,27 +47,29 @@ public abstract class GM_BasePhase
     protected virtual void BeginPhase()
     {
         isActive = true;
+        TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
+        
     }
 
     protected virtual void EndPhase()
     {
         isActive = false;
-    }
-
-    public virtual void StartPlayerTurn()
-    {
-        OnPlayerTurnStarted?.Invoke(game.CurrentPlayer);
+        TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
         
     }
 
-    public virtual void EndPlayerTurn()
+    protected virtual void StartPlayerTurn()
     {
-        OnPlayerTurnEnded?.Invoke(game.CurrentPlayer);
-        
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, game.CurrentPlayer));
     }
-    public virtual void MoveToNextPlayer() { }
 
-    public virtual void PlayerRolledDice(int roll)
+    protected virtual void EndPlayerTurn()
+    {
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, game.CurrentPlayer));
+    }
+    protected virtual void MoveToNextPlayer() { }
+
+    protected virtual void PlayerRolledDice(Player player, int roll)
     {
         
     }

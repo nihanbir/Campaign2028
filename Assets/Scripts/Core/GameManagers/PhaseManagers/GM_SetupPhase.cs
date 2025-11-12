@@ -120,12 +120,12 @@ public class GM_SetupPhase : GM_BasePhase
 
     #region Roll Stage
     
-    public override void PlayerRolledDice(int roll)
+    protected override void PlayerRolledDice(Player player, int roll)
     {
-        _rolledPlayers.Add(game.CurrentPlayer, roll);
-        _playersToRoll.Remove(game.CurrentPlayer);
+        _rolledPlayers.Add(player, roll);
+        _playersToRoll.Remove(player);
         
-        Debug.Log($"Player {game.CurrentPlayer.playerID} rolled {roll}");
+        Debug.Log($"Player {player.playerID} rolled {roll}");
         
         if (AllPlayersHaveRolled())
         {
@@ -209,7 +209,7 @@ public class GM_SetupPhase : GM_BasePhase
 
     #region Turn Management
 
-    public override void StartPlayerTurn()
+    protected override void StartPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         Debug.Log($"Player {current.playerID} turn started - Stage: {CurrentStage}");
@@ -223,7 +223,7 @@ public class GM_SetupPhase : GM_BasePhase
         }
     }
 
-    public override void EndPlayerTurn()
+    protected override void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;
         
@@ -232,7 +232,7 @@ public class GM_SetupPhase : GM_BasePhase
         Debug.Log($"Player {current.playerID} turn ended");
     }
 
-    public override void MoveToNextPlayer()
+    protected override void MoveToNextPlayer()
     {
         EndPlayerTurn();
         
