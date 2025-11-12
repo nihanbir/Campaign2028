@@ -9,8 +9,8 @@ public class GM_SetupPhase : GM_BasePhase
     public override GamePhase PhaseType => GamePhase.Setup;
     
     // Roll tracking
-    private List<Player> _playersToRoll = new List<Player>();
-    private Dictionary<Player, int> _rolledPlayers = new Dictionary<Player, int>();
+    private List<Player> _playersToRoll = new ();
+    private Dictionary<Player, int> _rolledPlayers = new ();
     
     private List<ActorCard> _unassignedActors;
     private List<Player> _unassignedPlayers;
@@ -343,6 +343,7 @@ public enum SetupStage
     None,
     Roll,
     Reroll,
-    AssignActor
+    AssignActor,
+    LastActorAssigned
 }
 
