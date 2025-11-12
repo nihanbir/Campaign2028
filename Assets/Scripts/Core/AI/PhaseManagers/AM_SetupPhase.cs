@@ -14,6 +14,8 @@ public class AM_SetupPhase
         _aiManager = manager;
         _setupPhase = _aiManager.game.setupPhase;
         _setupUI = GameUIManager.Instance.setupUI;
+        
+        //TODO: have it like phasemanager
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
@@ -39,7 +41,9 @@ public class AM_SetupPhase
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        // _setupUI.OnPlayerRolledDice();
+        
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest, new RollDiceRequest()));
+        
     }
 
     private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)

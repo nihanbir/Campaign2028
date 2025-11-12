@@ -24,6 +24,7 @@ public class AIManager : MonoBehaviour
 
         game = GameManager.Instance;
         
+        //TODO: have one active at a time
         setupAI = new AM_SetupPhase(this);
         mainAI = new AM_MainPhase(this);
         

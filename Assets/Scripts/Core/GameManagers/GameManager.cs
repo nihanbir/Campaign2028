@@ -36,7 +36,7 @@ public class GameManager : GameManagerBase
     private void Start()
     {
         InitializePhases();
-        SetPhase(mainPhase);
+        SetPhase(setupPhase);
     }
     
     public void SetPhase(GM_BasePhase newPhase)
@@ -130,4 +130,16 @@ public sealed class PlayerRolledData
 
 public sealed class RollDiceRequest
 {
+}
+
+public sealed class PlayerTurnStartedData
+{
+    public Player Player;
+    public PlayerTurnStartedData(Player p) { Player = p;}
+}
+
+public sealed class PlayerTurnEndedData
+{
+    public Player Player;
+    public PlayerTurnEndedData(Player p) { Player = p;}
 }

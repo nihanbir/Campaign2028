@@ -82,8 +82,9 @@ public class UM_MainPhase : UM_BasePhase
         saveEventButton.onClick.AddListener(OnClickEventSave);
         playEventButton.onClick.AddListener(OnClickEventApply);
         
-        _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
+        //TODO:bus
+        // _mainPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
+        // _mainPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured += OnCardCaptured;
         
         _stateDiscardedHandler = _ => ClearTargetCard();
@@ -105,8 +106,8 @@ public class UM_MainPhase : UM_BasePhase
         saveEventButton.onClick.RemoveAllListeners();
         playEventButton.onClick.RemoveAllListeners();
         
-        _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
+        // _mainPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+        // _mainPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _mainPhase.OnCardCaptured -= OnCardCaptured;
         
         if (_stateDiscardedHandler != null)

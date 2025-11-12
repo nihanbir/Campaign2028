@@ -9,9 +9,6 @@ public abstract class GM_BasePhase
     protected readonly GameUIManager uiManager;
     protected readonly AIManager aiManager;
     
-    public event Action<Player> OnPlayerTurnStarted;
-    public event Action<Player> OnPlayerTurnEnded;
-    
     protected GM_BasePhase()
     {
         game = GameManager.Instance;
@@ -60,12 +57,12 @@ public abstract class GM_BasePhase
 
     protected virtual void StartPlayerTurn()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, game.CurrentPlayer));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, new PlayerTurnStartedData(game.CurrentPlayer)));
     }
 
     protected virtual void EndPlayerTurn()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, game.CurrentPlayer));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, new PlayerTurnEndedData(game.CurrentPlayer)));
     }
     protected virtual void MoveToNextPlayer() { }
 

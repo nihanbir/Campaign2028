@@ -43,8 +43,6 @@ public class UM_SetupPhase : UM_BasePhase
 
     protected override void SubscribeToPhaseEvents()
     {
-        _setupPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
         _setupPhase.OnAllPlayersRolled += AnimateAllDicePopAndThenProcess;
         _setupPhase.OnActorAssignStage += OnActorAssignStage;
         _setupPhase.OnLastActorAssigned += UpdatePlayerUIWithActor;
@@ -58,8 +56,6 @@ public class UM_SetupPhase : UM_BasePhase
         base.UnsubscribeToPhaseEvents();
         if (_setupPhase == null) _setupPhase = game.setupPhase;
         
-        _setupPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _setupPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
         _setupPhase.OnAllPlayersRolled -= AnimateAllDicePopAndThenProcess;
         _setupPhase.OnActorAssignStage -= OnActorAssignStage;
         _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
@@ -125,7 +121,6 @@ public class UM_SetupPhase : UM_BasePhase
         
         bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
         rollDiceButton.gameObject.SetActive(!isAssignStage);
-        
 
        DicePopInAnimation();
     }

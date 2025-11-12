@@ -71,7 +71,6 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
-        TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
         
         isActive = false;
         
@@ -86,16 +85,38 @@ public abstract class UM_BasePhase : MonoBehaviour
     private void HandleTurnEvent(TurnEvent e)
     {
         if (!isActive) return;
-        if (e.stage == TurnStage.PlayerRolled)
+        switch (e.stage)
         {
-            var data = (PlayerRolledData)e.Payload;
-            OnPlayerRolledDice(data.Player, data.Roll);
+            case TurnStage.PlayerRolled:
+            {
+                var data = (PlayerRolledData)e.Payload;
+                OnPlayerRolledDice(data.Player, data.Roll);
+                break;
+            }
+            case TurnStage.PlayerTurnStarted:
+            {
+                var data = (PlayerTurnStartedData)e.Payload;
+                OnPlayerTurnStarted(data.Player);
+                break;
+            }
+            case TurnStage.PlayerTurnEnded:
+            {
+                var data = (PlayerTurnEndedData)e.Payload;
+                OnPlayerTurnEnded(data.Player);
+                break;
+            }
         }
     }
 
-    protected virtual void SubscribeToPhaseEvents() { }
-    
-    protected virtual void UnsubscribeToPhaseEvents() { }
+    protected virtual void SubscribeToPhaseEvents()
+    {
+        TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
+    }
+
+    protected virtual void UnsubscribeToPhaseEvents()
+    {
+        TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
+    }
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
