@@ -52,6 +52,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseEnabled()
     {
+        TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
+        
         GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
         
         EnableDiceButton(false);
@@ -59,6 +61,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         SubscribeToPhaseEvents();
         
         gameObject.SetActive(true);
+        
         isActive = true;
         
         // Animate UI entry
@@ -68,6 +71,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
+        TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
+        
         isActive = false;
         
         AnimatePhaseExit(() =>
@@ -76,6 +81,16 @@ public abstract class UM_BasePhase : MonoBehaviour
             UnsubscribeToPhaseEvents();
             gameObject.SetActive(false);
         });
+    }
+
+    private void HandleTurnEvent(TurnEvent e)
+    {
+        if (!isActive) return;
+        if (e.stage == TurnStage.PlayerRolled)
+        {
+            var data = (PlayerRolledData)e.Payload;
+            OnPlayerRolledDice(data.Player, data.Roll);
+        }
     }
 
     protected virtual void SubscribeToPhaseEvents() { }

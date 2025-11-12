@@ -130,12 +130,6 @@ public class UM_SetupPhase : UM_BasePhase
        DicePopInAnimation();
     }
 
-    protected override void OnPlayerRolledDice(Player player, int roll)
-    {
-        base.OnPlayerRolledDice(player, roll);
-        
-    }
-
     #endregion
 
     #region Actor Assignment UI

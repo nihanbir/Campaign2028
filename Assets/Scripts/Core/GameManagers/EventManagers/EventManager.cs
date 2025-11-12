@@ -88,7 +88,8 @@ public class EventManager
         // Inform systems that this event completed
         EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
-        _mainPhase.EndPlayerTurn();
+        //TODO: can have its own endplayerturn logic
+        // _mainPhase.EndPlayerTurn();
         
         NullifyEventLocals();
     }
