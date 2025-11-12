@@ -63,10 +63,10 @@ public class UM_MainPhase : UM_BasePhase
         
         //TODO: maybe SOLID
         challengeEvent.Initialize();
-        RelocatePlayerCards(playerUIParent);
+        // RelocatePlayerCards(playerUIParent);
         
         //TODO: dont forget to remove
-        // InitializePlayersForTesting();
+        InitializePlayersForTesting();
         
         base.OnPhaseEnabled();
     }
@@ -454,8 +454,7 @@ public class UM_MainPhase : UM_BasePhase
 
             enable = eventInactive && playerHasResolvedEvent && canRoll;
         }
-
-        Debug.Log($"{enable}");
+        
         EnableDiceButton(enable);
     }
 }

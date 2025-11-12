@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 public class GM_MainPhase : GM_BasePhase
 {
@@ -40,12 +41,15 @@ public class GM_MainPhase : GM_BasePhase
         
         game.currentPlayerIndex = 0;
         
+        _mainDeck.ShuffleInPlace();
+        
         var ui = GameUIManager.Instance.mainUI;
         if (ui)
         {
             ui.OnUIReady = () =>
             {
-                // AssignTestCardsToPlayers(_mainDeck);
+                //TODO: don't forget to remove this
+                AssignTestCardsToPlayers(_mainDeck);
                 Debug.Log("🟢 Mainphase UI Ready — starting player turns");
                 StartPlayerTurn();
             };
@@ -465,11 +469,30 @@ public class GM_MainPhase : GM_BasePhase
             return;
         }
 
-        // Create a shuffled copy of the card deck
+        // Create a shuffled copy of the deck
         var shuffled = sourceDeck.Shuffled();
 
-        int index = 0;
+        // 🔹 Force assignment for CIA and Supreme Court if present
+        var ciaCard = shuffled.FirstOrDefault(c => c.cardName.Contains("CIA", StringComparison.OrdinalIgnoreCase));
+        var courtCard = shuffled.FirstOrDefault(c => c.cardName.Contains("Supreme", StringComparison.OrdinalIgnoreCase));
 
+        if (ciaCard != null)
+        {
+            shuffled.Remove(ciaCard);
+            CaptureCard(game.players[5], ciaCard); // assign CIA to Player 0
+            Debug.Log($"🔸 Assigned CIA to {game.players[5].PlayerName}");
+        }
+
+        if (courtCard != null)
+        {
+            shuffled.Remove(courtCard);
+            var targetIndex = 5; // if 2+ players, give to Player 1
+            CaptureCard(game.players[targetIndex], courtCard);
+            Debug.Log($"🔸 Assigned Supreme Court to {game.players[targetIndex].PlayerName}");
+        }
+
+        // Continue assigning random remaining cards
+        int index = 0;
         foreach (var player in game.players)
         {
             for (int i = 0; i < cardsPerPlayer; i++)
@@ -483,14 +506,18 @@ public class GM_MainPhase : GM_BasePhase
 
                 var card = shuffled[index++];
 
-                // Use your proper capture logic — keeps everything in sync
-                CaptureCard(player, card);
+                // Skip if we already assigned CIA or Supreme Court to this player
+                if (card.cardName.Contains("CIA", StringComparison.OrdinalIgnoreCase) ||
+                    card.cardName.Contains("Supreme", StringComparison.OrdinalIgnoreCase))
+                    continue;
 
+                CaptureCard(player, card);
             }
         }
 
-        Debug.Log("✅ Test state assignment completed.");
+        Debug.Log("✅ Test card assignment completed.");
     }
+
     
 #endregion
 }

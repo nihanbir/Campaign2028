@@ -29,13 +29,13 @@ public class AM_MainPhase
 
     private void OnBusEvent(GameEvent e)
     {
-        switch (e.Type)
+        switch (e.stage)
         {
-            case GameEventType.EventCompleted:
+            case EventStage.EventCompleted:
                 _eventResolvedWait = true;
                 break;
             
-            case GameEventType.ChallengeStateShown:
+            case EventStage.ChallengeStateShown:
             {
                 var data = (ChallengeStatesData)e.Payload;
                 // if AI is the current player, choose a state
@@ -47,7 +47,7 @@ public class AM_MainPhase
                 break;
             }
 
-            case GameEventType.DuelStarted:
+            case EventStage.DuelStarted:
             {
                 var data = (DuelData)e.Payload;
                 // if AI is the attacker, roll dice
@@ -59,7 +59,7 @@ public class AM_MainPhase
                 break;
             }
 
-            case GameEventType.AltStatesShown:
+            case EventStage.AltStatesShown:
             {
                 var data = (AltStatesData)e.Payload;
                 // if AI is the player, roll dice for alternative states
@@ -97,14 +97,14 @@ public class AM_MainPhase
             yield return _aiManager.StartCoroutine(HandleEventCard(aiPlayer, _mainPhase.CurrentEventCard));
         }
         
-        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
-        {
-            yield return _aiManager.StartCoroutine(RollDice(aiPlayer));
-        }
-        else
-        {
-            Debug.Log($"AI Player: {aiPlayer.playerID} lost its turn or challenge active");
-        }
+        // if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
+        // {
+        //     yield return _aiManager.StartCoroutine(RollDice(aiPlayer));
+        // }
+        // else
+        // {
+        //     Debug.Log($"AI Player: {aiPlayer.playerID} lost its turn or challenge active");
+        // }
     }
     
     private IEnumerator HandleEventCard(AIPlayer aiPlayer, EventCard card)
@@ -114,20 +114,23 @@ public class AM_MainPhase
         _eventResolvedWait = false;
 
         // Decide to save or apply; keep UI calls to preserve your animations
-        if (ShouldSaveEvent(aiPlayer, card))
-        {
-            if (_mainPhase.TrySaveEvent(card))
-            {
-                _eventResolvedWait = true; // saving resolves immediately for AI flow
-            }
-        }
-        else
-        {
-            _mainPhase.EventManager.ApplyEvent(aiPlayer, _mainPhase.CurrentEventCard);
-        }
+        //TODO: don't forget to remove
+        // if (ShouldSaveEvent(aiPlayer, card))
+        // {
+        //     if (_mainPhase.TrySaveEvent(card))
+        //     {
+        //         _eventResolvedWait = true; // saving resolves immediately for AI flow
+        //     }
+        // }
+        // else
+        // {
+
+            Debug.Log($"{aiPlayer.playerID} is handling event, current player is {GameManager.Instance.CurrentPlayer.playerID} ");  
+            _mainPhase.EventManager.ApplyEvent(aiPlayer, card);
+        // }
 
         // Wait until the EventManager broadcasts completion (or save resolved)
-        yield return new WaitUntil(() => _eventResolvedWait);
+        // yield return new WaitUntil(() => _eventResolvedWait);
     }
 
     private bool ShouldSaveEvent(AIPlayer aiPlayer, EventCard card)
@@ -172,22 +175,9 @@ public class AM_MainPhase
         GameUIManager.Instance.DiceRoll = roll;
 
         GameEventBus.Instance.Raise(
-            new GameEvent(GameEventType.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
+            new GameEvent(EventStage.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
         );
     }
-    
-    // public IEnumerator RollEventDice(AIPlayer aiPlayer)
-    // {
-    //     _animationDone = false;
-    //     
-    //     // 🧠 Wait for both animation and event logic to finish
-    //     yield return new WaitUntil(() => _animationDone);
-    //     
-    //     yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-    //
-    //     EUM_ChallengeEvent eventUI = _mainUI.challengeEvent;
-    //     eventUI.OnRollDiceClicked();
-    // }
     #endregion
 
     #region Challenge Any State (AI choice)
@@ -197,6 +187,7 @@ public class AM_MainPhase
 
         var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
 
+        Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
         // Feed the choice back to logic; UI will have been opened by bus already
         _mainPhase.EventManager.HandleStateChosen(chosenState);
     }

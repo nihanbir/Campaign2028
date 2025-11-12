@@ -58,14 +58,14 @@ public class EventManager
         // Resolve effective type (including team-based)
         _effectiveType = ResolveEventType(card, player);
         
+        Debug.Log($"EventManager ApplyEvent: {card.cardName} resolved type={_effectiveType}, handlers count={_handlers.Count}");
+        
+        // Legacy callback + bus fire (applied does NOT mean resolved)
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
+        
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
             handler(player, card);
-            
-            Debug.Log($"EventManager ApplyEvent: {card.cardName} resolved type={_effectiveType}, handlers count={_handlers.Count}");
-
-            // Legacy callback + bus fire (applied does NOT mean resolved)
-            GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventApplied, new EventAppliedData(card, player)));
         }
         else
         {
@@ -124,11 +124,11 @@ public class EventManager
         _eventActive = true;
 
         // Broadcast start so UI can show small feedback if desired
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventStarted, new EventStartedData(_effectiveType, player, card)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventStarted, new EventStartedData(_effectiveType, player, card)));
 
-        //TODO: how to do this better
+        //TODO: instead of this end player turn without moving to next player
         // Small delay to let any UI coroutines/animations breathe; then end turn
-        GameManager.Instance.StartCoroutine(EndTurnAfterDelay(0.1f));
+        GameManager.Instance.StartCoroutine(EndTurnAfterDelay(2f));
     }
 
     private IEnumerator EndTurnAfterDelay(float seconds)
@@ -136,10 +136,11 @@ public class EventManager
         yield return new WaitForSeconds(seconds);
         _eventActive = false;
 
-        _mainPhase.EndPlayerTurn();
         // Inform systems that this event completed
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
-
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
+        
+        _mainPhase.EndPlayerTurn();
+        
         NullifyEventLocals();
     }
     #endregion
@@ -167,7 +168,7 @@ public class EventManager
 
         // Bus event for decoupled UI
         GameEventBus.Instance.Raise(new GameEvent(
-            GameEventType.AltStatesShown,
+            EventStage.AltStatesShown,
             new AltStatesData(player, _altState1, _altState2, card)));
 
         // Let UI/AI handle the dice roll; we stay idle until a roll arrives via OnPlayerRolledDice()
@@ -190,12 +191,8 @@ public class EventManager
         {
             Debug.Log($"Player {_currentPlayer.playerID} didn't discard any states!");
         }
-
-        // Bus notify
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelCompleted, null));
-
-        //TODO: do this better
-        GameManager.Instance.StartCoroutine(EndTurnAfterDelay(0.1f));
+        
+        GameManager.Instance.StartCoroutine(EndTurnAfterDelay(2f));
     }
     #endregion
 
@@ -239,12 +236,7 @@ public class EventManager
             Debug.Log($"Player {_currentPlayer.playerID} failed to capture {_chosenCard.cardName}");
         }
         
-        //TODO: listen to this duelcompleted here in eventmanager too
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelCompleted, null));
-
-        _eventActive = false;
-        
-        NullifyEventLocals();
+        GameManager.Instance.StartCoroutine(EndTurnAfterDelay(2.5f));
     }
     #endregion
 
@@ -276,7 +268,7 @@ public class EventManager
         _eventActive = true;
 
         // Legacy + bus
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelStarted, new DuelData(player, _defender, _chosenCard, _currentEventCard)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.DuelStarted, new DuelData(player, _defender, _chosenCard, _currentEventCard)));
         
     }
     #endregion
@@ -296,7 +288,7 @@ public class EventManager
 
         // Legacy + bus
         
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
     }
 
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
@@ -329,7 +321,7 @@ public class EventManager
 
         // Legacy + bus
         
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.DuelStarted, new DuelData(_currentPlayer, _defender, _chosenCard, _currentEventCard)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.DuelStarted, new DuelData(_currentPlayer, _defender, _chosenCard, _currentEventCard)));
     }
     #endregion
 
@@ -342,7 +334,7 @@ public class EventManager
 
         //TODO: raise event canceled instead
         // Let listeners know the event ended without duel/alt flow if they care
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, card)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
         NullifyEventLocals();
         _eventActive = false;
@@ -361,7 +353,7 @@ public class EventManager
     private void EndEventIfIdle()
     {
         // For instant-resolve events (ExtraRoll / NeedTwo), let systems know we’re done.
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         NullifyEventLocals();
         _eventActive = false;
     }
@@ -371,7 +363,7 @@ public class EventManager
         if (!_eventActive) return;
 
         // Broadcast the roll (useful for UI dice feedback)
-        GameEventBus.Instance.Raise(new GameEvent(GameEventType.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
 
         if (_effectiveType == EventType.AlternativeStates)
         {
@@ -392,7 +384,7 @@ public class EventManager
     
     private void OnGameEvent(GameEvent e)
     {
-        if (e.Type != GameEventType.RollDiceRequest)
+        if (e.stage != EventStage.RollDiceRequest)
             return;
 
         var data = (PlayerRolledData)e.Payload;
@@ -417,7 +409,7 @@ public sealed class GameEventBus
     public void Raise(GameEvent e)
     {
 #if UNITY_EDITOR
-        Debug.Log($"[EventBus] {e.Type}");
+        Debug.Log($"[EventBus] {e.stage}");
 #endif
         OnEvent?.Invoke(e);
     }
@@ -427,17 +419,17 @@ public sealed class GameEventBus
 
 public readonly struct GameEvent
 {
-    public readonly GameEventType Type;
+    public readonly EventStage stage;
     public readonly object Payload; // keep generic for flexibility
 
-    public GameEvent(GameEventType type, object payload)
+    public GameEvent(EventStage stage, object payload)
     {
-        Type = type;
+        this.stage = stage;
         Payload = payload;
     }
 }
 
-public enum GameEventType
+public enum EventStage
 {
     None,
     EventApplied,          // Sent when ApplyEvent() is called (not resolved)
