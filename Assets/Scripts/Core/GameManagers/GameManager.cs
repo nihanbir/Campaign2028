@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : GameManagerBase
 {
@@ -13,6 +14,8 @@ public class GameManager : GameManagerBase
     public GamePhase CurrentPhase =>  _currentPhaseManager?.PhaseType ?? GamePhase.None;
 
     public event Action<GM_BasePhase> OnPhaseChanged;
+    
+    public int DiceRoll { get; private set; }
 
     protected override void Awake()
     {
@@ -49,6 +52,18 @@ public class GameManager : GameManagerBase
     //     return _currentPhaseManager as T;
     // }
     
+    // In GameManager
+    public void HandleRollRequest(Player player)
+    {
+        if (_currentPhaseManager == null) return;
+        
+        DiceRoll = Random.Range(1, 7);
+        
+        //TODO: make this generic instead of event stage
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(player, DiceRoll)));
+        
+    }
+    
 }
 public enum GamePhase
 {
@@ -57,4 +72,45 @@ public enum GamePhase
     MainGame,
     CivilWar,
     GameOver
+}
+
+
+
+// public sealed class GamePhaseBus
+// {
+//     private static GamePhaseBus _instance;
+//     public static GamePhaseBus Instance => _instance ??= new GamePhaseBus();
+//
+//     public event Action<GameEvent> OnEvent;
+//
+//     public void Raise(GameEvent e)
+//     {
+// #if UNITY_EDITOR
+//         Debug.Log($"[EventBus] {e.stage}");
+// #endif
+//         OnEvent?.Invoke(e);
+//     }
+//
+//     public void Clear() => OnEvent = null;
+// }
+//
+// public readonly struct GameEvent
+// {
+//     public readonly EventStage stage;
+//     public readonly object Payload; // keep generic for flexibility
+//
+//     public GameEvent(EventStage stage, object payload)
+//     {
+//         this.stage = stage;
+//         Payload = payload;
+//     }
+// }
+
+public enum PhaseStage
+{
+    None,
+    RollDiceRequest,
+    PlayerRolled,           // Player rolled value (for UI dice feedback)
+    ClientAnimationCompleted,
+
 }

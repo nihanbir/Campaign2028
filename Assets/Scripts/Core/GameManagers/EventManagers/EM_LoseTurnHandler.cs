@@ -6,7 +6,7 @@ public class EM_LoseTurnHandler : BaseEventHandler
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
         // Broadcast start so UI can show small feedback if desired
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventStarted, new EventStartedData(effectiveType, player, card)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventStarted, new EventStartedData(effectiveType, player, card)));
 
         //TODO: instead of this end player turn without moving to next player
         

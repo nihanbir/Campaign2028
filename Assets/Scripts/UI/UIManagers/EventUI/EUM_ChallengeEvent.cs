@@ -51,7 +51,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         _mainUI       = GameUIManager.Instance.mainUI;
         _eventManager = _mainPhase.EventManager;
 
-        GameEventBus.Instance.OnEvent += HandleGameEvent;
+        EventCardBus.Instance.OnEvent += HandleGameEvent;
         
         if (rollDiceButton)
         {
@@ -60,7 +60,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         }
     }
 
-    private void HandleGameEvent(GameEvent e)
+    private void HandleGameEvent(CardEvent e)
     {
         switch (e.stage)
         {
@@ -117,8 +117,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private void OnRollDiceClicked()
     {
         // 🔹 Instead of calling EventManager directly, announce intent on the bus
-        GameEventBus.Instance.Raise(
-            new GameEvent(EventStage.RollDiceRequest, new RollDiceRequest())
+        EventCardBus.Instance.Raise(
+            new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
         );
     }
 
@@ -157,7 +157,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             anim.OnComplete(() =>
             {
                 // Signal UI finished animating
-                // GameEventBus.Instance.Raise(new GameEvent(EventStage.ClientAnimationCompleted, null));
+                // CardEventBus.Instance.Raise(new GameEvent(EventStage.ClientAnimationCompleted, null));
             });
         }
     }

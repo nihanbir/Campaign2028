@@ -34,7 +34,7 @@ public class EventManager
             { EventType.NoImpact, new EM_NoImpactHandler(gm, this) },
         };
         
-        GameEventBus.Instance.OnEvent += OnGameEvent;
+        EventCardBus.Instance.OnEvent += OnGameEvent;
 
     }
     
@@ -44,7 +44,7 @@ public class EventManager
         _currentEventCard = card;
         _effectiveType = ResolveEventType(card, player);
 
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
 
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
@@ -58,7 +58,7 @@ public class EventManager
         }
     }
     
-    private void OnGameEvent(GameEvent e)
+    private void OnGameEvent(CardEvent e)
     {
         if (e.stage == EventStage.RollDiceRequest)
             OnPlayerRequestedRoll();
@@ -74,7 +74,7 @@ public class EventManager
     {
         IsEventActive = false;
         
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, player, card)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, player, card)));
         
         NullifyEventLocals();
     }
@@ -86,7 +86,7 @@ public class EventManager
         yield return new WaitForSeconds(seconds);
 
         // Inform systems that this event completed
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
         _mainPhase.EndPlayerTurn();
         
@@ -103,7 +103,7 @@ public class EventManager
 
         //TODO: raise event canceled instead
         // Let listeners know the event ended without duel/alt flow if they care
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
         NullifyEventLocals();
     }
@@ -124,7 +124,7 @@ public class EventManager
         var roll = GameUIManager.Instance.DiceRoll;
         
         // Broadcast the roll (useful for UI dice feedback)
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
     }
     #endregion
 }
@@ -132,14 +132,14 @@ public class EventManager
 
 /// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
 
-public sealed class GameEventBus
+public sealed class EventCardBus
 {
-    private static GameEventBus _instance;
-    public static GameEventBus Instance => _instance ??= new GameEventBus();
+    private static EventCardBus _instance;
+    public static EventCardBus Instance => _instance ??= new EventCardBus();
 
-    public event Action<GameEvent> OnEvent;
+    public event Action<CardEvent> OnEvent;
 
-    public void Raise(GameEvent e)
+    public void Raise(CardEvent e)
     {
 #if UNITY_EDITOR
         Debug.Log($"[EventBus] {e.stage}");
@@ -150,12 +150,12 @@ public sealed class GameEventBus
     public void Clear() => OnEvent = null;
 }
 
-public readonly struct GameEvent
+public readonly struct CardEvent
 {
     public readonly EventStage stage;
     public readonly object Payload; // keep generic for flexibility
 
-    public GameEvent(EventStage stage, object payload)
+    public CardEvent(EventStage stage, object payload)
     {
         this.stage = stage;
         Payload = payload;

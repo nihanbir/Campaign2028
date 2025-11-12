@@ -17,7 +17,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
 
         // Legacy + bus
         
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
     }
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)
@@ -46,6 +46,6 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
             return;
         }
         
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.DuelStarted, new DuelData(player, defender, chosenState, currentEventCard)));
+        EventCardBus.Instance.Raise(new CardEvent(EventStage.DuelStarted, new DuelData(player, defender, chosenState, currentEventCard)));
     }
 }

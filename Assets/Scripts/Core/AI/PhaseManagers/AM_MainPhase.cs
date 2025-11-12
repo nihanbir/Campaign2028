@@ -24,10 +24,10 @@ public class AM_MainPhase
         _mainPhase  = _aiManager.game.mainPhase;
         _mainUI     = GameUIManager.Instance.mainUI;
 
-        GameEventBus.Instance.OnEvent += OnBusEvent;
+        EventCardBus.Instance.OnEvent += OnBusEvent;
     }
 
-    private void OnBusEvent(GameEvent e)
+    private void OnBusEvent(CardEvent e)
     {
         switch (e.stage)
         {
@@ -174,8 +174,8 @@ public class AM_MainPhase
         int roll = Random.Range(1, 7);
         GameUIManager.Instance.DiceRoll = roll;
 
-        GameEventBus.Instance.Raise(
-            new GameEvent(EventStage.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
+        EventCardBus.Instance.Raise(
+            new CardEvent(EventStage.RollDiceRequest, new PlayerRolledData(aiPlayer, roll))
         );
     }
     #endregion

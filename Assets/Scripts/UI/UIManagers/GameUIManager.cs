@@ -17,8 +17,6 @@ public class GameUIManager : MonoBehaviour
     [SerializeField] public UM_SetupPhase setupUI;
     [SerializeField] public UM_MainPhase mainUI;
     
-    
-    
     // Add others (CivilWarUI, GameOverUI) as needed
 
     public int DiceRoll { get; set; }
@@ -36,14 +34,20 @@ public class GameUIManager : MonoBehaviour
 
     #region Dice & Actions
 
-    // public void OnRollDiceClicked(Button diceButton)
-    // {
-    //     DiceRoll = Random.Range(1, 7);
-    //     SetDiceSprite(diceImage);
-    //     
-    //     //TODO: async or something
-    // }
-
+    public void OnRollDiceClicked(Button diceButton)
+    {
+        //TODO: make this generic instead of event stage
+        EventCardBus.Instance.Raise(
+            new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
+        );
+        
+    }
+    
+    public void PlayerRolled(Image diceImage)
+    {
+        diceImage.sprite = diceFaces[DiceRoll - 1];
+    }
+    
     public void SetDiceSprite(Image diceImage)
     {
         diceImage.sprite = diceFaces[DiceRoll - 1];
