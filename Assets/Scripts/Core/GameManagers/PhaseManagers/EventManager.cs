@@ -128,6 +128,7 @@ public class EventManager
         GameEventBus.Instance.Raise(new GameEvent(EventStage.EventStarted, new EventStartedData(_effectiveType, player, card)));
 
         //TODO: instead of this end player turn without moving to next player
+        
         // Small delay to let any UI coroutines/animations breathe; then end turn
         GameManager.Instance.StartCoroutine(EndTurnAfterDelay(2f));
     }
@@ -335,7 +336,7 @@ public class EventManager
 
         //TODO: raise event canceled instead
         // Let listeners know the event ended without duel/alt flow if they care
-        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, card)));
+        GameEventBus.Instance.Raise(new GameEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
         NullifyEventLocals();
         _eventActive = false;
@@ -433,6 +434,7 @@ public enum EventStage
     EventApplied,          // Sent when ApplyEvent() is called (not resolved)
     EventStarted,          // When a blocking event begins (LoseTurn, Duel, AltStates)
     EventCompleted,        // After an event fully resolves
+    EventCanceled,
     ChallengeStateShown,   // Show list of states to choose
     DuelStarted,           // Attacker vs Defender with chosen card
     DuelCompleted,         // Duel done
