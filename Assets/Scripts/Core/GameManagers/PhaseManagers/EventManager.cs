@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Authoritative (local) event logic for Main Phase.
@@ -358,10 +359,13 @@ public class EventManager
         _eventActive = false;
     }
 
-    private void OnPlayerRolledDice(int roll)
+    private void OnPlayerRequestedRoll()
     {
         if (!_eventActive) return;
 
+        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
+        var roll = GameUIManager.Instance.DiceRoll;
+        
         // Broadcast the roll (useful for UI dice feedback)
         GameEventBus.Instance.Raise(new GameEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
 
@@ -386,15 +390,9 @@ public class EventManager
     {
         if (e.stage != EventStage.RollDiceRequest)
             return;
-
-        var data = (PlayerRolledData)e.Payload;
-        // 🔹 This is the exact same logic as before, but now triggered by bus
-        if (_currentPlayer == data.Player)
-        {
-            OnPlayerRolledDice(data.Roll);
-        }
+        
+        OnPlayerRequestedRoll();
     }
-
 }
 
 /// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
@@ -500,4 +498,9 @@ public sealed class PlayerRolledData
     public Player Player;
     public int    Roll;
     public PlayerRolledData(Player p, int r) { Player = p; Roll = r; }
+}
+
+public sealed class RollDiceRequest
+{
+    
 }

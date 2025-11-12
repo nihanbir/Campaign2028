@@ -93,7 +93,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
             case EventStage.PlayerRolled:
             {
-                // Optional: dice UI feedback (already handled on click)
+                var p = (PlayerRolledData)e.Payload;
+                OnPlayerRolled(p.Player, p.Roll);
                 break;
             }
         }
@@ -113,25 +114,23 @@ public class EUM_ChallengeEvent : MonoBehaviour
         seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
     }
 
-    public void OnRollDiceClicked()
+    private void OnRollDiceClicked()
     {
-        
-        //TODO: bus to update ui only
-        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
-        var roll = GameUIManager.Instance.DiceRoll;
-        
-        GameUIManager.Instance.SetDiceSprite(diceImage);
-        
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
-
         // 🔹 Instead of calling EventManager directly, announce intent on the bus
         GameEventBus.Instance.Raise(
-            new GameEvent(EventStage.RollDiceRequest, new PlayerRolledData(currentPlayer, roll))
+            new GameEvent(EventStage.RollDiceRequest, new RollDiceRequest())
         );
     }
+
+    private void OnPlayerRolled(Player player, int roll)
+    {
+        GameUIManager.Instance.SetDiceSprite(diceImage);
+        
+        player.PlayerDisplayCard.SetRolledDiceImage();
+
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
+    }
+    
 
     #region AltStates
     private void ShowAltStates(Player player, StateCard card1, StateCard card2)
