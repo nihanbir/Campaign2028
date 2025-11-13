@@ -24,8 +24,8 @@ public class AM_SetupPhase
         if (_setupPhase == null) _setupPhase = _aiManager.game.setupPhase;
         if (_setupUI == null) _setupUI = GameUIManager.Instance.setupUI;
         
-        // Simulate thinking
-        yield return new WaitForSeconds(1f);
+        // 🟩 IMPORTANT: Wait until all UI animation from previous turn is done
+        yield return _setupUI.WaitUntilUIQueueFree();
         
         if (_setupPhase.CurrentStage == SetupStage.Roll ||
             _setupPhase.CurrentStage == SetupStage.Reroll)
@@ -74,12 +74,16 @@ public class AM_SetupPhase
         ActorCard selectedActor = availableActors[actorIndex];
         Player selectedPlayer = eligiblePlayers[playerIndex];
         
+        yield return _setupUI.WaitUntilUIQueueFree();
+        
         TurnFlowBus.Instance.Raise(
             new CardInputEvent(CardInputStage.Held, selectedActor));
         
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
         Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.cardName} to Player {selectedPlayer.playerID}");
+        
+        yield return _setupUI.WaitUntilUIQueueFree();
         
         TurnFlowBus.Instance.Raise(
             new CardInputEvent(CardInputStage.Clicked, selectedPlayer));

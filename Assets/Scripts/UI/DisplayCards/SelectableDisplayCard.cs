@@ -64,6 +64,7 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     {
         if (!isHoldable) return;
         
+        // If card is not selected → select it first, but DO NOT EXIT
         if (!isSelected)
         {
             SetIsSelected(true);
@@ -74,15 +75,14 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
                 );
         }
         
+        // Start hold regardless of previous state
         isHolding = true;
         holdTimer = 0f;
     }
 
     public virtual void OnPointerUp(PointerEventData eventData)
     {
-        //TODO: this?
-        if (!isHoldable || !isSelected) return;
-        
+        if (!isHoldable) return;
         isHolding = false;
         holdTimer = 0f;
     }
@@ -90,6 +90,7 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     public virtual void OnPointerExit(PointerEventData eventData)
     {
         if (!isHoldable) return;
+        
         isHolding = false;
         holdTimer = 0f;
     }

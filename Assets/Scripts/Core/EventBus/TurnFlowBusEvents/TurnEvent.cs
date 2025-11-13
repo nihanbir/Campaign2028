@@ -18,8 +18,6 @@ public enum TurnStage
     PlayerTurnEnded,
     RollDiceRequest,
     PlayerRolled,
-    AnimationCompleted
-
 }
 
 public sealed class PlayerRolledData

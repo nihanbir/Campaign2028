@@ -210,6 +210,8 @@ public class GM_SetupPhase : GM_BasePhase
     
     private void BeginAssignActorStage()
     {
+        // game.currentPlayerIndex = 0;
+        
         game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
         
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginActorAssignment));
@@ -229,7 +231,6 @@ public class GM_SetupPhase : GM_BasePhase
         
         if (AIManager.Instance.IsAIPlayer(current))
         {
-            //TODO: wait for animation complete?
             var aiPlayer = AIManager.Instance.GetAIPlayer(current);
             game.StartCoroutine(AIManager.Instance.setupAI.ExecuteAITurn(aiPlayer));
         }
@@ -275,12 +276,6 @@ public class GM_SetupPhase : GM_BasePhase
         {
             TryAssignActorToPlayer(player, _selectedActor);
         }
-        
-        // if (e.Payload is PlayerClickedData p)
-        // {
-        //     TryAssignActorToPlayer(p.player, _selectedActor);
-        // }
-        
     }
     
     private void HandleCardHeldRequest(ActorCard actorCard)
@@ -289,7 +284,7 @@ public class GM_SetupPhase : GM_BasePhase
         
         _selectedActor = actorCard;
         
-        Debug.Log($"Selected actor: {_selectedActor.cardName}");
+        Debug.Log($"Held actor: {_selectedActor.cardName}");
     }
     
     private bool CanAssignActor(Player targetPlayer)
@@ -314,10 +309,13 @@ public class GM_SetupPhase : GM_BasePhase
     {
         if (actorToAssign == null)
         {
+            Debug.Log("actor to assign was null");
+            
             return false;
         }
         if (!CanAssignActor(player))
         {
+            Debug.Log("couldnt assign");
             return false;
         }
         
@@ -379,8 +377,4 @@ public class GM_SetupPhase : GM_BasePhase
 
 
 }
-
-
-
-/// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
 

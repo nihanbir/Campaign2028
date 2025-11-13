@@ -29,9 +29,11 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
         {
             if (scorePanel) scorePanel.SetActive(false);
         }
-        
+
+        SetHoldable(displayType == CardDisplayType.UnassignedActor);
+
         SetClickable(true);
-        SetHoldable(false);
+        
     }
     
     /// <summary>
@@ -88,7 +90,6 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     {
         if (!diceImage) return;
         
-        ShowDice(true);
         diceImage.sprite = roll;
     }
     
@@ -104,13 +105,13 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
                 base.OnPointerClick(eventData);
                 break;
             case CardDisplayType.UnassignedPlayer:
-                if (isSelected)
                     TurnFlowBus.Instance.Raise(
-                        // new CardInputEvent(CardInputStage.Clicked, new PlayerClickedData(owningPlayer))
                         new CardInputEvent(CardInputStage.Clicked, owningPlayer)
                     );
                 break;
             case CardDisplayType.AssignedActor:
+                //TODO: adding logic here might require extra things in setupphase
+                
                 // Already assigned, no action
                 break;
         }

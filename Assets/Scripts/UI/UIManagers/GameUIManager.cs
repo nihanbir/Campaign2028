@@ -69,8 +69,6 @@ public class GameUIManager : MonoBehaviour
         player.PlayerDisplayCard.SetRolledDiceImage(diceFaces[roll - 1]);
         
         diceImage.sprite = diceFaces[roll - 1];
-        
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
 
     #endregion
