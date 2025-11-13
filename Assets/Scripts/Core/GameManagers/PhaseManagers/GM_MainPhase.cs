@@ -43,17 +43,11 @@ public class GM_MainPhase : GM_BasePhase
         
         _mainDeck.ShuffleInPlace();
         
-        var ui = GameUIManager.Instance.mainUI;
-        if (ui)
-        {
-            ui.OnUIReady = () =>
-            {
-                //TODO: don't forget to remove this
-                AssignTestCardsToPlayers(_mainDeck);
-                Debug.Log("🟢 Mainphase UI Ready — starting player turns");
-                StartPlayerTurn();
-            };
-        }
+        //TODO: don't forget to remove this
+        AssignTestCardsToPlayers(_mainDeck);
+        Debug.Log("🟢 Mainphase UI Ready — starting player turns");
+        StartPlayerTurn();
+        
     }
 
     private void BuildAndShuffleDecks()
