@@ -82,30 +82,34 @@ public abstract class UM_BasePhase : MonoBehaviour
         });
     }
 
-    private void HandleTurnEvent(TurnEvent e)
+    private void HandleTurnEvent(IGameEvent e)
     {
         if (!isActive) return;
-        switch (e.stage)
+        if (e is TurnEvent t)
         {
-            case TurnStage.PlayerRolled:
+            switch (t.stage)
             {
-                var data = (PlayerRolledData)e.Payload;
-                OnPlayerRolledDice(data.Player, data.Roll);
-                break;
-            }
-            case TurnStage.PlayerTurnStarted:
-            {
-                var data = (PlayerTurnStartedData)e.Payload;
-                OnPlayerTurnStarted(data.Player);
-                break;
-            }
-            case TurnStage.PlayerTurnEnded:
-            {
-                var data = (PlayerTurnEndedData)e.Payload;
-                OnPlayerTurnEnded(data.Player);
-                break;
+                case TurnStage.PlayerRolled:
+                {
+                    var data = (PlayerRolledData)t.Payload;
+                    OnPlayerRolledDice(data.Player, data.Roll);
+                    break;
+                }
+                case TurnStage.PlayerTurnStarted:
+                {
+                    var data = (PlayerTurnStartedData)t.Payload;
+                    OnPlayerTurnStarted(data.Player);
+                    break;
+                }
+                case TurnStage.PlayerTurnEnded:
+                {
+                    var data = (PlayerTurnEndedData)t.Payload;
+                    OnPlayerTurnEnded(data.Player);
+                    break;
+                }
             }
         }
+        
     }
 
     protected virtual void SubscribeToPhaseEvents()
