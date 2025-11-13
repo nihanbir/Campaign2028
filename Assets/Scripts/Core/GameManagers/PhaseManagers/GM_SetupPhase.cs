@@ -347,3 +347,16 @@ public enum SetupStage
     LastActorAssigned
 }
 
+/// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
+
+public readonly struct SetupStageEvent : IGameEvent
+{
+    public readonly SetupStage stage;
+    public readonly object Payload; // keep generic for flexibility
+
+    public SetupStageEvent(SetupStage stage, object payload)
+    {
+        this.stage = stage;
+        Payload = payload;
+    }
+}

@@ -20,16 +20,19 @@ public abstract class GM_BasePhase
 
     protected bool isActive = false;
     
-    private void HandleTurnEvent(TurnEvent e)
+    private void HandleTurnEvent(IGameEvent e)
     {
         if (!isActive) return;
 
-        switch (e.stage)
+        if (e is TurnEvent t)
         {
-            case TurnStage.PlayerRolled:
-                var data = (PlayerRolledData)e.Payload;
-                PlayerRolledDice(data.Player, data.Roll);
-                break;
+            switch (t.stage)
+            {
+                case TurnStage.PlayerRolled:
+                    var data = (PlayerRolledData)t.Payload;
+                    PlayerRolledDice(data.Player, data.Roll);
+                    break;
+            }
         }
     }
     

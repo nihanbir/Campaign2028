@@ -26,11 +26,17 @@ public class GameManager : GameManagerBase
         TurnFlowBus.Instance.OnEvent += OnTurnEvent;
         
     }
-
-    private void OnTurnEvent(TurnEvent e)
+    
+    private void OnTurnEvent(IGameEvent e)
     {
-        if (e.stage == TurnStage.RollDiceRequest)
-            OnPlayerRequestedRoll(CurrentPlayer);
+        if (e is TurnEvent t)
+        {
+            if (t.stage == TurnStage.RollDiceRequest)
+            {
+                var data = (PlayerRolledData)t.Payload;
+                OnPlayerRequestedRoll(CurrentPlayer);
+            }
+        }
     }
 
     private void Start()
@@ -85,12 +91,11 @@ public sealed class TurnFlowBus
     private static TurnFlowBus _instance;
     public static TurnFlowBus Instance => _instance ??= new TurnFlowBus();
 
-    public event Action<TurnEvent> OnEvent;
-
-    public void Raise(TurnEvent e)
+    public event Action<IGameEvent> OnEvent;
+    public void Raise(IGameEvent e)
     {
 #if UNITY_EDITOR
-        Debug.Log($"[EventBus] {e.stage}");
+        Debug.Log($"[EventBus] {e}");
 #endif
         OnEvent?.Invoke(e);
     }
@@ -98,7 +103,7 @@ public sealed class TurnFlowBus
     public void Clear() => OnEvent = null;
 }
 
-public readonly struct TurnEvent
+public readonly struct TurnEvent : IGameEvent
 {
     public readonly TurnStage stage;
     public readonly object Payload; // keep generic for flexibility
