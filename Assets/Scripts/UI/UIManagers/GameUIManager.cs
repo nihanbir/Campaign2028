@@ -37,9 +37,9 @@ public class GameUIManager : MonoBehaviour
     {
         if (e is TurnEvent t)
         {
-            if (t.stage == TurnStage.RollDiceRequest)
+            if (t.stage == TurnStage.PlayerRolled)
             {
-                var data = (PlayerRolledData)t.Payload;
+                var data = (PlayerRolledData)t.payload;
                 OnPlayerRolledDice(data.Player, data.Roll);
             }
         }

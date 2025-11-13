@@ -20,13 +20,12 @@ public class GM_SetupPhase : GM_BasePhase
     
     // Actor assignment tracking
     private Player _playerToSelect;
-    private ActorCard _actorToAssign;
+    private ActorCard _selectedActor;
 
     public GM_SetupPhase()
     {
         _unassignedActors = new List<ActorCard>(game.actorDeck);
         _unassignedPlayers = new List<Player>(game.players);
-        
     }
     
     private SetupStage _currentStage = SetupStage.None;
@@ -44,31 +43,31 @@ public class GM_SetupPhase : GM_BasePhase
         }
     }
 
-    public event Action OnAllPlayersRolled;
-    public event Action OnActorAssignStage;
-    public event Action<Player, ActorCard> OnLastActorAssigned;
-    public event Action<List<Player>> OnTiedRoll;
-    public event Action<Player> OnUniqueWinner;
-
+    protected override void HandleTurnEvent(IGameEvent e)
+    {
+        base.HandleTurnEvent(e);
+        if (e is CardInputEvent c)
+        {
+            switch (c.stage)
+            {
+                case CardInputStage.Clicked:
+                    HandleCardClickedRequest(c);
+                    break;
+                
+                case CardInputStage.Held:
+                    HandleCardHeldRequest((ActorCard)c.payload);
+                    break;
+            }
+        }
+    }
 
     protected override void BeginPhase()
     {
         base.BeginPhase();
 
-        var ui = GameUIManager.Instance.setupUI;
-        if (ui)
-        {
-            ui.OnUIReady = () =>
-            {
-                Debug.Log("🟢 SetupPhase UI Ready — starting player turns");
-                CurrentStage = SetupStage.Roll;
-            };
-        }
-        else
-        {
-            // fallback in case UI not found
-            CurrentStage = SetupStage.Roll;
-        }
+        Debug.Log("🟢 SetupPhase UI Ready — starting player turns");
+        
+        CurrentStage = SetupStage.Roll;
     }
 
     #region Stage Transitions
@@ -87,7 +86,7 @@ public class GM_SetupPhase : GM_BasePhase
                 BeginRerollStage();
                 break;
             
-            case SetupStage.AssignActor:
+            case SetupStage.BeginActorAssignment:
                 BeginAssignActorStage();
                 break;
         }
@@ -99,6 +98,8 @@ public class GM_SetupPhase : GM_BasePhase
         Debug.Log("All players will roll dice");
         InitializeRollTracking();
         
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.Roll));
+        
         game.currentPlayerIndex = 0;
         StartPlayerTurn();
     }
@@ -109,7 +110,7 @@ public class GM_SetupPhase : GM_BasePhase
         _rolledPlayers.Clear();
     }
 
-    public void BeginRerollStage()
+    private void BeginRerollStage()
     {
         Debug.Log($"Players tied for highest roll will reroll: {_playersToRoll.GetPlayerIDList()}");
         game.currentPlayerIndex = game.players.IndexOf(_playersToRoll[0]);
@@ -130,7 +131,9 @@ public class GM_SetupPhase : GM_BasePhase
         if (AllPlayersHaveRolled())
         {
             EndPlayerTurn();
-            OnAllPlayersRolled?.Invoke();
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.AllPlayersRolled));
+            
+            ProcessRollResults();
         }
         else
         {
@@ -153,12 +156,18 @@ public class GM_SetupPhase : GM_BasePhase
         if (winnersOfRoll.Count == 1)
         {
             Debug.Log($"Player {winnersOfRoll[0].playerID} won with roll {highestRoll}");
-            OnUniqueWinner?.Invoke(winnersOfRoll[0]);
+            
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.UniqueWinner, new UniqueWinner(winnersOfRoll[0])));
+            
+            HandleUniqueWinner(winnersOfRoll[0]);
         }
         else
         {
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
-            OnTiedRoll?.Invoke(winnersOfRoll);
+            
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.TiedRoll, new TiedRoll(winnersOfRoll)));
+            
+            HandleTiedRoll(winnersOfRoll);
         }
     }
 
@@ -175,11 +184,12 @@ public class GM_SetupPhase : GM_BasePhase
         _playerToSelect = winner;
         _rolledPlayers.Clear();
 
-        CurrentStage = SetupStage.AssignActor;
+        //TODO: maybe don't change the stage here
+        CurrentStage = SetupStage.BeginActorAssignment;
         
     }
 
-    public void HandleTiedRoll(List<Player> tiedPlayers)
+    private void HandleTiedRoll(List<Player> tiedPlayers)
     {
         _playersToRoll.Clear();
         _playersToRoll.AddRange(tiedPlayers);
@@ -191,6 +201,7 @@ public class GM_SetupPhase : GM_BasePhase
         }
         else
         {
+            //TODO: maybe don't change the stage here
             CurrentStage = SetupStage.Reroll;
         }
     }
@@ -201,8 +212,8 @@ public class GM_SetupPhase : GM_BasePhase
     {
         game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
         
-        OnActorAssignStage?.Invoke();
-
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginActorAssignment));
+        
         StartPlayerTurn();
     }
 
@@ -218,6 +229,7 @@ public class GM_SetupPhase : GM_BasePhase
         
         if (AIManager.Instance.IsAIPlayer(current))
         {
+            //TODO: wait for animation complete?
             var aiPlayer = AIManager.Instance.GetAIPlayer(current);
             game.StartCoroutine(AIManager.Instance.setupAI.ExecuteAITurn(aiPlayer));
         }
@@ -230,6 +242,7 @@ public class GM_SetupPhase : GM_BasePhase
         base.EndPlayerTurn();
         
         Debug.Log($"Player {current.playerID} turn ended");
+        
     }
 
     protected override void MoveToNextPlayer()
@@ -255,10 +268,33 @@ public class GM_SetupPhase : GM_BasePhase
     #endregion
 
     #region Actor Assignment Logic
+
+    private void HandleCardClickedRequest(CardInputEvent e)
+    {
+        if (e.payload is Player player)
+        {
+            TryAssignActorToPlayer(player, _selectedActor);
+        }
+        
+        // if (e.Payload is PlayerClickedData p)
+        // {
+        //     TryAssignActorToPlayer(p.player, _selectedActor);
+        // }
+        
+    }
+    
+    private void HandleCardHeldRequest(ActorCard actorCard)
+    {
+        if (_selectedActor == actorCard) return;
+        
+        _selectedActor = actorCard;
+        
+        Debug.Log($"Selected actor: {_selectedActor.cardName}");
+    }
     
     private bool CanAssignActor(Player targetPlayer)
     {
-        if (CurrentStage != SetupStage.AssignActor)
+        if (CurrentStage != SetupStage.BeginActorAssignment)
         {
             Debug.LogWarning("Not in actor assignment stage!");
             return false;
@@ -274,8 +310,12 @@ public class GM_SetupPhase : GM_BasePhase
     }
 
    
-    public bool TryAssignActorToPlayer(Player player, ActorCard actorToAssign)
+    private bool TryAssignActorToPlayer(Player player, ActorCard actorToAssign)
     {
+        if (actorToAssign == null)
+        {
+            return false;
+        }
         if (!CanAssignActor(player))
         {
             return false;
@@ -285,27 +325,30 @@ public class GM_SetupPhase : GM_BasePhase
 
         EndPlayerTurn();
         
-        //TODO: call from ui
         // Check if only one player remains without an actor
         if (ShouldAutoAssignLastActor())
         {
-            DOVirtual.DelayedCall(0.8f, AutoAssignLastActor);
+            AutoAssignLastActor();
         }
         else
         {
             CurrentStage = SetupStage.Roll;
         }
-        
+
         return true;
     }
     
     private void AssignActorToPlayer(Player player, ActorCard actorToAssign)
     {
+        _selectedActor = null;
+        
         player.assignedActor = actorToAssign;
         Debug.Log($"Assigned {actorToAssign.cardName} to Player {player.playerID}");
         
         _unassignedActors.Remove(actorToAssign);
         _unassignedPlayers.Remove(player);
+        
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.ActorAssigned, new ActorAssigned(player, actorToAssign)));
     }
     
     private bool ShouldAutoAssignLastActor()
@@ -321,9 +364,8 @@ public class GM_SetupPhase : GM_BasePhase
         AssignActorToPlayer(lastPlayer, lastActor);
         
         // Notify UI to update visuals
-        OnLastActorAssigned?.Invoke(lastPlayer, lastActor);
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.LastActorAssigned));
         
-        // OnAllActorsAssigned();
     }
     
     public void OnAllActorsAssigned()
@@ -338,25 +380,7 @@ public class GM_SetupPhase : GM_BasePhase
 
 }
 
-public enum SetupStage
-{
-    None,
-    Roll,
-    Reroll,
-    AssignActor,
-    LastActorAssigned
-}
+
 
 /// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
 
-public readonly struct SetupStageEvent : IGameEvent
-{
-    public readonly SetupStage stage;
-    public readonly object Payload; // keep generic for flexibility
-
-    public SetupStageEvent(SetupStage stage, object payload)
-    {
-        this.stage = stage;
-        Payload = payload;
-    }
-}

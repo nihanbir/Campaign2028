@@ -71,16 +71,19 @@ public class AM_SetupPhase
         int actorIndex = Random.Range(0, availableActors.Count);
         int playerIndex = Random.Range(0, eligiblePlayers.Count);
     
-        var selectedActor = availableActors[actorIndex];
-        var selectedPlayer = eligiblePlayers[playerIndex];
-
-         var actorDisplay = _setupUI.FindDisplayCardForUnassignedActor(selectedActor);
-         var playerDisplay = _setupUI.FindDisplayCardForPlayer(selectedPlayer);
-    
+        ActorCard selectedActor = availableActors[actorIndex];
+        Player selectedPlayer = eligiblePlayers[playerIndex];
+        
+        TurnFlowBus.Instance.Raise(
+            new CardInputEvent(CardInputStage.Held, selectedActor));
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
         Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.cardName} to Player {selectedPlayer.playerID}");
+        
+        TurnFlowBus.Instance.Raise(
+            new CardInputEvent(CardInputStage.Clicked, selectedPlayer));
     
-        _setupUI.SelectActorCard(actorDisplay);
-        _setupUI.AssignSelectedActorToPlayer(playerDisplay);
     }
     
 }

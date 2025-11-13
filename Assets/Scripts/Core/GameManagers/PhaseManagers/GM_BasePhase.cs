@@ -18,7 +18,7 @@ public abstract class GM_BasePhase
 
     protected bool isActive = false;
     
-    private void HandleTurnEvent(IGameEvent e)
+    protected virtual void HandleTurnEvent(IGameEvent e)
     {
         if (!isActive) return;
 
@@ -27,7 +27,7 @@ public abstract class GM_BasePhase
             switch (t.stage)
             {
                 case TurnStage.PlayerRolled:
-                    var data = (PlayerRolledData)t.Payload;
+                    var data = (PlayerRolledData)t.payload;
                     PlayerRolledDice(data.Player, data.Roll);
                     break;
             }

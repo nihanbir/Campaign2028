@@ -33,7 +33,6 @@ public class GameManager : GameManagerBase
         {
             if (t.stage == TurnStage.RollDiceRequest)
             {
-                var data = (PlayerRolledData)t.Payload;
                 OnPlayerRequestedRoll(CurrentPlayer);
             }
         }
@@ -86,67 +85,4 @@ public enum GamePhase
     MainGame,
     CivilWar,
     GameOver
-}
-
-public sealed class TurnFlowBus
-{
-    private static TurnFlowBus _instance;
-    public static TurnFlowBus Instance => _instance ??= new TurnFlowBus();
-
-    public event Action<IGameEvent> OnEvent;
-    public void Raise(IGameEvent e)
-    {
-#if UNITY_EDITOR
-        Debug.Log($"[EventBus] {e}");
-#endif
-        OnEvent?.Invoke(e);
-    }
-
-    public void Clear() => OnEvent = null;
-}
-
-public readonly struct TurnEvent : IGameEvent
-{
-    public readonly TurnStage stage;
-    public readonly object Payload; // keep generic for flexibility
-
-    public TurnEvent(TurnStage stage, object payload)
-    {
-        this.stage = stage;
-        Payload = payload;
-    }
-}
-
-public enum TurnStage
-{
-    None,
-    PlayerTurnStarted,
-    PlayerTurnEnded,
-    RollDiceRequest,
-    PlayerRolled,
-    AnimationCompleted
-
-}
-
-public sealed class PlayerRolledData
-{
-    public Player Player;
-    public int    Roll;
-    public PlayerRolledData(Player p, int r) { Player = p; Roll = r; }
-}
-
-public sealed class RollDiceRequest
-{
-}
-
-public sealed class PlayerTurnStartedData
-{
-    public Player Player;
-    public PlayerTurnStartedData(Player p) { Player = p;}
-}
-
-public sealed class PlayerTurnEndedData
-{
-    public Player Player;
-    public PlayerTurnEndedData(Player p) { Player = p;}
 }

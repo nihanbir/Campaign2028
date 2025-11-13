@@ -52,8 +52,6 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseEnabled()
     {
-        TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
-        
         GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
         
         EnableDiceButton(false);
@@ -82,7 +80,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         });
     }
 
-    private void HandleTurnEvent(IGameEvent e)
+    protected virtual void HandleTurnEvent(IGameEvent e)
     {
         if (!isActive) return;
         if (e is TurnEvent t)
@@ -91,19 +89,19 @@ public abstract class UM_BasePhase : MonoBehaviour
             {
                 case TurnStage.PlayerRolled:
                 {
-                    var data = (PlayerRolledData)t.Payload;
+                    var data = (PlayerRolledData)t.payload;
                     OnPlayerRolledDice(data.Player, data.Roll);
                     break;
                 }
                 case TurnStage.PlayerTurnStarted:
                 {
-                    var data = (PlayerTurnStartedData)t.Payload;
+                    var data = (PlayerTurnStartedData)t.payload;
                     OnPlayerTurnStarted(data.Player);
                     break;
                 }
                 case TurnStage.PlayerTurnEnded:
                 {
-                    var data = (PlayerTurnEndedData)t.Payload;
+                    var data = (PlayerTurnEndedData)t.payload;
                     OnPlayerTurnEnded(data.Player);
                     break;
                 }
