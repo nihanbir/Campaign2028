@@ -361,15 +361,17 @@ public class GM_SetupPhase : GM_BasePhase
 
         AssignActorToPlayer(lastPlayer, lastActor);
         
-        // Notify UI to update visuals
-        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.LastActorAssigned));
+        OnAllActorsAssigned();
         
     }
     
-    public void OnAllActorsAssigned()
+    private void OnAllActorsAssigned()
     {
+        // Notify UI to update visuals
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.LastActorAssigned));
+        
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
-        //TODO: ui
+        //TODO: maybe transition in gamemanager instead
         game.SetPhase(GameManager.Instance.mainPhase);
     }
 
