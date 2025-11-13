@@ -181,8 +181,8 @@ public class UM_SetupPhase : UM_BasePhase
     {
         Destroy(card.gameObject);
     }
-    
-    public PlayerDisplayCard FindDisplayCardForPlayer(Player player)
+
+    private PlayerDisplayCard FindDisplayCardForPlayer(Player player)
     {
         foreach (Transform child in playerUIParent)
         {
@@ -193,8 +193,8 @@ public class UM_SetupPhase : UM_BasePhase
         }
         return null;
     }
-    
-    public PlayerDisplayCard FindDisplayCardForUnassignedActor(ActorCard actor)
+
+    private PlayerDisplayCard FindDisplayCardForUnassignedActor(ActorCard actor)
     {
         foreach (Transform child in actorUIParent)
         {
