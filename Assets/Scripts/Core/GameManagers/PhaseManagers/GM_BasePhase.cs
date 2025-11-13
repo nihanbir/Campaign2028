@@ -6,13 +6,11 @@ public abstract class GM_BasePhase
     public abstract GamePhase PhaseType { get; }
     
     protected readonly GameManager game;
-    protected readonly GameUIManager uiManager;
     protected readonly AIManager aiManager;
     
     protected GM_BasePhase()
     {
         game = GameManager.Instance;
-        uiManager = GameUIManager.Instance;
         aiManager = AIManager.Instance;
         game.OnPhaseChanged += OnPhaseChanged;
         
