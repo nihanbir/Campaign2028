@@ -52,6 +52,8 @@ public class GameManager : GameManagerBase
         Debug.Log($"=== Transitioning to {newPhase.GetType().Name} ===");
 
         _currentPhaseManager = newPhase;
+        
+        //TODO:make this a bus later
         OnPhaseChanged?.Invoke(newPhase);
     }
     
