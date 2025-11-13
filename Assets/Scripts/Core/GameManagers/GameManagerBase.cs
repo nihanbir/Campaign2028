@@ -13,6 +13,7 @@ public abstract class GameManagerBase : MonoBehaviour
     [HideInInspector] public List<AllegianceCard> allegianceDeck;
 
     [Header("Players")]
+    [SerializeField] private int placeHumanAtIndex = 0;
     [SerializeField] protected int maxPlayers = 6;
     [HideInInspector] public List<Player> players;
     [HideInInspector] public int currentPlayerIndex = 0;
@@ -21,11 +22,26 @@ public abstract class GameManagerBase : MonoBehaviour
     
     protected virtual void Awake()
     {
-        players = new List<Player>(FindObjectsByType<Player>( FindObjectsInactive.Include, FindObjectsSortMode.None));
+        SetPlayers(placeHumanAtIndex);
+        
         LoadDecks();
     }
 
-    protected void LoadDecks()
+    private void SetPlayers(int index)
+    {
+        players = new List<Player>(FindObjectsByType<Player>( FindObjectsInactive.Include, FindObjectsSortMode.None));
+        
+        // Find the human player (no AI component attached)
+        Player human = players.FirstOrDefault(p => p.GetComponent<AIPlayer>() == null);
+
+        if (human != null)
+        {
+            players.Remove(human);
+            players.Insert(index, human);
+        }
+    }
+
+    private void LoadDecks()
     {
         if (!gameDeckData)
         {
