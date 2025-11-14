@@ -42,7 +42,7 @@ public class AM_SetupPhase
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest, new RollDiceRequest()));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
         
     }
 

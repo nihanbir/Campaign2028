@@ -60,7 +60,7 @@ public class GameUIManager : MonoBehaviour
 
     private void OnRollDiceClicked()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest, new RollDiceRequest()));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
     }
 
     private void OnPlayerRolledDice(Player player, int roll)

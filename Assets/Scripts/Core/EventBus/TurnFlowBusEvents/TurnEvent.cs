@@ -27,10 +27,6 @@ public sealed class PlayerRolledData
     public PlayerRolledData(Player p, int r) { Player = p; Roll = r; }
 }
 
-public sealed class RollDiceRequest
-{
-}
-
 public sealed class PlayerTurnStartedData
 {
     public Player Player;
