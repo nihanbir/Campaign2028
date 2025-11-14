@@ -46,6 +46,9 @@ public class GM_SetupPhase : GM_BasePhase
     protected override void HandleTurnEvent(IGameEvent e)
     {
         base.HandleTurnEvent(e);
+        
+        if (!isActive) return;
+        
         if (e is CardInputEvent c)
         {
             switch (c.stage)
