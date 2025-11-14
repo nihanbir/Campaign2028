@@ -187,6 +187,7 @@ public class UM_SetupPhase : UM_BasePhase
         foreach (Transform child in playerUIParent)
         {
             var display = child.GetComponent<PlayerDisplayCard>();
+            //TODO: continue instead
             if (!display) return null;
             if (display.owningPlayer == player)
                 return display;
