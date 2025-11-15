@@ -55,7 +55,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         if (rollDiceButton)
         {
-            GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
+            // GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
         }
     }
 

@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class GameManager : GameManagerBase
 {
@@ -15,27 +14,11 @@ public class GameManager : GameManagerBase
 
     public event Action<GM_BasePhase> OnPhaseChanged;
     
-    public int DiceRoll { get; private set; }
-
     protected override void Awake()
     {
         base.Awake();
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-        
-        TurnFlowBus.Instance.OnEvent += OnTurnEvent;
-        
-    }
-    
-    private void OnTurnEvent(IGameEvent e)
-    {
-        if (e is TurnEvent t)
-        {
-            if (t.stage == TurnStage.RollDiceRequest)
-            {
-                OnPlayerRequestedRoll(CurrentPlayer);
-            }
-        }
     }
 
     private void Start()
@@ -66,16 +49,6 @@ public class GameManager : GameManagerBase
     // {
     //     return _currentPhaseManager as T;
     // }
-    
-    private void OnPlayerRequestedRoll(Player player)
-    {
-        if (_currentPhaseManager == null) return;
-        
-        DiceRoll = Random.Range(1, 7);
-        
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(player, DiceRoll)));
-        
-    }
     
 }
 public enum GamePhase

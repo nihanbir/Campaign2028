@@ -68,7 +68,6 @@ public class GM_MainPhase : GM_BasePhase
         
         Debug.Log("🟢 Mainphase UI Ready — starting player turns");
         StartPlayerTurn();
-        
     }
 
     private void BuildAndShuffleDecks()
@@ -135,17 +134,21 @@ protected override void StartPlayerTurn()
         StartPlayerTurn();
     }
 
-    protected override void PlayerRolledDice(Player player, int roll)
+    protected override void HandleRequestedRoll()
     {
+        var player = game.CurrentPlayer;
+        
         if (!player.CanRoll())
         {
-            Debug.Log("Player already rolled.");
+            Debug.Log("Player can't roll.");
             return;
         }
-
+        
+        base.HandleRequestedRoll();
+        
         player.RegisterRoll();
         
-        CheckStateCardConditions(roll, out var discarded);
+        CheckStateCardConditions(diceRoll, out var discarded);
         
         if (discarded)
         {
@@ -154,8 +157,9 @@ protected override void StartPlayerTurn()
         }
         
         //TODO: maybe register to bus after rolling to see which evaluate to run
-        Debug.Log($"Rolled: {roll}");
-        EvaluateCapture(player, roll);
+        Debug.Log($"Rolled: {diceRoll}");
+        EvaluateCapture(player, diceRoll);
+        
     }
     
 #endregion

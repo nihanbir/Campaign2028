@@ -30,29 +30,35 @@ public class AM_MainPhase
     
     private void OnTurnEvent(IGameEvent e)
     {
-        if (e is MainStageEvent m)
+        switch (e)
         {
-            switch (m.stage)
-            {
-                case MainStage.EventCardDrawn:
-                    HandleEventCard(_currentAI, (EventCard)m.payload);
-                    break;
-                
-                case MainStage.TargetCardDrawn:
-                    HandleTargetDrawn(_currentAI, (Card)m.payload);
-                    break;
-            }
+            case MainStageEvent m:
+                HandleMainStageEvents(m);
+                break;
+            
+            case TurnEvent { stage: TurnStage.PlayerTurnEnded }:
+                Disable();
+                break;
         }
+    }
 
-        if (e is TurnEvent t)
+    private void HandleMainStageEvents(MainStageEvent m)
+    {
+        switch (m.stage)
         {
-            if (t.stage == TurnStage.PlayerTurnEnded) Disable();
+            case MainStage.EventCardDrawn:
+                HandleEventCard(_currentAI, (EventCard)m.payload);
+                break;
+                
+            case MainStage.TargetCardDrawn:
+                HandleTargetDrawn(_currentAI, (Card)m.payload);
+                break;
         }
     }
 
     #region Regular Turn Execution
     
-    private void Enable()   => TurnFlowBus.Instance.OnEvent += OnTurnEvent;
+    private void Enable() => TurnFlowBus.Instance.OnEvent += OnTurnEvent;
     
     private void Disable()
     {
@@ -110,7 +116,7 @@ public class AM_MainPhase
             return;
         }
 
-        ApplyOrSave(aiPlayer, card);
+        _ai.StartCoroutine(ApplyOrSave(aiPlayer, card));
     }
 
     private void HandleTargetDrawn(AIPlayer aiPlayer, Card card)
@@ -118,19 +124,21 @@ public class AM_MainPhase
         _drawnTarget = card;
     }
     
-    private IEnumerator WaitAndApplyEvent(AIPlayer ai, EventCard card)
+    private IEnumerator WaitAndApplyEvent(AIPlayer aiPlayer, EventCard card)
     {
         // Wait until target exists
         while (_drawnTarget == null)
             yield return null;
 
-        ApplyOrSave(ai, card);
+        _ai.StartCoroutine(ApplyOrSave(aiPlayer, card));
     }
 
-    private void ApplyOrSave(AIPlayer ai, EventCard card)
+    private IEnumerator ApplyOrSave(AIPlayer aiPlayer, EventCard card)
     {
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
         TurnFlowBus.Instance.Raise(
-            ShouldSaveEvent(ai, card)
+            ShouldSaveEvent(aiPlayer, card)
                 ? new MainStageEvent(MainStage.SaveEventCardRequest)
                 : new MainStageEvent(MainStage.ApplyEventCardRequest)
         );

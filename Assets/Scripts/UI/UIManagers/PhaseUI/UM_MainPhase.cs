@@ -245,7 +245,7 @@ public class UM_MainPhase : UM_BasePhase
             _currentTargetDisplayCard.inst.SetCard(inst);
         }
         
-        yield return AnimateCardSpawn(go.transform, 0.1f);
+        yield return AnimateCardSpawn(_currentTargetDisplayCard.Transform, 0.1f);
         
         SetEventButtonsInteractable(true);
     }
@@ -323,11 +323,11 @@ public class UM_MainPhase : UM_BasePhase
     
     private void ClearCurrentTargetCard()
     {
+        if (_currentTargetDisplayCard.IsNull()) return;
+        
         _currentTargetDisplayCard.Clear();
         
         //TODO: animation
-        
-        ClearCurrentEventCard();
     }
     
     private void OnClickEventApply()

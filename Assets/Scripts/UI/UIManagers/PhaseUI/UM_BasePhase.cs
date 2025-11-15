@@ -8,6 +8,9 @@ using UnityEngine.UI;
 public abstract class UM_BasePhase : MonoBehaviour
 {
     protected GameManager game;
+    protected GameUIManager gameUI;
+    
+    public abstract GamePhase PhaseType { get; }
     
     [Header("Buttons")]     
     public Button rollDiceButton;
@@ -18,14 +21,41 @@ public abstract class UM_BasePhase : MonoBehaviour
     public Ease enterEase = Ease.OutBack;
     public Ease exitEase = Ease.InBack;
     
-    public abstract GamePhase PhaseType { get; }
-
     protected bool isActive = false;
 
     protected bool isPlayerAI;
     
     private readonly Queue<IEnumerator> _uiQueue = new();
     private bool _uiQueueRunning;
+    protected bool IsQueueRunning => _uiQueueRunning;
+
+    #region Object
+
+    private void Awake()
+    {
+        game = GameManager.Instance;
+        gameUI = GameUIManager.Instance;
+        
+        gameObject.SetActive(false);
+        
+        game.OnPhaseChanged += OnPhaseChanged;
+        
+    }
+    private void OnDestroy()
+    {
+        UnsubscribeToPhaseEvents();
+        if (game != null)
+            game.OnPhaseChanged -= OnPhaseChanged;
+    }
+
+    #endregion
+    
+    #region Queue
+    public IEnumerator WaitUntilUIQueueFree()
+    {
+        while (_uiQueueRunning)
+            yield return null;
+    }
     
     protected void EnqueueUI(IEnumerator routine)
     {
@@ -48,22 +78,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         if (PhaseType == GamePhase.Setup)
             EnableDiceButton(true);
     }
-    
-    private void Awake()
-    {
-        game = GameManager.Instance;
-        
-        gameObject.SetActive(false);
-        
-        game.OnPhaseChanged += OnPhaseChanged;
-        
-    }
-    private void OnDestroy()
-    {
-        UnsubscribeToPhaseEvents();
-        if (game != null)
-            game.OnPhaseChanged -= OnPhaseChanged;
-    }
+    #endregion
     
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
@@ -75,7 +90,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseEnabled()
     {
-        GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
+        rollDiceButton.onClick.RemoveAllListeners();
+        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
         EnableDiceButton(false);
         
@@ -92,47 +108,13 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
-        
         isActive = false;
         
-        EnqueueUI(AnimatePhaseExit(() =>
-        {
-            // 🔥 Only run this AFTER animation is done
-            UnsubscribeToPhaseEvents();
-            gameObject.SetActive(false);
-        }));
-    }
+        UnsubscribeToPhaseEvents();
 
-    protected virtual void HandleTurnEvent(IGameEvent e)
-    {
-        if (!isActive) return;
-        if (e is TurnEvent t)
-        {
-            switch (t.stage)
-            {
-                case TurnStage.PlayerRolled:
-                {
-                    var data = (PlayerRolledData)t.payload;
-                    OnPlayerRolledDice(data.Player, data.Roll);
-                    break;
-                }
-                case TurnStage.PlayerTurnStarted:
-                {
-                    var data = (PlayerTurnStartedData)t.payload;
-                    OnPlayerTurnStarted(data.Player);
-                    break;
-                }
-                case TurnStage.PlayerTurnEnded:
-                {
-                    var data = (PlayerTurnEndedData)t.payload;
-                    OnPlayerTurnEnded(data.Player);
-                    break;
-                }
-            }
-        }
-        
+        EnqueueUI(AnimatePhaseExit());
     }
-
+    
     protected virtual void SubscribeToPhaseEvents()
     {
         TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
@@ -143,6 +125,36 @@ public abstract class UM_BasePhase : MonoBehaviour
         TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
     }
     
+    protected virtual void HandleTurnEvent(IGameEvent e)
+        {
+            if (!isActive) return;
+            if (e is TurnEvent t)
+            {
+                switch (t.stage)
+                {
+                    case TurnStage.PlayerRolled:
+                    {
+                        var data = (PlayerRolledData)t.payload;
+                        OnPlayerRolledDice(data.Player, data.Roll);
+                        break;
+                    }
+                    case TurnStage.PlayerTurnStarted:
+                    {
+                        var data = (PlayerTurnStartedData)t.payload;
+                        OnPlayerTurnStarted(data.Player);
+                        break;
+                    }
+                    case TurnStage.PlayerTurnEnded:
+                    {
+                        var data = (PlayerTurnEndedData)t.payload;
+                        OnPlayerTurnEnded(data.Player);
+                        break;
+                    }
+                }
+            }
+            
+        }
+    
     protected virtual void OnPlayerTurnStarted(Player player)
     {
         isPlayerAI = AIManager.Instance.IsAIPlayer(player);
@@ -150,7 +162,6 @@ public abstract class UM_BasePhase : MonoBehaviour
         var card = player.PlayerDisplayCard;
         if (card)
             EnqueueUI(card.HighlightRoutine());
-        
     }
     
     protected virtual void OnPlayerTurnEnded(Player player)
@@ -162,14 +173,28 @@ public abstract class UM_BasePhase : MonoBehaviour
             EnqueueUI(card.RemoveHighlightRoutine());
     }
     
+    protected virtual void OnRollDiceClicked()
+    {
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+    }
+    
     protected virtual void OnPlayerRolledDice(Player player, int roll)
     {
+        if (!player.PlayerDisplayCard)
+        {
+            Debug.Log("WTF");
+            return;
+        }
+        
+        player.PlayerDisplayCard.SetRolledDiceImage(gameUI.diceFaces[roll - 1]);
+        
+        diceImage.sprite = gameUI.diceFaces[roll - 1];
+        
         EnqueueUI(DicePopAnimation(diceImage));
 
         var playerDiceImage = player.PlayerDisplayCard.diceImage;
         EnqueueUI(DicePopAnimation(playerDiceImage));
     }
-    
 
     protected virtual void EnableDiceButton(bool enable)
     {
@@ -181,15 +206,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
         rollDiceButton.interactable = enable;
     }
-
-    protected bool IsQueueRunning => _uiQueueRunning;
     
-    public IEnumerator WaitUntilUIQueueFree()
-    {
-        while (_uiQueueRunning)
-            yield return null;
-    }
-    
+    #region Animations
     protected virtual IEnumerator AnimatePhaseEntry()
     {
         transform.localPosition += new Vector3(-1200f, 0f, 0f);
@@ -206,7 +224,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         
     }
     
-    protected virtual IEnumerator AnimatePhaseExit(System.Action onComplete)
+    protected virtual IEnumerator AnimatePhaseExit()
     {
         bool finished = false;
         
@@ -222,24 +240,25 @@ public abstract class UM_BasePhase : MonoBehaviour
             finished = true;
             if (cg) cg.alpha = 1f;
             transform.localScale = Vector3.one;
-            onComplete?.Invoke();
         });
         
         while (!finished) yield return null;
+        
+        gameObject.SetActive(false);
     }
     
-    private IEnumerator DicePopAnimation(Image diceImage)
+    private IEnumerator DicePopAnimation(Image diceImg)
     {
-        if (!diceImage) yield break;
+        if (!diceImg) yield break;
 
-        diceImage.gameObject.SetActive(true);
+        diceImg.gameObject.SetActive(true);
 
-        diceImage.transform.DOKill();
-        diceImage.transform.localScale = Vector3.zero;
+        diceImg.transform.DOKill();
+        diceImg.transform.localScale = Vector3.zero;
 
         bool done = false;
 
-        diceImage.transform
+        diceImg.transform
             .DOScale(1f, 0.35f)
             .SetEase(Ease.OutBack)
             .OnComplete(() => done = true);
@@ -247,5 +266,5 @@ public abstract class UM_BasePhase : MonoBehaviour
         while (!done)
             yield return null;
     }
-    
+    #endregion
 }

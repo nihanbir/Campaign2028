@@ -123,13 +123,15 @@ public class GM_SetupPhase : GM_BasePhase
     #endregion
 
     #region Roll Stage
-    
-    protected override void PlayerRolledDice(Player player, int roll)
+
+    protected override void HandleRequestedRoll()
     {
-        _rolledPlayers.Add(player, roll);
-        _playersToRoll.Remove(player);
+        base.HandleRequestedRoll();
         
-        Debug.Log($"Player {player.playerID} rolled {roll}");
+        _rolledPlayers.Add(game.CurrentPlayer, diceRoll);
+        _playersToRoll.Remove(game.CurrentPlayer);
+        
+        Debug.Log($"Player {game.CurrentPlayer.playerID} rolled {diceRoll}");
         
         if (AllPlayersHaveRolled())
         {
@@ -142,6 +144,7 @@ public class GM_SetupPhase : GM_BasePhase
         {
             MoveToNextPlayer();
         }
+        
     }
 
     private bool AllPlayersHaveRolled()
@@ -149,7 +152,7 @@ public class GM_SetupPhase : GM_BasePhase
         return _playersToRoll.Count == 0;
     }
 
-    public void ProcessRollResults()
+    private void ProcessRollResults()
     {
         Debug.Log("=== Processing roll results ===");
         

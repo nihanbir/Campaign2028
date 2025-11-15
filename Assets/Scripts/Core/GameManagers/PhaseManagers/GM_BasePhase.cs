@@ -1,5 +1,6 @@
 
 using System;
+using Random = UnityEngine.Random;
 
 public abstract class GM_BasePhase
 {
@@ -7,6 +8,8 @@ public abstract class GM_BasePhase
     
     protected readonly GameManager game;
     protected readonly AIManager aiManager;
+
+    protected int diceRoll;
     
     protected GM_BasePhase()
     {
@@ -26,14 +29,13 @@ public abstract class GM_BasePhase
         {
             switch (t.stage)
             {
-                case TurnStage.PlayerRolled:
-                    var data = (PlayerRolledData)t.payload;
-                    PlayerRolledDice(data.Player, data.Roll);
+                case TurnStage.RollDiceRequest:
+                    HandleRequestedRoll();
                     break;
             }
         }
     }
-    
+
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
         if (PhaseType == newPhase.PhaseType)
@@ -67,10 +69,10 @@ public abstract class GM_BasePhase
     }
     protected virtual void MoveToNextPlayer() { }
 
-    protected virtual void PlayerRolledDice(Player player, int roll)
+    protected virtual void HandleRequestedRoll()
     {
+        diceRoll = Random.Range(1, 7);
         
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(game.CurrentPlayer, diceRoll)));
     }
-
-    
 }
