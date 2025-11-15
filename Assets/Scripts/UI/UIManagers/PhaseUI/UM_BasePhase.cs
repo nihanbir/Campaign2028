@@ -45,7 +45,8 @@ public abstract class UM_BasePhase : MonoBehaviour
 
         _uiQueueRunning = false;
         
-        EnableDiceButton(true);
+        if (PhaseType == GamePhase.Setup)
+            EnableDiceButton(true);
     }
     
     private void Awake()
@@ -167,7 +168,6 @@ public abstract class UM_BasePhase : MonoBehaviour
 
         var playerDiceImage = player.PlayerDisplayCard.diceImage;
         EnqueueUI(DicePopAnimation(playerDiceImage));
-        
     }
     
 

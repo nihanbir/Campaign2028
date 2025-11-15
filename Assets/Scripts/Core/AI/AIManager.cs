@@ -16,6 +16,15 @@ public class AIManager : MonoBehaviour
     public AM_MainPhase mainAI;
 
     [HideInInspector] public GameManager game;
+    
+    private IAIPhase _activePhase;
+
+    public void ActivatePhase(IAIPhase phase)
+    {
+        _activePhase?.OnExit();
+        _activePhase = phase;
+        _activePhase.OnEnter();
+    }
 
     private void Awake()
     {

@@ -53,9 +53,12 @@ public class Player : MonoBehaviour
                 assignedActor.AddInstitution();
                 break;
         }
+        
+        //TODO: tie these up nicer
         PlayerDisplayCard.UpdateScore();
     }
 
+    //TODO: notify ui to update player info i guess
     public void RemoveCapturedCard(Card card)
     {
         if (card == null) return;

@@ -23,18 +23,38 @@ public class GM_MainPhase : GM_BasePhase
     public EventManager EventManager { get; private set; }
     private AM_MainPhase _aiManager;
 
-    // === Events for UI or external systems ===
-    public event Action<Player, Card> OnCardCaptured;
-    public event Action<StateCard> OnStateDiscarded;
-    private Action<EventCard> _eventAppliedHandler;
-
     public GM_MainPhase()
     {
         EventManager = new EventManager(this);
         
         BuildAndShuffleDecks();
     }
-    
+
+    protected override void HandleTurnEvent(IGameEvent e)
+    {
+        base.HandleTurnEvent(e);
+        
+        if (!isActive) return;
+
+        if (e is MainStageEvent m)
+        {
+            switch (m.stage)
+            {
+                case MainStage.DrawEventCardRequest:
+                    HandleDrawEventCardRequest();
+                    break;
+                
+                case MainStage.DrawTargetCardRequest:
+                    HandleDrawTargetCardRequest();
+                    break;
+                
+                case MainStage.SaveEventCardRequest:
+                    SaveEvent((EventCard)m.payload);
+                    break;
+            }
+        }
+    }
+
     protected override void BeginPhase()
     {
         base.BeginPhase();
@@ -45,6 +65,7 @@ public class GM_MainPhase : GM_BasePhase
         
         //TODO: don't forget to remove this
         AssignTestCardsToPlayers(_mainDeck);
+        
         Debug.Log("🟢 Mainphase UI Ready — starting player turns");
         StartPlayerTurn();
         
@@ -57,9 +78,20 @@ public class GM_MainPhase : GM_BasePhase
 
         _mainDeck.AddRange(game.stateDeck);
         _mainDeck.AddRange(game.institutionDeck);
-        _mainDeck.ShuffleInPlace();
+        ShuffleMainDeck();
+        
+        _eventDeck.AddRange(game.eventDeck);
+        ShuffleEventDeck();
+    }
 
-        _eventDeck.AddRange(game.eventDeck.Shuffled());
+    private void ShuffleMainDeck()
+    {
+        _mainDeck.ShuffleInPlace();
+    }
+
+    private void ShuffleEventDeck()
+    {
+        _eventDeck.ShuffleInPlace();
     }
 
 #region Turn Sequence
@@ -67,6 +99,7 @@ public class GM_MainPhase : GM_BasePhase
 protected override void StartPlayerTurn()
     {
         base.StartPlayerTurn();
+        
         if (_eventDeck.Count == 0)
         {
             Debug.Log("No more event cards!");
@@ -91,7 +124,7 @@ protected override void StartPlayerTurn()
         
         base.EndPlayerTurn();
         
-        ClearEventCard();
+        ClearCurrentEventCard();
         
         MoveToNextPlayer();
     }
@@ -112,6 +145,7 @@ protected override void StartPlayerTurn()
 
         player.RegisterRoll();
         
+        //TODO: maybe register to bus after rolling to see which evaluate to run
         Debug.Log($"Rolled: {roll}");
         EvaluateCapture(player, roll);
     }
@@ -120,7 +154,7 @@ protected override void StartPlayerTurn()
 
 #region Card Capture
 
-    public void CheckStateCardConditions(int roll, out bool stateDiscarded)
+    private void CheckStateCardConditions(int roll, out bool stateDiscarded)
     {
         if (CurrentTargetCard is StateCard state)
         {
@@ -128,7 +162,6 @@ protected override void StartPlayerTurn()
             {
                 Debug.Log($"Player {game.CurrentPlayer.playerID} rolled: {roll} and {CurrentTargetCard.cardName} had secession");
                 
-                //TODO: Fire an event for UI and then call this from UI
                 DiscardState(state);
                 stateDiscarded = true;
                 return;
@@ -136,13 +169,15 @@ protected override void StartPlayerTurn()
 
             if (state.hasRollAgain && roll == 4)
             {
-                //TODO: move add extraroll logic to here and fire event for UI to indicate
+                //TODO: bus for adding extra roll for UI visuals
                 game.CurrentPlayer.AddExtraRoll();
             }
         }
 
         stateDiscarded = false;
     }
+    
+    //TODO: maybe raise a bus after rolling to see if we should run this
     private void EvaluateCapture(Player player, int roll)
     {
         CheckStateCardConditions(roll, out var discarded);
@@ -152,34 +187,24 @@ protected override void StartPlayerTurn()
             EndPlayerTurn();
             return;
         }
-        
-        bool success;
-        
-        //TODO: evaluate capture should be a part of that event instead
-        // if (EventManager.ConsumeNeedTwo())
-        // {
-        //     success = (roll == 2);
-        //     Debug.Log($"'Need2' active — success = {success}");
-        // }
-        // else
-        // {
-            success = CurrentTargetCard switch
-            {
-                StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
-                InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
-                _ => false
-            };
-        // }
 
+        var success = CurrentTargetCard switch
+        {
+            StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
+            InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
+            _ => false
+        };
+        
         if (success)
         {
-            OnCardCaptured?.Invoke(player, CurrentTargetCard);
+            CaptureCard(player, CurrentTargetCard);
             
-            //TODO: take a look at this
-            // EndPlayerTurn();
+            EndPlayerTurn();
         }
         else if (player.CanRoll())
         {
+            //TODO: maybe bus for visual indication
+            
             Debug.Log("-------- Player can roll again ----------");
             //wait for player to roll again
             if (aiManager.IsAIPlayer(player))
@@ -194,7 +219,7 @@ protected override void StartPlayerTurn()
             EndPlayerTurn();
         }
     }
-    public void CaptureCard(Player player, Card card)
+    private void CaptureCard(Player player, Card card)
     {
         if (card == null)
             return;
@@ -230,10 +255,17 @@ protected override void StartPlayerTurn()
         player.CaptureCard(card);
 
         Debug.Log($"Player {player.playerID} captured {card.cardName}");
+
+        //TODO: pay attention to this, since it's raised after removing the card from the deck, UI might not be able to find it
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardCaptured, new CardCapturedData(player, card)));
+
+        ClearCurrentTargetCard();
         
-        CurrentTargetCard = null;
+        
     }
     
+    //TODO: should we have bus here
+    //TODO: does it make sense to have updatecardownership bus, because capture card has it for ui too, maybe need a bool param there
     private void UncaptureCard(Card card, bool returnToDeck = false)
     {
         if (card == null || !IsCardHeld(card))
@@ -270,39 +302,46 @@ protected override void StartPlayerTurn()
     
     public void UpdateCardOwnership(Player newOwner, Card card)
     {
-        
-        //TODO:indicate this in UI
-        
         // Remove card from its current owner first
         UncaptureCard(card);
 
         // Add to new owner's list
         CaptureCard(newOwner, card);
-    }
-
-    public void DiscardState(StateCard stateToDiscard)
-    {
-        //TODO:indicate this in UI
         
-        if (_mainDeck.Contains(stateToDiscard))
-        {
-            Debug.Log($"{stateToDiscard.cardName} was discarded");
-            _mainDeck.Remove(stateToDiscard);
-        }
-        else if (CurrentTargetCard == stateToDiscard)
-        {
-            OnStateDiscarded?.Invoke(stateToDiscard);
-            CurrentTargetCard = null;
-        }
+        //This is only here to notify the UI
+        Player owner = GetCardHolder(card);
+        
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardOwnerChanged, new CardOwnerChangedData(owner, newOwner, card)));
         
     }
     
+    public void DiscardState(StateCard stateToDiscard)
+    {
+        if (_mainDeck.Contains(stateToDiscard))
+            _mainDeck.Remove(stateToDiscard);
+        
+        if (CurrentTargetCard == stateToDiscard)
+            CurrentTargetCard = null;
+        
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.StateDiscarded, stateToDiscard));
+    }
+
+    private void ClearCurrentTargetCard()
+    {
+        if (CurrentTargetCard == null) return;
+        
+        //TODO: check if needed
+        // TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CurrentTargetCardCleared, CurrentTargetCard));
+        
+        CurrentTargetCard = null;
+    }
 #endregion    
 
 #region Event Card
-    public EventCard DrawEventCard()
+
+    private void HandleDrawEventCardRequest()
     {
-        if (_eventDeck.Count == 0) return null;
+        if (_eventDeck.Count == 0) return;
 
         EventCard card = _eventDeck.PopFront();
         
@@ -310,27 +349,37 @@ protected override void StartPlayerTurn()
 
         CurrentEventCard = card;
         
-        return card;
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.EventCardDrawn, card));
+        
     }
-
-    public bool TrySaveEvent(EventCard card)
+    
+    private void SaveEvent(EventCard card)
     {
+        if (card != CurrentEventCard)
+        {
+            Debug.LogWarning($"Tried to save {card.cardName} but current event is {CurrentEventCard.cardName}");
+            return;
+        }
         var player = game.CurrentPlayer;
 
         if (_heldEvents.ContainsKey(player))
-            return false;
+            return;
 
         _heldEvents[player] = card;
         player.SaveEvent(card);
         Debug.Log($"Saved {card.cardName}");
         
-        ClearEventCard();
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.EventCardSaved, CurrentEventCard));
         
-        return true;
+        ClearCurrentEventCard();
     }
     
-    private void ClearEventCard()
+    private void ClearCurrentEventCard()
     {
+        if (CurrentEventCard == null) return;
+        
+        //TODO: check if needed
+        // TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CurrentEventCardCleared, CurrentEventCard));
         CurrentEventCard = null;
     }
     
@@ -339,23 +388,24 @@ protected override void StartPlayerTurn()
     
 #region Target Card
 
-    public Card DrawTargetCard()
+    private void HandleDrawTargetCardRequest()
     {
         if (_mainDeck.Count == 0)
         {
             Debug.LogWarning("Main deck empty!");
-            return null;
+            return;
         }
 
-        Card drawn = _mainDeck.PopFront();
+        Card card = _mainDeck.PopFront();
         
-        Debug.Log($"Draw target card: {drawn.cardName}");
+        Debug.Log($"Draw target card: {card.cardName}");
 
-        CurrentTargetCard = drawn;
+        CurrentTargetCard = card;
         
-        return drawn;
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.TargetCardDrawn, card));
+        
     }
-
+    
     public void ReturnCardToDeck(Card card)
     {
         switch (card)
@@ -378,9 +428,7 @@ protected override void StartPlayerTurn()
                 break;
         }
         
-        //TODO: raise bus event
-        Debug.Log($"Returned to deck {card.cardName}");
-        
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardReturnedToDeck, card));
     }
     
     public Player GetCardHolder(Card card)
