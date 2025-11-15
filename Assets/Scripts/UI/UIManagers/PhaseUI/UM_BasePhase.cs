@@ -174,13 +174,15 @@ public abstract class UM_BasePhase : MonoBehaviour
     protected virtual void EnableDiceButton(bool enable)
     {
         if (!rollDiceButton) return;
-        if (isPlayerAI || _uiQueueRunning)
+        if (isPlayerAI)
         {
             enable = false;
         }
 
         rollDiceButton.interactable = enable;
     }
+
+    protected bool IsQueueRunning => _uiQueueRunning;
     
     public IEnumerator WaitUntilUIQueueFree()
     {

@@ -151,6 +151,13 @@ public class UM_SetupPhase : UM_BasePhase
         
     }
 
+    protected override void EnableDiceButton(bool enable)
+    {
+        if (IsQueueRunning) enable = false;
+        
+        base.EnableDiceButton(enable);
+    }
+
     #endregion
 
     #region Actor Assignment UI
