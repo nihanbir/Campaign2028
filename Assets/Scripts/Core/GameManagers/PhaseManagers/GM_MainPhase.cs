@@ -145,6 +145,14 @@ protected override void StartPlayerTurn()
 
         player.RegisterRoll();
         
+        CheckStateCardConditions(roll, out var discarded);
+        
+        if (discarded)
+        {
+            EndPlayerTurn();
+            return;
+        }
+        
         //TODO: maybe register to bus after rolling to see which evaluate to run
         Debug.Log($"Rolled: {roll}");
         EvaluateCapture(player, roll);
@@ -180,15 +188,7 @@ protected override void StartPlayerTurn()
     //TODO: maybe raise a bus after rolling to see if we should run this
     private void EvaluateCapture(Player player, int roll)
     {
-        CheckStateCardConditions(roll, out var discarded);
-
-        if (discarded)
-        {
-            EndPlayerTurn();
-            return;
-        }
-
-        var success = CurrentTargetCard switch
+       var success = CurrentTargetCard switch
         {
             StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
             InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
