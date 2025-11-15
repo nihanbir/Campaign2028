@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 /// <summary>
 /// Authoritative (local) event logic for Main Phase.
@@ -44,7 +42,7 @@ public class EventManager
         _currentEventCard = card;
         _effectiveType = ResolveEventType(card, player);
 
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
 
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
@@ -58,7 +56,7 @@ public class EventManager
         }
     }
     
-    private void OnGameEvent(CardEvent e)
+    private void OnGameEvent(EventCardEvent e)
     {
         if (e.stage == EventStage.RollDiceRequest)
             OnPlayerRequestedRoll();
@@ -74,7 +72,7 @@ public class EventManager
     {
         IsEventActive = false;
         
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, player, card)));
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, player, card)));
         
         NullifyEventLocals();
     }
@@ -86,7 +84,7 @@ public class EventManager
         yield return new WaitForSeconds(seconds);
 
         // Inform systems that this event completed
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
         //TODO: can have its own endplayerturn logic
         // _mainPhase.EndPlayerTurn();
@@ -104,7 +102,7 @@ public class EventManager
 
         //TODO: raise event canceled instead
         // Let listeners know the event ended without duel/alt flow if they care
-        EventCardBus.Instance.Raise(new CardEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
         NullifyEventLocals();
     }
@@ -126,106 +124,6 @@ public class EventManager
         // EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
     }
     #endregion
-}
-
-
-/// ======= Event Bus & Payloads (lightweight, mobile-safe) =======
-
-public sealed class EventCardBus
-{
-    private static EventCardBus _instance;
-    public static EventCardBus Instance => _instance ??= new EventCardBus();
-
-    public event Action<CardEvent> OnEvent;
-
-    public void Raise(CardEvent e)
-    {
-#if UNITY_EDITOR
-        Debug.Log($"[EventBus] {e.stage}");
-#endif
-        OnEvent?.Invoke(e);
-    }
-
-    public void Clear() => OnEvent = null;
-}
-
-public readonly struct CardEvent
-{
-    public readonly EventStage stage;
-    public readonly object Payload; // keep generic for flexibility
-
-    public CardEvent(EventStage stage, object payload)
-    {
-        this.stage = stage;
-        Payload = payload;
-    }
-}
-
-public enum EventStage
-{
-    None,
-    EventApplied,          // Sent when ApplyEvent() is called (not resolved)
-    EventStarted,          // When a blocking event begins (LoseTurn, Duel, AltStates)
-    EventCompleted,        // After an event fully resolves
-    EventCanceled,
-    ChallengeStateShown,   // Show list of states to choose
-    DuelStarted,           // Attacker vs Defender with chosen card
-    DuelCompleted,         // Duel done
-    AltStatesShown,        // Alt states UI should appear
-    PlayerRolled,           // Player rolled value (for UI dice feedback)
-    ClientAnimationCompleted,
-    RollDiceRequest,
-
-}
-
-// Strongly-typed payloads (class for clarity, can be structs if you want)
-public sealed class DuelData
-{
-    public Player Attacker;
-    public Player Defender;
-    public Card   ChosenCard;
-    public EventCard SourceEvent;
-    public DuelData(Player a, Player d, Card c, EventCard src) { Attacker = a; Defender = d; ChosenCard = c; SourceEvent = src; }
-}
-
-public sealed class AltStatesData
-{
-    public Player Player;
-    public StateCard State1;
-    public StateCard State2;
-    public EventCard SourceEvent;
-    public AltStatesData(Player p, StateCard s1, StateCard s2, EventCard src) { Player = p; State1 = s1; State2 = s2; SourceEvent = src; }
-}
-
-public sealed class ChallengeStatesData
-{
-    public Player Player;
-    public List<StateCard> States;
-    public EventCard SourceEvent;
-    public ChallengeStatesData(Player p, List<StateCard> list, EventCard src) { Player = p; States = list; SourceEvent = src; }
-}
-
-public sealed class EventAppliedData
-{
-    public EventCard Card;
-    public Player    Player;
-    public EventAppliedData(EventCard c, Player p) { Card = c; Player = p; }
-}
-
-public sealed class EventStartedData
-{
-    public EventType Type;
-    public Player    Player;
-    public EventCard Card;
-    public EventStartedData(EventType t, Player p, EventCard c) { Type = t; Player = p; Card = c; }
-}
-
-public sealed class EventCompletedData
-{
-    public EventType Type;
-    public Player    Player;
-    public EventCard Card;
-    public EventCompletedData(EventType t, Player p, EventCard c) { Type = t; Player = p; Card = c; }
 }
 
 

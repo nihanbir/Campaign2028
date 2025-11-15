@@ -16,7 +16,7 @@ public class MP_EventResponse
     private void Enable()   => EventCardBus.Instance.OnEvent += OnEvent;
     private void Disable()  => EventCardBus.Instance.OnEvent -= OnEvent;
     
-    private void OnEvent(CardEvent e)
+    private void OnEvent(EventCardEvent e)
     {
         // Only reacts to events, never active logic
         switch (e.stage)
@@ -32,12 +32,8 @@ public class MP_EventResponse
             case EventStage.ChallengeStateShown:
             {
                 var data = (ChallengeStatesData)e.Payload;
-                // if AI is the current player, choose a state
-                if (AIManager.Instance.IsAIPlayer(data.Player))
-                {
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                    _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
-                }
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
                 break;
             }
 
@@ -45,23 +41,19 @@ public class MP_EventResponse
             {
                 var data = (DuelData)e.Payload;
                 // if AI is the attacker, roll dice
-                if (AIManager.Instance.IsAIPlayer(data.Attacker))
-                {
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
-                    // _ai.StartCoroutine(RollDice(aiPlayer));
-                }
+                
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
+                // _ai.StartCoroutine(RollDice(aiPlayer));
                 break;
             }
 
             case EventStage.AltStatesShown:
             {
                 var data = (AltStatesData)e.Payload;
-                // if AI is the player, roll dice for alternative states
-                if (AIManager.Instance.IsAIPlayer(data.Player))
-                {
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                    // _ai.StartCoroutine(RollDice(aiPlayer));
-                }
+                
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                // _ai.StartCoroutine(RollDice(aiPlayer));
+                
                 break;
             }
         }

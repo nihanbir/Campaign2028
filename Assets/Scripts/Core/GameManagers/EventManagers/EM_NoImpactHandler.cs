@@ -11,7 +11,7 @@ public class EM_NoImpactHandler : BaseEventHandler
 
         // Still raise bus events for consistency
         EventCardBus.Instance.Raise(
-            new CardEvent(EventStage.EventStarted, new EventStartedData(effectiveType, player, card))
+            new EventCardEvent(EventStage.EventStarted, new EventStartedData(effectiveType, player, card))
         );
 
         // Immediately mark as completed

@@ -23,7 +23,7 @@ public class EM_AltStatesHandler : BaseEventHandler
         }
         
         // Bus event for decoupled UI
-        EventCardBus.Instance.Raise(new CardEvent(
+        EventCardBus.Instance.Raise(new EventCardEvent(
             EventStage.AltStatesShown,
             new AltStatesData(player, _altState1, _altState2, card)));
     }

@@ -59,7 +59,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         }
     }
 
-    private void HandleGameEvent(CardEvent e)
+    private void HandleGameEvent(EventCardEvent e)
     {
         switch (e.stage)
         {
