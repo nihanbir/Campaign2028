@@ -13,6 +13,7 @@ public class AM_MainPhase
     private MP_EventResponse _aiEventManager;
 
     private GM_MainPhase _gm;
+    private UM_MainPhase _mainUI;
     private EventManager _eventManager;
 
     private AIPlayer _currentAI;
@@ -26,6 +27,8 @@ public class AM_MainPhase
     {
         _ai = ai;
         _aiEventManager = new MP_EventResponse(ai, this);
+        _mainUI = GameUIManager.Instance.mainUI;
+        
     }
     
     private void OnTurnEvent(IGameEvent e)
@@ -62,18 +65,21 @@ public class AM_MainPhase
     
     private void Disable()
     {
+        TurnFlowBus.Instance.OnEvent -= OnTurnEvent;
         _currentAI = null;
         _drawnTarget = null;
         _drawnEvent = null;
-        TurnFlowBus.Instance.OnEvent -= OnTurnEvent;
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
-        if (_gm == null)  _gm = GameManager.Instance.mainPhase;
-        if (_eventManager == null) _eventManager = _gm.EventManager;
+        _gm ??= GameManager.Instance.mainPhase;
+        _eventManager ??= _gm.EventManager;
+        _mainUI ??= GameUIManager.Instance.mainUI;
         
         Enable();
+        
+        yield return _mainUI.WaitUntilUIQueueFree();
         
         _currentAI = aiPlayer;
         
@@ -96,7 +102,7 @@ public class AM_MainPhase
         
         if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
         {
-            TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+            yield return _ai.StartCoroutine(RollDice(aiPlayer));
         }
         else
         {
