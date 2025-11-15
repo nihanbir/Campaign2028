@@ -39,8 +39,7 @@ public class UM_SetupPhase : UM_BasePhase
             switch (t.stage)
             {
                 case SetupStage.Roll:
-                    rollDiceButton.gameObject.SetActive(true);
-                    diceImage.gameObject.SetActive(true);
+                    EnqueueUI(OnRollStage());
                     break;
                 
                 case SetupStage.AllPlayersRolled:
@@ -59,7 +58,7 @@ public class UM_SetupPhase : UM_BasePhase
                 
                 case SetupStage.BeginActorAssignment:
                     //TODO: anims later
-                    OnActorAssignStage();
+                    EnqueueUI(OnActorAssignStage());
                     break;
                 
                 case SetupStage.ActorAssigned:
@@ -143,35 +142,34 @@ public class UM_SetupPhase : UM_BasePhase
     
     #region Turn State UI
 
+    private IEnumerator OnRollStage()
+    {
+        rollDiceButton.gameObject.SetActive(true);
+        diceImage.gameObject.SetActive(true);
+        yield break;
+    }
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
-        
-        EnableDiceButton(true);
-        
-    }
 
-    protected override void EnableDiceButton(bool enable)
-    {
-        if (IsQueueRunning) enable = false;
-        
-        base.EnableDiceButton(enable);
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        EnqueueUI(EnableDiceButtonRoutine(!isAIPlayer));
     }
 
     #endregion
 
     #region Actor Assignment UI
     
-    private void OnActorAssignStage()
+    private IEnumerator OnActorAssignStage()
     {
         rollDiceButton.gameObject.SetActive(false);
         diceImage.gameObject.SetActive(false);
         _selectedActorCard = null;
+        yield break;
     }
     
-    private void HighlightActorCard(ActorCard actorCard)
+    private IEnumerator HighlightActorCard(ActorCard actorCard)
     {
-       
         if (_selectedActorCard)
             _selectedActorCard.SetIsSelected(false);
         
@@ -182,6 +180,8 @@ public class UM_SetupPhase : UM_BasePhase
         _selectedActorCard?.transform.DOPunchScale(Vector3.one * 0.15f, 0.25f, 8, 1f);
 
         Debug.Log($"Selected actor: {_selectedActorCard?.GetCard().cardName}");
+        yield break;
+        
     }
     
     private void RemoveCard(PlayerDisplayCard card)

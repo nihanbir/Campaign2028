@@ -174,14 +174,20 @@ public class UM_MainPhase : UM_BasePhase
         base.OnPlayerTurnStarted(player);
 
         _currentPlayerDisplayCard = player.PlayerDisplayCard;
-        
-        if (!isPlayerAI)
+
+        EnqueueUI(EnableDrawButtons());
+    }
+
+    private IEnumerator EnableDrawButtons()
+    {
+        if (!isAIPlayer)
         {
             if (_currentTargetDisplayCard.IsNull())
                 drawTargetButton.interactable = true;
             
             drawEventButton.interactable = true;
         }
+        yield break;
     }
 
     protected override void OnPlayerTurnEnded(Player player)
@@ -190,9 +196,14 @@ public class UM_MainPhase : UM_BasePhase
 
        _currentPlayerDisplayCard = null;
        
-       player.PlayerDisplayCard.ShowDice(false);
+       EnqueueUI(HidePlayerDiceImg(player));
     }
 
+    private IEnumerator HidePlayerDiceImg(Player player)
+    {
+       player.PlayerDisplayCard.ShowDice(false);
+        yield break;
+    }
     
     protected override void OnPlayerRolledDice(Player player, int roll)
     {
@@ -216,8 +227,6 @@ public class UM_MainPhase : UM_BasePhase
             yield break;
         
         drawTargetButton.interactable = false;
-        
-        ClearCurrentTargetCard();
         
         GameObject prefab = card switch
         {
@@ -478,6 +487,8 @@ public class UM_MainPhase : UM_BasePhase
     }
 #endregion Testing Helper
 
+    #region Buttons
+    
     private void UpdateRollButtonState()
     {
         var currentPlayer = GameManager.Instance.CurrentPlayer;
@@ -489,7 +500,7 @@ public class UM_MainPhase : UM_BasePhase
         // - Not AI
         // - Not while an event is active
         // - Player has either played or saved their event
-        if (!isPlayerAI)
+        if (!isAIPlayer)
         {
             var eventManager = _eventManager ?? _mainPhase.EventManager;
 
@@ -504,4 +515,7 @@ public class UM_MainPhase : UM_BasePhase
         
         EnableDiceButton(enable);
     }
+
+    #endregion
+   
 }
