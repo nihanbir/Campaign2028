@@ -6,6 +6,7 @@ public class MP_EventResponse
 {
     private readonly AIManager _ai;
     private readonly AM_MainPhase _main;
+    private EUM_ChallengeEvent _ui;
     
     public MP_EventResponse(AIManager ai, AM_MainPhase main)
     {
@@ -13,7 +14,12 @@ public class MP_EventResponse
         _main = main;
     }
 
-    private void Enable()   => TurnFlowBus.Instance.OnEvent += OnEvent;
+    private void Enable()
+    {
+        if (!_ui) _ui = GameUIManager.Instance.mainUI.challengeEvent;
+        TurnFlowBus.Instance.OnEvent += OnEvent;
+    }
+
     private void Disable()  => TurnFlowBus.Instance.OnEvent -= OnEvent;
     
     private void OnEvent(IGameEvent e)
@@ -60,6 +66,28 @@ public class MP_EventResponse
     }
     
     #region Challenge Any State (AI choice)
+    private IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
+    {
+        yield return _ui.WaitUntilQueueFree();
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+
+        var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
+
+        Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
+        
+        //TODO: raise a bus
+    }
+
+    private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
+    {
+        yield return _ui.WaitUntilQueueFree();
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
+    }
+    
     private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
         List<StateCard> beneficialStates = new();
@@ -83,24 +111,6 @@ public class MP_EventResponse
             }
         }
         return chosen;
-    }
-    
-    private IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
-    {
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-
-        var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
-
-        Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
-        
-        //TODO: raise a bus
-    }
-
-    private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
-    {
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
-        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
     }
     #endregion
     

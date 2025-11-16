@@ -7,7 +7,6 @@ public class EM_ChallengeHandler : BaseEventHandler
     
     protected Card chosenCard;
     protected Player defender;
-    protected Player attacker;
     protected EventCard currentEventCard;
 
     public EM_ChallengeHandler(GM_MainPhase phase, EventManager parent) : base(phase, parent) { }
@@ -15,7 +14,6 @@ public class EM_ChallengeHandler : BaseEventHandler
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
         currentEventCard = card;
-        attacker = player;
         
         switch (card.eventConditions)
         {
@@ -34,14 +32,13 @@ public class EM_ChallengeHandler : BaseEventHandler
                 break;
         }
     }
-
-    // Optional: expose unified evaluate and forward to whichever handler was active
-    public void EvaluateCapture(int roll)
+    
+    public override void EvaluateRoll(Player player, int roll)
     {
         bool success = chosenCard switch
         {
-            StateCard s => s.IsSuccessfulRoll(roll, attacker.assignedActor.team),
-            InstitutionCard i => i.IsSuccessfulRoll(roll, attacker.assignedActor.team),
+            StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
+            InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
             _                 => false
         };
 
@@ -49,15 +46,14 @@ public class EM_ChallengeHandler : BaseEventHandler
            
         if (success)
         {
-            _phase.UpdateCardOwnership(attacker, chosenCard);
+            _phase.UpdateCardOwnership(player, chosenCard);
         }
         else
         {
             _phase.ReturnCardToDeck(currentEventCard);
-            Debug.Log($"Player {attacker.playerID} failed to capture {chosenCard.cardName}");
+            Debug.Log($"Player {player.playerID} failed to capture {chosenCard.cardName}");
         }
         
-        //TODO: duel completed instead
-        _parent.CompleteEvent();
+        _parent.CompleteDuel();
     }
 }

@@ -53,6 +53,17 @@ public class EventManager
     {
         if (e.stage == EventStage.RollDiceRequest)
             OnPlayerRequestedRoll();
+        
+        if (e.stage == EventStage.PlayerRolled)
+        {
+            if (!IsEventActive) return;
+
+            var data = (PlayerRolledData)e.payload;
+
+            // Forward roll to the active handler
+            if (_handlers.TryGetValue(_effectiveType, out var handler))
+                handler.EvaluateRoll(data.Player, data.Roll);
+        }
     }
 
     public void ApplyEvent(Player player, EventCard card)
@@ -92,6 +103,13 @@ public class EventManager
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
         NullifyEventLocals();
+    }
+
+    public void CompleteDuel()
+    {
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
+        
+        CompleteEvent();
     }
     
     public void CancelEvent(EventCard card)

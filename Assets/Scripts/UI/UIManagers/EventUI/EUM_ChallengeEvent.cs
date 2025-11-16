@@ -13,6 +13,8 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class EUM_ChallengeEvent : MonoBehaviour
 {
+    [Header("Challenge Any State")]
+    [SerializeField] private GameObject showStatesScreen;
     [SerializeField] private Transform stateCardsUIParent;
     [SerializeField] private float spacingBetweenStateCards = 150f;
     
@@ -22,20 +24,56 @@ public class EUM_ChallengeEvent : MonoBehaviour
     [SerializeField] private Transform leftCardUI;
     [SerializeField] private Transform midCardUI;
 
-    private StateDisplayCard _highlightedCard;
     
+    [Header("Event Screen")]
     [SerializeField] protected GameObject eventScreen;
     [SerializeField] protected Button rollDiceButton;
     [SerializeField] protected Image diceImage;
+    
+    [Header("CanvasGroup")] 
+    [SerializeField] private CanvasGroup canvasGroup;
 
     private GM_MainPhase _mainPhase;
     private UM_MainPhase _mainUI;
 
     private Player _currentPlayer;
+    private StateDisplayCard _highlightedCard;
+    
+    private readonly Queue<IEnumerator> _queue = new();
+    private bool _queueRunning;
+
+    private void EnqueueUI(IEnumerator routine)
+    {
+        _queue.Enqueue(routine);
+        if (!_queueRunning)
+            StartCoroutine(ProcessQueue());
+    }
+
+    private IEnumerator ProcessQueue()
+    {
+        _queueRunning = true;
+
+        while (_queue.Count > 0)
+            yield return StartCoroutine(_queue.Dequeue());
+    
+        _queueRunning = false;
+    }
+
+    public IEnumerator WaitUntilQueueFree()
+    {
+        while (_queueRunning)
+            yield return null;
+    }
 
     private void Awake()
     {
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        
         eventScreen.SetActive(false);
+        stateCardsUIParent.gameObject.SetActive(false);
+        duelScreen.SetActive(false);
     }
 
     public void Initialize()
@@ -60,6 +98,15 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void HandleGameEvent(EventCardEvent e)
     {
+        StartCoroutine(HandleGameEventRoutine(e));
+    }
+    
+    private IEnumerator HandleGameEventRoutine(EventCardEvent e)
+    {
+        // 🔥 WAIT FOR MAIN PHASE UI ANIMATIONS to finish
+        if (_mainUI != null)
+            yield return _mainUI.WaitUntilUIQueueFree();
+        
         switch (e.stage)
         {
             case EventStage.ChallengeStatesDetermined:
@@ -76,7 +123,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 break;
             }
 
-            case EventStage.EventCompleted:
+            case EventStage.DuelCompleted:
             {
                 ReturnToMainPhaseUI();
                 break;
@@ -98,18 +145,23 @@ public class EUM_ChallengeEvent : MonoBehaviour
         }
     }
 
-    private void AnimateEventUI(out Sequence seq)
+    private IEnumerator AnimateEventUIRoutine()
     {
-        seq = null;
         CanvasGroup cg = eventScreen.GetComponent<CanvasGroup>();
         if (!cg) cg = eventScreen.AddComponent<CanvasGroup>();
 
         cg.alpha = 0f;
         eventScreen.transform.localScale = Vector3.one * 0.85f;
 
-        seq = DOTween.Sequence();
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
         seq.Append(cg.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
         seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
     }
 
     
@@ -122,40 +174,31 @@ public class EUM_ChallengeEvent : MonoBehaviour
     
     private void OnPlayerRolled(Player player, int roll)
     {
-        // GameUIManager.Instance.SetDiceSprite(diceImage);
-
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
+        diceImage.sprite = GameUIManager.Instance.diceFaces[roll - 1];
+        EnqueueUI(DicePopAnimation(diceImage));
     }
     
 
     #region AltStates
     private void ShowAltStates(Player player, StateCard card1, StateCard card2)
     {
+        EnqueueUI(ShowAltStatesRoutine(player, card1, card2));
+    }
+
+    private IEnumerator ShowAltStatesRoutine(Player player, StateCard card1, StateCard card2)
+    {
         _currentPlayer = player;
         
-        CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
-        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI,  card1);
-        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
-        
-        _mainUI.gameObject.SetActive(false);
-        
-        eventScreen.SetActive(true);
-        
         stateCardsUIParent.gameObject.SetActive(false);
-        
         duelScreen.gameObject.SetActive(true);
-        
-        AnimateEventUI(out var anim);
 
-        if (anim != null)
-        {
-            anim.OnComplete(() =>
-            {
-                // Signal UI finished animating
-                // CardEventBus.Instance.Raise(new GameEvent(EventStage.ClientAnimationCompleted, null));
-            });
-        }
+        CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
+        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI, card1);
+        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
+
+        yield return AnimateEventUIRoutine();
     }
+
     #endregion
     
     #region Challenge State
@@ -183,29 +226,23 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void ShowStateCards(Player attacker, List<StateCard> statesToDisplay)
     {
+        EnqueueUI(ShowStateCardsRoutine(attacker, statesToDisplay));
+    }
+
+    private IEnumerator ShowStateCardsRoutine(Player attacker, List<StateCard> statesToDisplay)
+    {
         _currentPlayer = attacker;
-        
-        _mainUI.gameObject.SetActive(false);
-        
-        eventScreen.gameObject.SetActive(true);
-        
-        duelScreen.SetActive(false);
         
         stateCardsUIParent.gameObject.SetActive(true);
 
         StateDisplayCard.OnCardSelected += OnCardSelected;
-        StateDisplayCard.OnCardHeld     += OnStateHeld;
+        StateDisplayCard.OnCardHeld += OnStateHeld;
 
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
 
-        AnimateEventUI(out var anim);
-        if (anim != null)
-        {
-            anim.OnComplete(() =>
-            {
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-            });
-        }
+        yield return AnimateEventUIRoutine();
+
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
     }
 
     private void OnCardSelected(ISelectableDisplayCard card)
@@ -225,49 +262,40 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void ShowDuel(Player attacker, Player defender, Card chosenCard)
     {
+        EnqueueUI(ShowDuelRoutine(attacker, defender, chosenCard));
+    }
+
+    private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
+    {
+        _currentPlayer = attacker;
+
         StateDisplayCard.OnCardSelected -= OnCardSelected;
         StateDisplayCard.OnCardHeld -= OnStateHeld;
         
-        _mainUI.gameObject.SetActive(false);
-        
-        eventScreen.gameObject.SetActive(true);
-        
         stateCardsUIParent.gameObject.SetActive(false);
-        
-        duelScreen.SetActive(true);
+        duelScreen.gameObject.SetActive(true);
 
-        _currentPlayer = attacker;
+        // attacker card
+        CreateCardInTransform<PlayerDisplayCard>(attacker.PlayerDisplayCard.gameObject, leftCardUI, attacker.assignedActor);
 
-        // Left: attacker
-        CreateCardInTransform<PlayerDisplayCard>(_currentPlayer.PlayerDisplayCard.gameObject, leftCardUI, _currentPlayer.assignedActor);
-
-        // Right: defender
+        // defender card
         if (defender)
             CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
 
-        // Mid: chosen card
+        // mid card
         switch (chosenCard)
         {
-            case StateCard stateCard:
-                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, stateCard);
+            case StateCard s:
+                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, s);
                 break;
-            case InstitutionCard instCard:
-                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, instCard);
+            case InstitutionCard inst:
+                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, inst);
                 break;
         }
-        
-        AnimateEventUI(out var anim);
 
-        if (anim != null)
-        {
-            anim.OnComplete(() =>
-            {
-                // Tell everyone (especially AI) that visuals are done
-                // GameEventBus.Instance.Raise(new GameEvent(EventStage.ClientAnimationCompleted, null));
+        yield return AnimateEventUIRoutine();
 
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-            });
-        }
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
@@ -355,16 +383,38 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void ReturnToMainPhaseUI()
     {
-        //TODO: animate then continue
+        EnqueueUI(ReturnToMainPhaseUIRoutine());
+    }
+
+    private IEnumerator ReturnToMainPhaseUIRoutine()
+    {
+        // Fade out event screen if needed
+        yield return FadeOutEventScreenRoutine();
         
-        _mainUI.gameObject.SetActive(true);
         eventScreen.SetActive(false);
 
-        _currentPlayer  = null;
+        _currentPlayer = null;
         _highlightedCard = null;
 
         duelScreen.SetActive(false);
         stateCardsUIParent.gameObject.SetActive(false);
+    }
+    
+    private IEnumerator FadeOutEventScreenRoutine()
+    {
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
+        seq.Join(eventScreen.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        canvasGroup.alpha = 1f;
+        eventScreen.transform.localScale = Vector3.one;
     }
 
     private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
@@ -375,10 +425,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         if (cardToSet == null) return;
         
-        var cardGO = Instantiate(prefab, uiParent);
-        cardGO.SetActive(true);
+        var go = Instantiate(prefab, uiParent);
+        go.SetActive(true);
 
-        if (cardGO.TryGetComponent(out T displayCard))
+        if (go.TryGetComponent(out T displayCard))
         {
             displayCard.SetCard(cardToSet);
         }
@@ -387,7 +437,27 @@ public class EUM_ChallengeEvent : MonoBehaviour
             Debug.LogError($"{prefab.name} is missing {typeof(T).Name} component.");
         }
 
-        if (cardGO.TryGetComponent(out RectTransform rt))
+        if (go.TryGetComponent(out RectTransform rt))
             rt.anchoredPosition = Vector2.zero;
+    }
+    
+    private IEnumerator DicePopAnimation(Image diceImg)
+    {
+        if (!diceImg) yield break;
+
+        diceImg.gameObject.SetActive(true);
+
+        diceImg.transform.DOKill();
+        diceImg.transform.localScale = Vector3.zero;
+
+        bool done = false;
+
+        diceImg.transform
+            .DOScale(1f, 0.35f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
     }
 }

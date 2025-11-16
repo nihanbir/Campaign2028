@@ -26,7 +26,7 @@ public class EM_AltStatesHandler : BaseEventHandler
             new AltStatesData(player, _altState1, _altState2, card)));
     }
     
-    public void EvaluateStateDiscard(Player player, int roll)
+    public override void EvaluateRoll(Player player, int roll)
     {
         StateCard cardToDiscard = null;
         switch (roll)
@@ -44,6 +44,6 @@ public class EM_AltStatesHandler : BaseEventHandler
             Debug.Log($"Player {player.playerID} didn't discard any states!");
         }
         
-        _parent.CompleteEvent();
+        _parent.CompleteDuel();
     }
 }

@@ -497,9 +497,9 @@ MonoBehaviour:
   drawTargetButton: {fileID: 2148205393308016843}
   playerPanelButton: {fileID: 2176689909167869587}
   ownedCardsPanel: {fileID: 1257706460539914140}
-  challengeUI: {fileID: 0}
-  altStateUI: {fileID: 0}
+  challengeEvent: {fileID: 0}
   cardSpawnDuration: 0.4
+  canvasGroup: {fileID: 9059959801080100329}
 --- !u!1 &5505552107030277264
 GameObject:
   m_ObjectHideFlags: 0

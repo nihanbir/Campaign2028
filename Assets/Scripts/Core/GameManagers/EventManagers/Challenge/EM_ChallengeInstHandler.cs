@@ -26,8 +26,7 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
             Cancel(card);
             return;
         }
-
-        // Legacy + bus
-        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelStarted, new DuelData(attacker, defender, chosenCard, card)));
+        
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelStarted, new DuelData(player, defender, chosenCard, card)));
     }
 }

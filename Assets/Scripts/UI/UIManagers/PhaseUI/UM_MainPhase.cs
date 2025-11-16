@@ -105,6 +105,16 @@ public class UM_MainPhase : UM_BasePhase
                     break;
             }
         }
+
+        if (e is EventCardEvent c)
+        {
+            switch (c.stage)
+            {
+                case EventStage.EventApplied:
+                    EnqueueUI(EventApplied());
+                    break;
+            }
+        }
     }
 
     protected override void SubscribeToPhaseEvents()
@@ -347,14 +357,34 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator EventApplied()
     {
-        yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
-        
         ClearCurrentEventCard();
         UpdateRollButtonState();
-        
-        gameObject.SetActive(false);
-
         canvasGroup.interactable = false;
+        
+        yield return FadeOutEventScreenRoutine();
+        
+        yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
+        
+        
+        //TODO: maybe an anim
+        // gameObject.SetActive(false);
+    }
+    
+    private IEnumerator FadeOutEventScreenRoutine()
+    {
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
+        seq.Join(gameObject.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        canvasGroup.alpha = 0f;
+        gameObject.transform.localScale = Vector3.one;
     }
 
     private void OnClickEventSave()

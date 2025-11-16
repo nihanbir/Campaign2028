@@ -679,6 +679,7 @@ MonoBehaviour:
   eventDeck: []
   actorDeck: []
   allegianceDeck: []
+  placeHumanAtIndex: 0
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0
@@ -698,6 +699,11 @@ MonoBehaviour:
   aiPlayerPrefab: {fileID: 6437916321570752279, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
   aiPlayers: []
   game: {fileID: 0}
+--- !u!225 &1937510968 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 3180347299032236362, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+  m_PrefabInstance: {fileID: 2553868797784039014}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2031575820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2672511314526740918, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
@@ -785,6 +791,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4420054567724687799, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: canvasGroup
+      value: 
+      objectReference: {fileID: 1937510968}
     - target: {fileID: 4594792614455268744, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

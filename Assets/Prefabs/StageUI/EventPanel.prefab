@@ -408,6 +408,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
+  showStatesScreen: {fileID: 4271613462701129112}
   stateCardsUIParent: {fileID: 3967855992564129598}
   spacingBetweenStateCards: 150
   duelScreen: {fileID: 3298725457486808726}
@@ -417,6 +418,7 @@ MonoBehaviour:
   eventScreen: {fileID: 5789861288748144512}
   rollDiceButton: {fileID: 4016181547966507740}
   diceImage: {fileID: 4190949239517227204}
+  canvasGroup: {fileID: 4583404886209649554}
 --- !u!1 &6141832280865122820
 GameObject:
   m_ObjectHideFlags: 0

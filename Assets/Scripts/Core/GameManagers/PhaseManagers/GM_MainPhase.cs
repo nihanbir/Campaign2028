@@ -228,7 +228,7 @@ protected override void StartPlayerTurn()
             EndPlayerTurn();
         }
     }
-    private void CaptureCard(Player player, Card card)
+    public void CaptureCard(Player player, Card card)
     {
         if (card == null)
             return;
@@ -269,8 +269,6 @@ protected override void StartPlayerTurn()
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardCaptured, new CardCapturedData(player, card)));
 
         ClearCurrentTargetCard();
-        
-        
     }
     
     //TODO: should we have bus here
