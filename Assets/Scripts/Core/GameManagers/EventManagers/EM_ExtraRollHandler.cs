@@ -16,7 +16,7 @@ public class EM_ExtraRollHandler : BaseEventHandler
         
         else if (card.canReturnToDeck)
             _phase.ReturnCardToDeck(card);
-
-        Complete(player, card);
+        
+        _parent.CompleteEvent();
     }
 }

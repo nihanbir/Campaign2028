@@ -15,6 +15,6 @@ public class EM_NoImpactHandler : BaseEventHandler
         );
 
         // Immediately mark as completed
-        _parent.EndEventImmediate(card, player);
+        _parent.CompleteEvent();
     }
 }

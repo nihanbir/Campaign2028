@@ -9,6 +9,7 @@ using UnityEngine;
 /// </summary>
 public class EventManager
 {
+    private GameManager _gm;
     private readonly GM_MainPhase _mainPhase;
     private readonly Dictionary<EventType, IEventHandler> _handlers;
 
@@ -20,6 +21,8 @@ public class EventManager
     
     public EventManager(GM_MainPhase gm)
     {
+        _gm = GameManager.Instance;
+        
         _mainPhase = gm;
 
         _handlers = new()
@@ -31,19 +34,37 @@ public class EventManager
             { EventType.Challenge, new EM_ChallengeHandler(gm, this) },
             { EventType.NoImpact, new EM_NoImpactHandler(gm, this) },
         };
-        
-        EventCardBus.Instance.OnEvent += OnGameEvent;
+    }
 
+    private void OnGameEvent(IGameEvent e)
+    {
+        if (e is MainStageEvent m)
+        {
+            switch (m.stage)
+            {
+                case MainStage.ApplyEventCardRequest:
+                    ApplyEvent(_gm.CurrentPlayer, _mainPhase.CurrentEventCard);
+                    break;
+            }
+        }
     }
     
+    private void OnCardEvent(EventCardEvent e)
+    {
+        if (e.stage == EventStage.RollDiceRequest)
+            OnPlayerRequestedRoll();
+    }
+
     public void ApplyEvent(Player player, EventCard card)
     {
         _currentPlayer = player;
         _currentEventCard = card;
         _effectiveType = ResolveEventType(card, player);
 
+        EventCardBus.Instance.OnEvent += OnCardEvent;
+        
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
-
+        
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
             IsEventActive = true;
@@ -52,14 +73,8 @@ public class EventManager
         else
         {
             Debug.LogWarning($"No handler for {_effectiveType}");
-            EndEventImmediate(card, player);
+            CompleteEvent();
         }
-    }
-    
-    private void OnGameEvent(EventCardEvent e)
-    {
-        if (e.stage == EventStage.RollDiceRequest)
-            OnPlayerRequestedRoll();
     }
     
     private static EventType ResolveEventType(EventCard card, Player player)
@@ -67,33 +82,22 @@ public class EventManager
         if (card.eventType != EventType.TeamBased) return card.eventType;
         return player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
     }
-    
-    public void EndEventImmediate(EventCard card, Player player)
-    {
-        IsEventActive = false;
-        
-        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, player, card)));
-        
-        NullifyEventLocals();
-    }
-    
-    public IEnumerator EndTurnAfterDelay(float seconds)
-    {
-        IsEventActive = false;
-        
-        yield return new WaitForSeconds(seconds);
 
-        // Inform systems that this event completed
-        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
+    public void CompleteEvent()
+    {
+        EventCardBus.Instance.OnEvent -= OnCardEvent;
         
-        //TODO: can have its own endplayerturn logic
-        // _mainPhase.EndPlayerTurn();
+        IsEventActive = false;
+        
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
         NullifyEventLocals();
     }
     
     public void CancelEvent(EventCard card)
     {
+        EventCardBus.Instance.OnEvent -= OnCardEvent;
+        
         IsEventActive = false;
         
         Debug.Log("Event cannot be applied.");
@@ -119,9 +123,9 @@ public class EventManager
     {
         if (!IsEventActive) return;
         
-        //TODO: should we?
-        // Broadcast the roll (useful for UI dice feedback)
-        // EventCardBus.Instance.Raise(new CardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
+        var roll = Random.Range(1, 7);
+        
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.PlayerRolled, new PlayerRolledData(_currentPlayer, roll)));
     }
     #endregion
 }

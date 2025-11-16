@@ -10,8 +10,6 @@ public class EM_AltStatesHandler : BaseEventHandler
     private StateCard _altState2;
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
-        // NOTE: your original code looked up altState2 using altState1 by mistake.
-        // Fixed to use card.altState2 for second find.
         _altState1 = _phase.FindStateFromDeck(card.altState1, out var found1);
         _altState2 = _phase.FindStateFromDeck(card.altState2, out var found2);
 
@@ -46,6 +44,6 @@ public class EM_AltStatesHandler : BaseEventHandler
             Debug.Log($"Player {player.playerID} didn't discard any states!");
         }
         
-        GameManager.Instance.StartCoroutine(_parent.EndTurnAfterDelay(2f));
+        _parent.CompleteEvent();
     }
 }

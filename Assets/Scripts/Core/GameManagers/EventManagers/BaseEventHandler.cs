@@ -13,11 +13,6 @@ public abstract class BaseEventHandler : IEventHandler
 
     public abstract void Handle(Player player, EventCard card, EventType effectiveType);
 
-    protected void Complete(Player player, EventCard card)
-    {
-        _parent.EndEventImmediate(card, player);
-    }
-
     protected void Cancel(EventCard card)
     {
         _parent.CancelEvent(card);

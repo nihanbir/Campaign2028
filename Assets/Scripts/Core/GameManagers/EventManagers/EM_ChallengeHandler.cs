@@ -58,6 +58,6 @@ public class EM_ChallengeHandler : BaseEventHandler
         }
         
         //TODO: duel completed instead
-        GameManager.Instance.StartCoroutine(_parent.EndTurnAfterDelay(2.5f));
+        _parent.CompleteEvent();
     }
 }

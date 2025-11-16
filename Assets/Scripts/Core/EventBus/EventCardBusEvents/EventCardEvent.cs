@@ -5,7 +5,7 @@ public readonly struct EventCardEvent
     public readonly EventStage stage;
     public readonly object Payload; // keep generic for flexibility
 
-    public EventCardEvent(EventStage stage, object payload)
+    public EventCardEvent(EventStage stage, object payload = null)
     {
         this.stage = stage;
         Payload = payload;

@@ -53,7 +53,7 @@ public class MP_EventResponse
                 
                 var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
                 // _ai.StartCoroutine(RollDice(aiPlayer));
-                
+                EventCardBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
                 break;
             }
         }

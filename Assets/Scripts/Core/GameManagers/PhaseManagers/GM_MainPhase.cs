@@ -51,6 +51,11 @@ public class GM_MainPhase : GM_BasePhase
                 case MainStage.SaveEventCardRequest:
                     SaveEvent((EventCard)m.payload);
                     break;
+                
+                case MainStage.ApplyEventCardRequest:
+                    EventManager.ApplyEvent(game.CurrentPlayer, CurrentEventCard);
+                    break;
+                    
             }
         }
     }
