@@ -932,6 +932,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3381758312561441647, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+      propertyPath: statesScreen
+      value: 
+      objectReference: {fileID: 2953950956723889984}
     - target: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1026,6 +1030,11 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4032646870049022151, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
   m_PrefabInstance: {fileID: 1421267700002347736}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2953950956723889984 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4271613462701129112, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+  m_PrefabInstance: {fileID: 1421267700002347736}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &4420054567724687799 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3381758312561441647, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
@@ -1047,6 +1056,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1918790564760583912, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       propertyPath: challengeUI
+      value: 
+      objectReference: {fileID: 4420054567724687799}
+    - target: {fileID: 1918790564760583912, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: challengeEvent
       value: 
       objectReference: {fileID: 4420054567724687799}
     - target: {fileID: 2535211725244805025, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}

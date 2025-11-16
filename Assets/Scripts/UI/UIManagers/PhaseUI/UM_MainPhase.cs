@@ -357,20 +357,18 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator EventApplied()
     {
-        ClearCurrentEventCard();
-        UpdateRollButtonState();
-        canvasGroup.interactable = false;
-        
-        yield return FadeOutEventScreenRoutine();
+        // canvasGroup.interactable = false;
         
         yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
         
+        ClearCurrentEventCard();
+        UpdateRollButtonState();
         
-        //TODO: maybe an anim
-        // gameObject.SetActive(false);
+        yield return FadeOutScreenRoutine();
+
     }
     
-    private IEnumerator FadeOutEventScreenRoutine()
+    private IEnumerator FadeOutScreenRoutine()
     {
         bool done = false;
 

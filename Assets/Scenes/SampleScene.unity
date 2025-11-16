@@ -119,17 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &124821374 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4420054567724687799, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
 --- !u!1 &172211629
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,11 +688,6 @@ MonoBehaviour:
   aiPlayerPrefab: {fileID: 6437916321570752279, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
   aiPlayers: []
   game: {fileID: 0}
---- !u!225 &1937510968 stripped
-CanvasGroup:
-  m_CorrespondingSourceObject: {fileID: 3180347299032236362, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2031575820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2672511314526740918, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
@@ -775,6 +759,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3677301458403426367, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.000061035156
+      objectReference: {fileID: 0}
+    - target: {fileID: 3677301458403426367, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3929747334465014236, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -791,10 +783,6 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4420054567724687799, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: canvasGroup
-      value: 
-      objectReference: {fileID: 1937510968}
     - target: {fileID: 4594792614455268744, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -907,10 +895,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5544439552543579108, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: challengeEvent
-      value: 
-      objectReference: {fileID: 124821374}
     - target: {fileID: 8133739447094004840, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

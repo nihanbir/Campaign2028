@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 public class EUM_ChallengeEvent : MonoBehaviour
 {
     [Header("Challenge Any State")]
-    [SerializeField] private GameObject showStatesScreen;
+    [SerializeField] private GameObject statesScreen;
     [SerializeField] private Transform stateCardsUIParent;
     [SerializeField] private float spacingBetweenStateCards = 150f;
     
@@ -35,7 +35,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private GM_MainPhase _mainPhase;
     private UM_MainPhase _mainUI;
-
+    
     private Player _currentPlayer;
     private StateDisplayCard _highlightedCard;
     
@@ -67,12 +67,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void Awake()
     {
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
-        
         eventScreen.SetActive(false);
-        stateCardsUIParent.gameObject.SetActive(false);
+        statesScreen.SetActive(false);
         duelScreen.SetActive(false);
     }
 
@@ -106,6 +102,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         // 🔥 WAIT FOR MAIN PHASE UI ANIMATIONS to finish
         if (_mainUI != null)
             yield return _mainUI.WaitUntilUIQueueFree();
+        
+        eventScreen.SetActive(true);
         
         switch (e.stage)
         {
@@ -189,8 +187,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         _currentPlayer = player;
         
-        stateCardsUIParent.gameObject.SetActive(false);
-        duelScreen.gameObject.SetActive(true);
+        duelScreen.SetActive(true);
 
         CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
         CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI, card1);
@@ -233,7 +230,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         _currentPlayer = attacker;
         
-        stateCardsUIParent.gameObject.SetActive(true);
+        SetStateScreenActive(true);
 
         StateDisplayCard.OnCardSelected += OnCardSelected;
         StateDisplayCard.OnCardHeld += OnStateHeld;
@@ -272,8 +269,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         StateDisplayCard.OnCardSelected -= OnCardSelected;
         StateDisplayCard.OnCardHeld -= OnStateHeld;
         
-        stateCardsUIParent.gameObject.SetActive(false);
-        duelScreen.gameObject.SetActive(true);
+        statesScreen.SetActive(false);
+        duelScreen.SetActive(true);
 
         // attacker card
         CreateCardInTransform<PlayerDisplayCard>(attacker.PlayerDisplayCard.gameObject, leftCardUI, attacker.assignedActor);
@@ -390,14 +387,13 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         // Fade out event screen if needed
         yield return FadeOutEventScreenRoutine();
-        
-        eventScreen.SetActive(false);
 
         _currentPlayer = null;
         _highlightedCard = null;
 
+        eventScreen.SetActive(false);
         duelScreen.SetActive(false);
-        stateCardsUIParent.gameObject.SetActive(false);
+        statesScreen.SetActive(false);
     }
     
     private IEnumerator FadeOutEventScreenRoutine()
@@ -439,6 +435,12 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         if (go.TryGetComponent(out RectTransform rt))
             rt.anchoredPosition = Vector2.zero;
+    }
+
+    private void SetStateScreenActive(bool active)
+    {
+        statesScreen.SetActive(active);
+        stateCardsUIParent.gameObject.SetActive(active);
     }
     
     private IEnumerator DicePopAnimation(Image diceImg)

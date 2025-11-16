@@ -72,12 +72,15 @@ public class EventManager
         _currentEventCard = card;
         _effectiveType = ResolveEventType(card, player);
 
-        EventCardBus.Instance.OnEvent += OnCardEvent;
+        
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.EventApplied));
         
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventApplied, new EventAppliedData(card, player)));
         
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
+            EventCardBus.Instance.OnEvent += OnCardEvent;
+            
             IsEventActive = true;
             handler.Handle(player, card, _effectiveType);
         }
