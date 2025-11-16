@@ -230,7 +230,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         _currentPlayer = attacker;
         
-        SetStateScreenActive(true);
+        statesScreen.SetActive(true);
 
         StateDisplayCard.OnCardSelected += OnCardSelected;
         StateDisplayCard.OnCardHeld += OnStateHeld;
@@ -435,12 +435,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         if (go.TryGetComponent(out RectTransform rt))
             rt.anchoredPosition = Vector2.zero;
-    }
-
-    private void SetStateScreenActive(bool active)
-    {
-        statesScreen.SetActive(active);
-        stateCardsUIParent.gameObject.SetActive(active);
     }
     
     private IEnumerator DicePopAnimation(Image diceImg)
