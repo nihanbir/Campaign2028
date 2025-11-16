@@ -5,11 +5,15 @@ public class EM_ChallengeHandler : BaseEventHandler
     private EM_AnyStateHandler _anyStateHandler;
     private EM_ChallengeInstHandler _instHandler;
     
-    protected Card chosenCard;
-    protected Player defender;
+    private Card _chosenCard;
     protected EventCard currentEventCard;
+    
+    private readonly EM_ChallengeHandler _parentHandler;
 
-    public EM_ChallengeHandler(GM_MainPhase phase, EventManager parent) : base(phase, parent) { }
+    public EM_ChallengeHandler(GM_MainPhase phase, EventManager parent) : base(phase, parent)
+    {
+        _parentHandler = this;
+    }
 
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
@@ -18,12 +22,12 @@ public class EM_ChallengeHandler : BaseEventHandler
         switch (card.eventConditions)
         {
             case EventConditions.Any:
-                _anyStateHandler = new EM_AnyStateHandler(_phase, _parent);
+                _anyStateHandler = new EM_AnyStateHandler(_phase, _parent, this);
                 _anyStateHandler.Handle(player, card, effectiveType);
                 break;
 
             case EventConditions.IfInstitutionCaptured:
-                _instHandler = new EM_ChallengeInstHandler(_phase, _parent);
+                _instHandler = new EM_ChallengeInstHandler(_phase, _parent, this);
                 _instHandler.Handle(player, card, effectiveType);
                 break;
 
@@ -32,10 +36,12 @@ public class EM_ChallengeHandler : BaseEventHandler
                 break;
         }
     }
-    
+
+    public void SetChosenCard(Card chosenCard) => _chosenCard = chosenCard;
+
     public override void EvaluateRoll(Player player, int roll)
     {
-        bool success = chosenCard switch
+        bool success = _chosenCard switch
         {
             StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
             InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
@@ -46,14 +52,15 @@ public class EM_ChallengeHandler : BaseEventHandler
            
         if (success)
         {
-            _phase.UpdateCardOwnership(player, chosenCard);
+            _phase.UpdateCardOwnership(player, _chosenCard);
         }
         else
         {
             _phase.ReturnCardToDeck(currentEventCard);
-            Debug.Log($"Player {player.playerID} failed to capture {chosenCard.cardName}");
+            Debug.Log($"Player {player.playerID} failed to capture {_chosenCard.cardName}");
         }
         
+        _chosenCard = null;
         _parent.CompleteDuel();
     }
 }

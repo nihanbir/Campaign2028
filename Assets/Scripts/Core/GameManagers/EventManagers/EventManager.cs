@@ -124,9 +124,7 @@ public class EventManager
         Debug.Log("Event cannot be applied.");
         if (card != null && card.canReturnToDeck)
             _mainPhase.ReturnCardToDeck(card);
-
-        //TODO: raise event canceled instead
-        // Let listeners know the event ended without duel/alt flow if they care
+        
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCanceled, new EventCompletedData(_effectiveType, _currentPlayer, card)));
 
         NullifyEventLocals();

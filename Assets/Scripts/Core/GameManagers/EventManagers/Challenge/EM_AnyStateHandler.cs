@@ -1,10 +1,15 @@
 
 using System.Collections.Generic;
-using UnityEngine;
 
 public class EM_AnyStateHandler : EM_ChallengeHandler
 {
-    public EM_AnyStateHandler(GM_MainPhase phase, EventManager parent) : base(phase, parent) { }
+    private readonly EM_ChallengeHandler _parentHandler;
+
+    public EM_AnyStateHandler(GM_MainPhase phase, EventManager parent, EM_ChallengeHandler parentHandler) : base(phase,
+        parent)
+    {
+        _parentHandler = parentHandler;
+    }
     
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
@@ -34,8 +39,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
     
     public void HandleStateChosen(Player player, StateCard chosenState)
     {
-        defender = _phase.GetCardHolder(chosenState);
-        chosenCard = chosenState;
+        var defender = _phase.GetCardHolder(chosenState);
 
         // Defender could be null if something desynced; cancel safely
         if (!defender)
@@ -44,6 +48,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
             return;
         }
         
+        _parentHandler.SetChosenCard(chosenState);
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelStarted, new DuelData(player, defender, chosenState, currentEventCard)));
     }
 }
