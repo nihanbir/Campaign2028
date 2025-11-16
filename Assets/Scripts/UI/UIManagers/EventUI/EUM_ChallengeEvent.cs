@@ -167,16 +167,13 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator AnimateEventUIRoutine()
     {
-        CanvasGroup cg = eventScreen.GetComponent<CanvasGroup>();
-        if (!cg) cg = eventScreen.AddComponent<CanvasGroup>();
-
-        cg.alpha = 0f;
+        canvasGroup.alpha = 0f;
         eventScreen.transform.localScale = Vector3.one * 0.85f;
 
         bool done = false;
 
         Sequence seq = DOTween.Sequence();
-        seq.Append(cg.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
+        seq.Append(canvasGroup.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
         seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
         seq.OnComplete(() => done = true);
 
@@ -242,14 +239,11 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void ToggleHighlightedCard(StateDisplayCard card)
     {
-        if (!_highlightedCard)
-            _highlightedCard = card;
-
-        if (_highlightedCard == card) return;
+        if (_highlightedCard)
+            _highlightedCard.SetIsSelected(false);
         
-        _highlightedCard.SetIsSelected(false);
         _highlightedCard = card;
-        _highlightedCard.SetIsSelected(true);
+        _highlightedCard?.SetIsSelected(true);
     }
 
     private void ShowDuel(Player attacker, Player defender, Card chosenCard)
@@ -259,6 +253,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
     {
+        statesScreen.SetActive(false);
+        duelScreen.SetActive(true);
+        
         if (_challengeStates)
         {
             SelectableCardBus.Instance.OnEvent -= HandleCardInputEvent;
@@ -269,9 +266,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
             _challengeStates = false;
         }
         
-        statesScreen.SetActive(false);
-        duelScreen.SetActive(true);
-
         // attacker card
         CreateCardInTransform<PlayerDisplayCard>(attacker.PlayerDisplayCard.gameObject, leftCardUI, attacker.assignedActor);
 
@@ -315,7 +309,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
             }
 
             displayCard.SetCard(statesToDisplay[i]);
+            
             displayCard.SetClickable(true);
+            displayCard.SetHoldable(true);
 
             if (uiInstance.TryGetComponent(out RectTransform rt))
                 cardRects.Add(rt);
@@ -423,6 +419,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     
     private IEnumerator AnimateFadeOutEventScreen()
     {
+        Debug.Log("out");
         bool done = false;
 
         Sequence seq = DOTween.Sequence();
@@ -435,6 +432,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
             yield return null;
 
         canvasGroup.alpha = 1f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
         eventScreen.transform.localScale = Vector3.one;
     }
     
@@ -444,6 +443,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         // Ensure starting state (invisible + shrunk)
         canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
         eventScreen.transform.localScale = Vector3.one * 0.9f;
 
         Sequence seq = DOTween.Sequence();
@@ -457,6 +458,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         // Ensure final state is perfect
         canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         eventScreen.transform.localScale = Vector3.one;
     }
     

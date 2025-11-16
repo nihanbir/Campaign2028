@@ -80,7 +80,8 @@ public class MP_EventResponse
 
         Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
         
-        //TODO: raise a bus
+        SelectableCardBus.Instance.Raise(
+            new CardInputEvent(CardInputStage.Held, chosenState));
     }
 
     private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)

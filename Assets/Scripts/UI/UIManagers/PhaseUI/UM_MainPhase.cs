@@ -413,6 +413,8 @@ public class UM_MainPhase : UM_BasePhase
 
         // Ensure starting state (invisible + shrunk)
         canvasGroup.alpha = 0f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         gameObject.transform.localScale = Vector3.one * 0.9f;
 
         Sequence seq = DOTween.Sequence();
@@ -426,6 +428,8 @@ public class UM_MainPhase : UM_BasePhase
 
         // Ensure final state is perfect
         canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         gameObject.transform.localScale = Vector3.one;
     }
     private IEnumerator AnimateFadeOutScreen()
@@ -442,6 +446,8 @@ public class UM_MainPhase : UM_BasePhase
             yield return null;
 
         canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
         gameObject.transform.localScale = Vector3.one;
     }
     

@@ -11,6 +11,6 @@ public class EM_LoseTurnHandler : BaseEventHandler
         //TODO: maybe instead of this end player turn without moving to next player
         
         // Small delay to let any UI coroutines/animations breathe; then end turn
-        _parent.CompleteEvent();
+        parent.CompleteEvent();
     }
 }

@@ -159,6 +159,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2355731425670060775}
+  - component: {fileID: 7920867382125218456}
   m_Layer: 5
   m_Name: EventScreen
   m_TagString: Untagged
@@ -187,6 +188,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &7920867382125218456
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3102711098250810298}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3298725457486808726
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +291,7 @@ GameObject:
   - component: {fileID: 2051661168701634460}
   - component: {fileID: 99067697336928547}
   m_Layer: 5
-  m_Name: ChallengeUIParent
+  m_Name: StatesScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -353,7 +366,6 @@ GameObject:
   - component: {fileID: 4032646870049022151}
   - component: {fileID: 8996393523042317938}
   - component: {fileID: 3381758312561441647}
-  - component: {fileID: 1771099351469619246}
   m_Layer: 5
   m_Name: EventPanel
   m_TagString: Untagged
@@ -411,19 +423,7 @@ MonoBehaviour:
   eventScreen: {fileID: 3102711098250810298}
   rollDiceButton: {fileID: 4016181547966507740}
   diceImage: {fileID: 4190949239517227204}
-  canvasGroup: {fileID: 1771099351469619246}
---- !u!225 &1771099351469619246
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5789861288748144512}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
+  canvasGroup: {fileID: 7920867382125218456}
 --- !u!1 &6141832280865122820
 GameObject:
   m_ObjectHideFlags: 0

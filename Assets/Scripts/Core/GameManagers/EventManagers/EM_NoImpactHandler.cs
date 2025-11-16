@@ -10,6 +10,6 @@ public class EM_NoImpactHandler : BaseEventHandler
         Debug.Log($"No impact event triggered: {card.cardName}");
 
         // Immediately mark as completed
-        _parent.CompleteEvent();
+        parent.CompleteEvent();
     }
 }

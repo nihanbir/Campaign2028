@@ -10,8 +10,8 @@ public class EM_AltStatesHandler : BaseEventHandler
     private StateCard _altState2;
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
-        _altState1 = _phase.FindStateFromDeck(card.altState1, out var found1);
-        _altState2 = _phase.FindStateFromDeck(card.altState2, out var found2);
+        _altState1 = phase.FindStateFromDeck(card.altState1, out var found1);
+        _altState2 = phase.FindStateFromDeck(card.altState2, out var found2);
 
         // If neither found, cancel
         if (!found1 && !found2)
@@ -38,13 +38,13 @@ public class EM_AltStatesHandler : BaseEventHandler
 
         if (cardToDiscard != null)
         {
-            _phase.DiscardState(cardToDiscard);
+            phase.DiscardState(cardToDiscard);
         }
         else
         {
             Debug.Log($"Player {player.playerID} didn't discard any states!");
         }
         
-        _parent.CompleteDuel();
+        parent.CompleteDuel();
     }
 }

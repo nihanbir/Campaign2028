@@ -64,8 +64,6 @@ MonoBehaviour:
   needTwoEvents: []
   challengeEvents:
   - {fileID: 11400000, guid: b77aac1173ef29144a4679bdee0c1d96, type: 2}
-  - {fileID: 11400000, guid: 60f79d8490fc36b4783ba6253896b7f2, type: 2}
-  - {fileID: 11400000, guid: ee04fbbff2e7a454faa0c923b8faa87c, type: 2}
   loseTurnEvents: []
   noImpactEvents: []
   alternativeStatesEvents: []

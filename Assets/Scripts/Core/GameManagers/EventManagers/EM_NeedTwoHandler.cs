@@ -9,14 +9,14 @@ public class EM_NeedTwoHandler : BaseEventHandler
     
     public override void EvaluateRoll(Player player, int roll)
     {
-        if (_phase.CurrentTargetCard is StateCard state)
+        if (phase.CurrentTargetCard is StateCard state)
         {
             if (state.hasSecession && roll == 1)
             {
                 Debug.Log($"Player {player.playerID} rolled: {roll} and {state.cardName} had secession");
                 
-                _phase.DiscardState(state);
-                _parent.CompleteEvent();
+                phase.DiscardState(state);
+                parent.CompleteEvent();
                 return;
             }
 
@@ -25,13 +25,13 @@ public class EM_NeedTwoHandler : BaseEventHandler
         }
 
         if (roll == 2)
-            _phase.CaptureCard(player, _phase.CurrentTargetCard);
+            phase.CaptureCard(player, phase.CurrentTargetCard);
         
         else
-            Debug.Log($"Player {player.playerID} failed to capture {_phase.CurrentTargetCard.cardName}");
+            Debug.Log($"Player {player.playerID} failed to capture {phase.CurrentTargetCard.cardName}");
         
         
-        _parent.CompleteEvent();
+        parent.CompleteEvent();
     }
     
 }

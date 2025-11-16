@@ -10,7 +10,7 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
     
     public override void Handle(Player player, EventCard card, EventType effectiveType)
     {
-        var chosenCard = _phase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
+        var chosenCard = phase.FindHeldInstitution(card.requiredInstitution, out var cardFound);
         
         if (!cardFound)
         {
@@ -19,7 +19,7 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
         }
 
         Player defender = null;
-        var cardHolder = _phase.GetCardHolder(chosenCard);
+        var cardHolder = phase.GetCardHolder(chosenCard);
         if (cardHolder && cardHolder != player)
         {
             defender = cardHolder;

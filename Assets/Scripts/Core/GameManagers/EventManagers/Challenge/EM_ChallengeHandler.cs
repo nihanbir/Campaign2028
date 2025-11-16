@@ -22,12 +22,12 @@ public class EM_ChallengeHandler : BaseEventHandler
         switch (card.eventConditions)
         {
             case EventConditions.Any:
-                _anyStateHandler = new EM_AnyStateHandler(_phase, _parent, this);
+                _anyStateHandler = new EM_AnyStateHandler(phase, parent, this);
                 _anyStateHandler.Handle(player, card, effectiveType);
                 break;
 
             case EventConditions.IfInstitutionCaptured:
-                _instHandler = new EM_ChallengeInstHandler(_phase, _parent, this);
+                _instHandler = new EM_ChallengeInstHandler(phase, parent, this);
                 _instHandler.Handle(player, card, effectiveType);
                 break;
 
@@ -52,15 +52,15 @@ public class EM_ChallengeHandler : BaseEventHandler
            
         if (success)
         {
-            _phase.UpdateCardOwnership(player, _chosenCard);
+            phase.UpdateCardOwnership(player, _chosenCard);
         }
         else
         {
-            _phase.ReturnCardToDeck(currentEventCard);
+            phase.ReturnCardToDeck(currentEventCard);
             Debug.Log($"Player {player.playerID} failed to capture {_chosenCard.cardName}");
         }
         
         _chosenCard = null;
-        _parent.CompleteDuel();
+        parent.CompleteDuel();
     }
 }

@@ -12,6 +12,8 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     protected bool isHolding;
     protected bool isSelected;
     protected float holdTimer;
+    
+    private bool _wasHoldingSelection;
 
     protected virtual void Update()
     {
@@ -52,6 +54,12 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     {
         if (!isClickable) return;
 
+        if (_wasHoldingSelection)
+        {
+            _wasHoldingSelection = false;  // reset
+            return;                       // skip click toggle entirely
+        }
+
         SetIsSelected(!isSelected);
 
         if (isSelected)
@@ -69,22 +77,20 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     public virtual void OnPointerDown(PointerEventData eventData)
     {
         if (!isHoldable) return;
+
+        _wasHoldingSelection = true;
         
         // If card is not selected → select it first, but DO NOT EXIT
         if (!isSelected)
         {
             SetIsSelected(true);
-            //TODO: is there a cleaner way?
-            if (isSelected)
-            {
-                SelectableCardBus.Instance.Raise(
-                    new CardInputEvent(CardInputStage.Clicked, this)
-                );
-                
-                TurnFlowBus.Instance.Raise(
-                    new CardInputEvent(CardInputStage.Clicked, GetCard())
-                );
-            }
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, this)
+            );
+            
+            TurnFlowBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, GetCard())
+            );
         }
         
         // Start hold regardless of previous state

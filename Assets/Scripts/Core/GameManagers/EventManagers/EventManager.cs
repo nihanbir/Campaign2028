@@ -35,21 +35,8 @@ public class EventManager
             { EventType.NoImpact, new EM_NoImpactHandler(gm, this) },
         };
     }
-
-    private void OnGameEvent(IGameEvent e)
-    {
-        if (e is MainStageEvent m)
-        {
-            switch (m.stage)
-            {
-                case MainStage.ApplyEventCardRequest:
-                    ApplyEvent(_gm.CurrentPlayer, _mainPhase.CurrentEventCard);
-                    break;
-            }
-        }
-    }
     
-    private void OnCardEvent(EventCardEvent e)
+    private void OnEventCardEvent(EventCardEvent e)
     {
         if (e.stage == EventStage.RollDiceRequest)
             OnPlayerRequestedRoll();
@@ -78,7 +65,7 @@ public class EventManager
         
         if (_handlers.TryGetValue(_effectiveType, out var handler))
         {
-            EventCardBus.Instance.OnEvent += OnCardEvent;
+            EventCardBus.Instance.OnEvent += OnEventCardEvent;
             
             IsEventActive = true;
             handler.Handle(player, card, _effectiveType);
@@ -98,7 +85,7 @@ public class EventManager
 
     public void CompleteEvent()
     {
-        EventCardBus.Instance.OnEvent -= OnCardEvent;
+        EventCardBus.Instance.OnEvent -= OnEventCardEvent;
         
         IsEventActive = false;
         
@@ -118,7 +105,7 @@ public class EventManager
     
     public void CancelEvent(EventCard card)
     {
-        EventCardBus.Instance.OnEvent -= OnCardEvent;
+        EventCardBus.Instance.OnEvent -= OnEventCardEvent;
         
         IsEventActive = false;
         
