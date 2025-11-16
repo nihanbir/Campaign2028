@@ -19,6 +19,7 @@ public enum EventStage
     None,
     EventApplied,          // Sent when ApplyEvent() is called (not resolved)
     EventStarted,          // When a blocking event begins (LoseTurn, Duel, AltStates)
+    ChangeToEventScreen,
     EventCompleted,        // After an event fully resolves
     EventCanceled,
     ChallengeStatesDetermined,   // Show list of states to choose

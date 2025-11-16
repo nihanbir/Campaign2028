@@ -19,6 +19,8 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
             Cancel(card);
             return;
         }
+        
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.ChangeToEventScreen));
 
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.ChallengeStatesDetermined, new ChallengeStatesData(player, availableStates, card)));
     }

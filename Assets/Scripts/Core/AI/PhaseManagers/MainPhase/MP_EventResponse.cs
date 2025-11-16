@@ -16,7 +16,7 @@ public class MP_EventResponse
 
     private void Enable()
     {
-        if (!_ui) _ui = GameUIManager.Instance.mainUI.challengeEvent;
+        if (!_ui) _ui = GameUIManager.Instance.mainUI.eventUI;
         TurnFlowBus.Instance.OnEvent += OnEvent;
     }
 

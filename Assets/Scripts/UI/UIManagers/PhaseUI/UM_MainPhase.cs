@@ -30,7 +30,7 @@ public class UM_MainPhase : UM_BasePhase
     [SerializeField] private OwnedCardsPanel ownedCardsPanel;
     
     [Header("Event UIs")]
-    [SerializeField] public EUM_ChallengeEvent challengeEvent;
+    [SerializeField] public EUM_ChallengeEvent eventUI;
     
     [Header("UI Animation Settings")]
     public float cardSpawnDuration = 0.4f;
@@ -63,7 +63,7 @@ public class UM_MainPhase : UM_BasePhase
         
         _eventManager = _mainPhase.EventManager;
         
-        challengeEvent.Initialize();
+        eventUI.Initialize();
         
         // RelocatePlayerCards(playerUIParent);
         
@@ -111,7 +111,15 @@ public class UM_MainPhase : UM_BasePhase
             switch (c.stage)
             {
                 case EventStage.EventApplied:
-                    EnqueueUI(EventApplied());
+                    EnqueueUI(HandleEventApplied());
+                    break;
+                
+                case EventStage.ChangeToEventScreen:
+                    EnqueueUI(HandleChangeToEventScreen());
+                    break;
+                    
+                case EventStage.DuelCompleted:
+                    EnqueueUI(HandleChangeFromEventScreen());
                     break;
             }
         }
@@ -355,34 +363,23 @@ public class UM_MainPhase : UM_BasePhase
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.ApplyEventCardRequest, _currentEventDisplayCard.GetCard()));
     }
 
-    private IEnumerator EventApplied()
+    private IEnumerator HandleEventApplied()
     {
-        // canvasGroup.interactable = false;
-        
         yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
-        
+    }
+
+    private IEnumerator HandleChangeToEventScreen()
+    {
         ClearCurrentEventCard();
         UpdateRollButtonState();
         
-        yield return FadeOutScreenRoutine();
-
+        yield return AnimateFadeOutScreen();
     }
-    
-    private IEnumerator FadeOutScreenRoutine()
+
+    private IEnumerator HandleChangeFromEventScreen()
     {
-        bool done = false;
-
-        Sequence seq = DOTween.Sequence();
-        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
-        seq.Join(gameObject.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
-
-        seq.OnComplete(() => done = true);
-
-        while (!done)
-            yield return null;
-
-        canvasGroup.alpha = 0f;
-        gameObject.transform.localScale = Vector3.one;
+        yield return eventUI.WaitUntilQueueFree();
+        yield return AnimateFadeInScreen();
     }
 
     private void OnClickEventSave()
@@ -410,6 +407,44 @@ public class UM_MainPhase : UM_BasePhase
 
     #region Animations
 
+    private IEnumerator AnimateFadeInScreen()
+    {
+        bool done = false;
+
+        // Ensure starting state (invisible + shrunk)
+        canvasGroup.alpha = 0f;
+        gameObject.transform.localScale = Vector3.one * 0.9f;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(1f, 0.3f).SetEase(Ease.OutCubic));
+        seq.Join(gameObject.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        // Ensure final state is perfect
+        canvasGroup.alpha = 1f;
+        gameObject.transform.localScale = Vector3.one;
+    }
+    private IEnumerator AnimateFadeOutScreen()
+    {
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
+        seq.Join(gameObject.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        canvasGroup.alpha = 0f;
+        gameObject.transform.localScale = Vector3.one;
+    }
+    
     private IEnumerator AnimateCardSpawn(Transform card, float delay)
     {
         bool done = false;

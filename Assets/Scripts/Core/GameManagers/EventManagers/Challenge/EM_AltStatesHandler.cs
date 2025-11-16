@@ -19,6 +19,7 @@ public class EM_AltStatesHandler : BaseEventHandler
             Cancel(card);
             return;
         }
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.ChangeToEventScreen));
         
         // Bus event for decoupled UI
         EventCardBus.Instance.Raise(new EventCardEvent(

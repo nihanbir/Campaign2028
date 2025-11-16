@@ -916,6 +916,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2355731425670060775, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.000061035156
+      objectReference: {fileID: 0}
     - target: {fileID: 2679675932447544068, guid: 01b8c8e8a8440ab48be0e44e6b5f613a, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1054,6 +1058,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6370305516995381812}
     m_Modifications:
+    - target: {fileID: 1918790564760583912, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
+      propertyPath: eventUI
+      value: 
+      objectReference: {fileID: 4420054567724687799}
     - target: {fileID: 1918790564760583912, guid: 17f1147f97ea44244b286e6f69b26a63, type: 3}
       propertyPath: challengeUI
       value: 

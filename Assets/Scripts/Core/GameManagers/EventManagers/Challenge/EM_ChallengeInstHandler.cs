@@ -30,6 +30,7 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
             Cancel(card);
             return;
         }
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.ChangeToEventScreen));
         
         _parentHandler.SetChosenCard(chosenCard);
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelStarted, new DuelData(player, defender, chosenCard, card)));

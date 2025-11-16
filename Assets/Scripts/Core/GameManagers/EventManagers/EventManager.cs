@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 public class EventManager
 {
-    private GameManager _gm;
+    private readonly GameManager _gm;
     private readonly GM_MainPhase _mainPhase;
     private readonly Dictionary<EventType, IEventHandler> _handlers;
 
@@ -71,7 +71,6 @@ public class EventManager
         _currentPlayer = player;
         _currentEventCard = card;
         _effectiveType = ResolveEventType(card, player);
-
         
         TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.EventApplied));
         
@@ -111,6 +110,8 @@ public class EventManager
     public void CompleteDuel()
     {
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
+        
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
         
         CompleteEvent();
     }

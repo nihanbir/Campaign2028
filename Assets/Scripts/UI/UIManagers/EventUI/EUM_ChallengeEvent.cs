@@ -1,11 +1,9 @@
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 /// <summary>
 /// UI for Challenge/AltStates/Duel. Now reacts primarily to GameEventBus.
@@ -94,7 +92,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private void HandleGameEvent(EventCardEvent e)
     {
-        StartCoroutine(HandleGameEventRoutine(e));
+        switch (e.stage)
+        {
+            case EventStage.DuelCompleted:
+                ReturnToMainPhaseUI();
+                break;
+            
+            default:
+                StartCoroutine(HandleGameEventRoutine(e));
+                break;
+        }
     }
     
     private IEnumerator HandleGameEventRoutine(EventCardEvent e)
@@ -107,9 +114,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         switch (e.stage)
         {
+            case EventStage.DuelCompleted:
+            {
+                ReturnToMainPhaseUI();
+                break;
+            }
+            
             case EventStage.ChallengeStatesDetermined:
             {
                 var payload = (ChallengeStatesData)e.payload;
+                EnqueueUI(AnimateFadeInEventScreen());
                 ShowStateCards(payload.Player, payload.States);
                 break;
             }
@@ -117,13 +131,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
             case EventStage.DuelStarted:
             {
                 var duel = (DuelData)e.payload;
+                EnqueueUI(AnimateFadeInEventScreen());
                 ShowDuel(duel.Attacker, duel.Defender, duel.ChosenCard);
-                break;
-            }
-
-            case EventStage.DuelCompleted:
-            {
-                ReturnToMainPhaseUI();
                 break;
             }
 
@@ -291,6 +300,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
         }
 
         yield return AnimateEventUIRoutine();
+        
+        rollDiceButton.onClick.RemoveAllListeners();
+        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
 
         rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
     }
@@ -377,42 +389,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         }
     }
     #endregion
-
-    private void ReturnToMainPhaseUI()
-    {
-        EnqueueUI(ReturnToMainPhaseUIRoutine());
-    }
-
-    private IEnumerator ReturnToMainPhaseUIRoutine()
-    {
-        // Fade out event screen if needed
-        yield return FadeOutEventScreenRoutine();
-
-        _currentPlayer = null;
-        _highlightedCard = null;
-
-        eventScreen.SetActive(false);
-        duelScreen.SetActive(false);
-        statesScreen.SetActive(false);
-    }
     
-    private IEnumerator FadeOutEventScreenRoutine()
-    {
-        bool done = false;
-
-        Sequence seq = DOTween.Sequence();
-        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
-        seq.Join(eventScreen.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
-
-        seq.OnComplete(() => done = true);
-
-        while (!done)
-            yield return null;
-
-        canvasGroup.alpha = 1f;
-        eventScreen.transform.localScale = Vector3.one;
-    }
-
     private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
         where T : MonoBehaviour, IDisplayCard
     {
@@ -435,6 +412,65 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         if (go.TryGetComponent(out RectTransform rt))
             rt.anchoredPosition = Vector2.zero;
+    }
+    
+    private void ReturnToMainPhaseUI()
+    {
+        rollDiceButton.onClick.RemoveAllListeners();
+        
+        EnqueueUI(ReturnToMainPhaseUIRoutine());
+    }
+
+    private IEnumerator ReturnToMainPhaseUIRoutine()
+    {
+        // Fade out event screen if needed
+        yield return AnimateFadeOutEventScreen();
+        
+        _currentPlayer = null;
+        _highlightedCard = null;
+
+        eventScreen.SetActive(false);
+        duelScreen.SetActive(false);
+        statesScreen.SetActive(false);
+    }
+    
+    private IEnumerator AnimateFadeOutEventScreen()
+    {
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
+        seq.Join(eventScreen.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        canvasGroup.alpha = 1f;
+        eventScreen.transform.localScale = Vector3.one;
+    }
+    
+    private IEnumerator AnimateFadeInEventScreen()
+    {
+        bool done = false;
+
+        // Ensure starting state (invisible + shrunk)
+        canvasGroup.alpha = 0f;
+        eventScreen.transform.localScale = Vector3.one * 0.9f;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(1f, 0.3f).SetEase(Ease.OutCubic));
+        seq.Join(eventScreen.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        // Ensure final state is perfect
+        canvasGroup.alpha = 1f;
+        eventScreen.transform.localScale = Vector3.one;
     }
     
     private IEnumerator DicePopAnimation(Image diceImg)

@@ -9,11 +9,6 @@ public class EM_NoImpactHandler : BaseEventHandler
     {
         Debug.Log($"No impact event triggered: {card.cardName}");
 
-        // Still raise bus events for consistency
-        EventCardBus.Instance.Raise(
-            new EventCardEvent(EventStage.EventStarted, new EventStartedData(effectiveType, player, card))
-        );
-
         // Immediately mark as completed
         _parent.CompleteEvent();
     }
