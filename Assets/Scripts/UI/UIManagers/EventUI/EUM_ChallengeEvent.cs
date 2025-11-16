@@ -30,7 +30,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private GM_MainPhase _mainPhase;
     private UM_MainPhase _mainUI;
-    private EventManager _eventManager;
 
     private Player _currentPlayer;
 
@@ -41,21 +40,21 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     public void Initialize()
     {
-        _mainPhase    = GameManager.Instance?.mainPhase;
+        _mainPhase = GameManager.Instance?.mainPhase;
         if (_mainPhase == null)
         {
             Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
 
-        _mainUI       = GameUIManager.Instance.mainUI;
-        _eventManager = _mainPhase.EventManager;
-
+        _mainUI = GameUIManager.Instance.mainUI;
+        
         EventCardBus.Instance.OnEvent += HandleGameEvent;
         
         if (rollDiceButton)
         {
-            // GameUIManager.Instance.RegisterRollButtonAndDiceImage(rollDiceButton, diceImage);
+            rollDiceButton.onClick.RemoveAllListeners();
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         }
     }
 
@@ -63,16 +62,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         switch (e.stage)
         {
-            case EventStage.ChallengeStateShown:
+            case EventStage.ChallengeStatesDetermined:
             {
-                var payload = (ChallengeStatesData)e.Payload;
+                var payload = (ChallengeStatesData)e.payload;
                 ShowStateCards(payload.Player, payload.States);
                 break;
             }
 
             case EventStage.DuelStarted:
             {
-                var duel = (DuelData)e.Payload;
+                var duel = (DuelData)e.payload;
                 ShowDuel(duel.Attacker, duel.Defender, duel.ChosenCard);
                 break;
             }
@@ -85,14 +84,14 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
             case EventStage.AltStatesShown:
             {
-                var p = (AltStatesData)e.Payload;
+                var p = (AltStatesData)e.payload;
                 ShowAltStates(p.Player, p.State1, p.State2);
                 break;
             }
 
             case EventStage.PlayerRolled:
             {
-                var p = (PlayerRolledData)e.Payload;
+                var p = (PlayerRolledData)e.payload;
                 OnPlayerRolled(p.Player, p.Roll);
                 break;
             }
@@ -113,21 +112,19 @@ public class EUM_ChallengeEvent : MonoBehaviour
         seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
     }
 
-    //TODO:
-    // private void OnRollDiceClicked()
-    // {
-    //     // 🔹 Instead of calling EventManager directly, announce intent on the bus
-    //     EventCardBus.Instance.Raise(
-    //         new CardEvent(EventStage.RollDiceRequest, new RollDiceRequest())
-    //     );
-    // }
-
-    //TODO:bus
+    
+    private void OnRollDiceClicked()
+    {
+        EventCardBus.Instance.Raise(
+            new EventCardEvent(EventStage.RollDiceRequest)
+        );
+    }
+    
     private void OnPlayerRolled(Player player, int roll)
     {
         // GameUIManager.Instance.SetDiceSprite(diceImage);
 
-        // diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
+        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
     }
     
 
@@ -140,7 +137,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
         CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI,  card1);
         CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
         
-        //TODO: find a way to do this shi
         _mainUI.gameObject.SetActive(false);
         
         eventScreen.SetActive(true);

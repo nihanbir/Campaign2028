@@ -15,9 +15,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
             return;
         }
 
-        // Legacy + bus
-        
-        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.ChallengeStateShown, new ChallengeStatesData(player, availableStates, card)));
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.ChallengeStatesDetermined, new ChallengeStatesData(player, availableStates, card)));
     }
     
     private List<StateCard> GetChallengableStatesForPlayer(Player player)

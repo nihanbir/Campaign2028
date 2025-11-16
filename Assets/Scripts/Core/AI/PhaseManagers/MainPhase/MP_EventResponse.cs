@@ -13,55 +13,53 @@ public class MP_EventResponse
         _main = main;
     }
 
-    private void Enable()   => EventCardBus.Instance.OnEvent += OnEvent;
-    private void Disable()  => EventCardBus.Instance.OnEvent -= OnEvent;
+    private void Enable()   => TurnFlowBus.Instance.OnEvent += OnEvent;
+    private void Disable()  => TurnFlowBus.Instance.OnEvent -= OnEvent;
     
-    private void OnEvent(EventCardEvent e)
+    private void OnEvent(IGameEvent e)
     {
-        // Only reacts to events, never active logic
-        switch (e.stage)
+        if (e is EventCardEvent c)
         {
-            case EventStage.EventCanceled:
-                Disable();
-                break;
+            // Only reacts to events, never active logic
+            switch (c.stage)
+            {
+                case EventStage.EventCanceled:
+                    Disable();
+                    break;
             
-            case EventStage.EventCompleted:
-                Disable();
-                break;
+                case EventStage.EventCompleted:
+                    Disable();
+                    break;
             
-            case EventStage.ChallengeStateShown:
-            {
-                var data = (ChallengeStatesData)e.Payload;
-                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
-                break;
-            }
+                case EventStage.ChallengeStatesDetermined:
+                {
+                    var data = (ChallengeStatesData)c.payload;
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                    _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
+                    break;
+                }
 
-            case EventStage.DuelStarted:
-            {
-                var data = (DuelData)e.Payload;
-                // if AI is the attacker, roll dice
-                
-                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
-                // _ai.StartCoroutine(RollDice(aiPlayer));
-                break;
-            }
+                case EventStage.DuelStarted:
+                {
+                    var data = (DuelData)c.payload;
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
+                    _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                    break;
+                }
 
-            case EventStage.AltStatesShown:
-            {
-                var data = (AltStatesData)e.Payload;
-                
-                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                // _ai.StartCoroutine(RollDice(aiPlayer));
-                EventCardBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
-                break;
+                case EventStage.AltStatesShown:
+                {
+                    var data = (AltStatesData)c.payload;
+                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                    _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                    break;
+                }
             }
         }
+       
     }
     
     #region Challenge Any State (AI choice)
-    
-
     private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
         List<StateCard> beneficialStates = new();
@@ -95,9 +93,15 @@ public class MP_EventResponse
 
         Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
         
-        //raise a bus
+        //TODO: raise a bus
     }
-    
+
+    private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
+    {
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
+        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
+    }
     #endregion
     
     

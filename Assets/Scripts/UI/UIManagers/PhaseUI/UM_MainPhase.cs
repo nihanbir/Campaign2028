@@ -34,6 +34,9 @@ public class UM_MainPhase : UM_BasePhase
     
     [Header("UI Animation Settings")]
     public float cardSpawnDuration = 0.4f;
+
+    [Header("CanvasGroup")] 
+    [SerializeField] private CanvasGroup canvasGroup;
     
     private TargetDisplayCard _currentTargetDisplayCard;
     private EventDisplayCard _currentEventDisplayCard;
@@ -335,8 +338,6 @@ public class UM_MainPhase : UM_BasePhase
         if (_currentTargetDisplayCard.IsNull()) return;
         
         _currentTargetDisplayCard.Clear();
-        
-        //TODO: animation
     }
     
     private void OnClickEventApply()
@@ -350,6 +351,10 @@ public class UM_MainPhase : UM_BasePhase
         
         ClearCurrentEventCard();
         UpdateRollButtonState();
+        
+        gameObject.SetActive(false);
+
+        canvasGroup.interactable = false;
     }
 
     private void OnClickEventSave()

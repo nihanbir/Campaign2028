@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 
-public readonly struct EventCardEvent
+public class EventCardEvent : GameEventBase
 {
     public readonly EventStage stage;
-    public readonly object Payload; // keep generic for flexibility
-
+    
     public EventCardEvent(EventStage stage, object payload = null)
+        : base(payload)
     {
         this.stage = stage;
-        Payload = payload;
     }
+
+    public override string GetName() => $"EventCardEvent({stage})";
+    
 }
 
 public enum EventStage
@@ -19,7 +21,7 @@ public enum EventStage
     EventStarted,          // When a blocking event begins (LoseTurn, Duel, AltStates)
     EventCompleted,        // After an event fully resolves
     EventCanceled,
-    ChallengeStateShown,   // Show list of states to choose
+    ChallengeStatesDetermined,   // Show list of states to choose
     DuelStarted,           // Attacker vs Defender with chosen card
     DuelCompleted,         // Duel done
     AltStatesShown,        // Alt states UI should appear
