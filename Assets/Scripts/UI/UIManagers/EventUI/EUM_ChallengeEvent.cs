@@ -152,6 +152,18 @@ public class EUM_ChallengeEvent : MonoBehaviour
             }
         }
     }
+    
+    private void HandleCardInputEvent(CardInputEvent e)
+    {
+        if (!eventScreen.activeSelf) return;
+        
+        switch (e.stage)
+        {
+            case CardInputStage.Clicked:
+                ToggleHighlightedCard((StateDisplayCard)e.payload);
+                break;
+        }
+    }
 
     private IEnumerator AnimateEventUIRoutine()
     {
@@ -219,8 +231,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         statesScreen.SetActive(true);
 
-        // StateDisplayCard.OnCardSelected += OnCardSelected;
-        // StateDisplayCard.OnCardHeld += OnStateHeld;
+        SelectableCardBus.Instance.OnEvent += HandleCardInputEvent;
 
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
 
@@ -229,37 +240,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
         rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
 
-    private void OnCardSelected(ISelectableDisplayCard card)
+    private void ToggleHighlightedCard(StateDisplayCard card)
     {
-        var newHighlightedCard = card as StateDisplayCard;
-        if (!newHighlightedCard) return;
-        
         if (!_highlightedCard)
-            _highlightedCard = newHighlightedCard;
+            _highlightedCard = card;
 
-        if (_highlightedCard == newHighlightedCard) return;
+        if (_highlightedCard == card) return;
         
         _highlightedCard.SetIsSelected(false);
-        _highlightedCard = newHighlightedCard;
+        _highlightedCard = card;
         _highlightedCard.SetIsSelected(true);
-    }
-
-    private void OnStateHeld(StateCard chosen)
-    {
-        // lock UI immediately so user can't double tap
-        HandleCardHeld();
-
-        // forward the actual choice to logic
-        //TODO: bus
-        // _eventManager.HandleStateChosen(chosen);
-    }
-    
-    private void HandleCardHeld()
-    {
-        // StateDisplayCard.OnCardSelected -= OnCardSelected;
-        // StateDisplayCard.OnCardHeld -= OnStateHeld;
-
-        stateCardsUIParent.gameObject.SetActive(false);
     }
 
     private void ShowDuel(Player attacker, Player defender, Card chosenCard)
@@ -269,11 +259,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
     {
-        // StateDisplayCard.OnCardSelected -= OnCardSelected;
-        // StateDisplayCard.OnCardHeld -= OnStateHeld;
-
         if (_challengeStates)
         {
+            SelectableCardBus.Instance.OnEvent -= HandleCardInputEvent;
+            
             foreach (Transform child in stateCardsUIParent)
                 Destroy(child.gameObject);
 

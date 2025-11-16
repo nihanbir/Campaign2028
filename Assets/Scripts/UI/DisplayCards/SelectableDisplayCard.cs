@@ -6,11 +6,6 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     where T : Card
 {
-    
-    //TODO: clean this up later
-    public static event Action<ISelectableDisplayCard> OnCardSelected;
-    public static event Action<T> OnCardHeld;
-
     [SerializeField] protected float holdDuration = 1f;
     protected bool isClickable;
     protected bool isHoldable;
@@ -30,6 +25,11 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
         {
             isHolding = false;
             //TODO: animate
+            
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Held, GetCard())
+            );
+            
             TurnFlowBus.Instance.Raise(
                 new CardInputEvent(CardInputStage.Held, GetCard())
             );
@@ -55,9 +55,15 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
         SetIsSelected(!isSelected);
 
         if (isSelected)
+        {
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, this)
+            );
+            
             TurnFlowBus.Instance.Raise(
                 new CardInputEvent(CardInputStage.Clicked, GetCard())
             );
+        }
     }
 
     public virtual void OnPointerDown(PointerEventData eventData)
@@ -70,9 +76,15 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
             SetIsSelected(true);
             //TODO: is there a cleaner way?
             if (isSelected)
+            {
+                SelectableCardBus.Instance.Raise(
+                    new CardInputEvent(CardInputStage.Clicked, this)
+                );
+                
                 TurnFlowBus.Instance.Raise(
                     new CardInputEvent(CardInputStage.Clicked, GetCard())
                 );
+            }
         }
         
         // Start hold regardless of previous state

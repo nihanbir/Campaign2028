@@ -27,7 +27,6 @@ public enum EventStage
     DuelCompleted,         // Duel done
     AltStatesShown,        // Alt states UI should appear
     PlayerRolled,           // Player rolled value (for UI dice feedback)
-    ClientAnimationCompleted,
     RollDiceRequest,
 
 }
