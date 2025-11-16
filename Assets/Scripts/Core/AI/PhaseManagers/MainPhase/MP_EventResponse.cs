@@ -33,6 +33,10 @@ public class MP_EventResponse
                     Disable();
                     break;
             
+                case EventStage.DuelCompleted:
+                    Disable();
+                    break;
+                
                 case EventStage.EventCompleted:
                     Disable();
                     break;
