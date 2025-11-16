@@ -34,8 +34,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private GM_MainPhase _mainPhase;
     private UM_MainPhase _mainUI;
     
-    private Player _currentPlayer;
     private StateDisplayCard _highlightedCard;
+
+    private bool _challengeStates = false;
     
     private readonly Queue<IEnumerator> _queue = new();
     private bool _queueRunning;
@@ -194,8 +195,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowAltStatesRoutine(Player player, StateCard card1, StateCard card2)
     {
-        _currentPlayer = player;
-        
         duelScreen.SetActive(true);
 
         CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
@@ -208,27 +207,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
     #endregion
     
     #region Challenge State
-    private void HandleCardHeld()
-    {
-        foreach (Transform child in stateCardsUIParent)
-            if (child.TryGetComponent(out StateDisplayCard display))
-                display.SetClickable(false);
-        
-        StateDisplayCard.OnCardSelected -= OnCardSelected;
-        StateDisplayCard.OnCardHeld -= OnStateHeld;
-
-        stateCardsUIParent.gameObject.SetActive(false);
-    }
-
-    private void OnStateHeld(StateCard chosen)
-    {
-        // lock UI immediately so user can't double tap
-        HandleCardHeld();
-
-        // forward the actual choice to logic
-        //TODO: bus
-        // _eventManager.HandleStateChosen(chosen);
-    }
 
     private void ShowStateCards(Player attacker, List<StateCard> statesToDisplay)
     {
@@ -237,18 +215,18 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowStateCardsRoutine(Player attacker, List<StateCard> statesToDisplay)
     {
-        _currentPlayer = attacker;
+        _challengeStates = true;
         
         statesScreen.SetActive(true);
 
-        StateDisplayCard.OnCardSelected += OnCardSelected;
-        StateDisplayCard.OnCardHeld += OnStateHeld;
+        // StateDisplayCard.OnCardSelected += OnCardSelected;
+        // StateDisplayCard.OnCardHeld += OnStateHeld;
 
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
 
         yield return AnimateEventUIRoutine();
 
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
 
     private void OnCardSelected(ISelectableDisplayCard card)
@@ -266,6 +244,24 @@ public class EUM_ChallengeEvent : MonoBehaviour
         _highlightedCard.SetIsSelected(true);
     }
 
+    private void OnStateHeld(StateCard chosen)
+    {
+        // lock UI immediately so user can't double tap
+        HandleCardHeld();
+
+        // forward the actual choice to logic
+        //TODO: bus
+        // _eventManager.HandleStateChosen(chosen);
+    }
+    
+    private void HandleCardHeld()
+    {
+        // StateDisplayCard.OnCardSelected -= OnCardSelected;
+        // StateDisplayCard.OnCardHeld -= OnStateHeld;
+
+        stateCardsUIParent.gameObject.SetActive(false);
+    }
+
     private void ShowDuel(Player attacker, Player defender, Card chosenCard)
     {
         EnqueueUI(ShowDuelRoutine(attacker, defender, chosenCard));
@@ -273,10 +269,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
     {
-        _currentPlayer = attacker;
+        // StateDisplayCard.OnCardSelected -= OnCardSelected;
+        // StateDisplayCard.OnCardHeld -= OnStateHeld;
 
-        StateDisplayCard.OnCardSelected -= OnCardSelected;
-        StateDisplayCard.OnCardHeld -= OnStateHeld;
+        if (_challengeStates)
+        {
+            foreach (Transform child in stateCardsUIParent)
+                Destroy(child.gameObject);
+
+            _challengeStates = false;
+        }
         
         statesScreen.SetActive(false);
         duelScreen.SetActive(true);
@@ -304,16 +306,13 @@ public class EUM_ChallengeEvent : MonoBehaviour
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
 
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
     {
         int count = statesToDisplay.Count;
         if (count == 0) return;
-
-        foreach (Transform child in stateCardsUIParent)
-            Destroy(child.gameObject);
 
         List<RectTransform> cardRects = new();
 
@@ -426,7 +425,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
         // Fade out event screen if needed
         yield return AnimateFadeOutEventScreen();
         
-        _currentPlayer = null;
         _highlightedCard = null;
 
         eventScreen.SetActive(false);
