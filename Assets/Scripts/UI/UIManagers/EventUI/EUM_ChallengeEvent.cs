@@ -21,7 +21,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
     [SerializeField] private Transform rightCardUI;
     [SerializeField] private Transform leftCardUI;
     [SerializeField] private Transform midCardUI;
-    private GameObject _targetDisplay;
     
     [Header("Event Screen")]
     [SerializeField] protected GameObject eventScreen;
@@ -267,48 +266,51 @@ public class EUM_ChallengeEvent : MonoBehaviour
         // defender card
         if (defender)
             CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
+        
+        duelScreen.SetActive(true);
+        yield return AnimateEventUIRoutine();
 
-        ClearCurrentTargetDisplay();
+        GameObject targetDisplay = null;
         
         // mid card
         switch (chosenCard)
         {
             case StateCard s:
-                _targetDisplay = CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, s);
+                targetDisplay = CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, s);
                 break;
             case InstitutionCard inst:
-                _targetDisplay = CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, inst);
+                targetDisplay = CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, inst);
                 break;
         }
 
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
+        yield return AnimateCardMoveToMid(
+            targetDisplay,
+            rightCardUI as RectTransform, 
+            midCardUI as RectTransform
+        );
         
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
         
-        yield return AnimateEventUIRoutine();
-        duelScreen.SetActive(true);
-
-        yield return AnimateCardCaptured(_targetDisplay.transform, midCardUI);
-    }
-
-    private void ClearCurrentTargetDisplay()
-    {
-        if (_targetDisplay)
-        {
-            Destroy(_targetDisplay);
-            _targetDisplay = null;
-        }
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
     
     private IEnumerator CardOwnerChangedRoutine(Player owner,Player newOwner, Card card)
     {
+        GameObject targetDisplay = null;
+        
+        if (midCardUI.childCount > 0)
+            targetDisplay = midCardUI.GetChild(0).gameObject;
+
+        if (!targetDisplay) 
+            yield break;
+        
         yield return AnimateCardCaptured(
-            _targetDisplay.transform,
+            targetDisplay.transform,
             newOwner.PlayerDisplayCard.transform
         );
         
-        ClearCurrentTargetDisplay();
+        Destroy(targetDisplay);
     }
     
     private IEnumerator AnimateCardCaptured(Transform card, Transform target)
@@ -322,6 +324,38 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         while (!done)
             yield return null;
+    }
+    
+    private IEnumerator AnimateCardMoveToMid(GameObject cardGO, RectTransform fromUI, RectTransform toUI)
+    {
+        RectTransform cardRT = cardGO.transform as RectTransform;
+
+        // 1. Cache final mid-world position BEFORE reparenting
+        Vector3 midWorldPos = toUI.position;
+
+        // 2. Reparent card to eventScreen (top-level), but do NOT preserve world position
+        //    This prevents layout snapping back to (0,0)
+        cardRT.SetParent(eventScreen.transform, worldPositionStays: false);
+
+        // 3. Move card to attacker/defender world position
+        cardRT.position = fromUI.position;
+
+        // 4. Animate card from defender → mid (using world-space)
+        bool done = false;
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(cardRT.DOMove(midWorldPos, 0.4f).SetEase(Ease.OutCubic));
+        seq.Join(cardRT.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        // 5. Snap card under midCardUI correctly after animation
+        cardRT.SetParent(toUI, worldPositionStays: false);
+        cardRT.anchoredPosition = Vector2.zero;
+        cardRT.localScale = Vector3.one;
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
@@ -357,8 +391,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         if (cardToSet == null) return null;
         
-        var go = Instantiate(prefab, uiParent);
-        go.SetActive(true);
+        var go = Instantiate(prefab, uiParent, false);
 
         if (go.TryGetComponent(out T displayCard))
         {
@@ -368,9 +401,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
         {
             Debug.LogError($"{prefab.name} is missing {typeof(T).Name} component.");
         }
-
-        if (go.TryGetComponent(out RectTransform rt))
-            rt.anchoredPosition = Vector2.zero;
+        
+        go.transform.localPosition = Vector3.zero;
+        go.transform.localRotation = Quaternion.identity;
+        go.transform.localScale = Vector3.one;
 
         return go;
     }
@@ -384,12 +418,11 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ReturnToMainPhaseUIRoutine()
     {
-        yield return new WaitForSeconds(2.5f);
         
         // Fade out event screen if needed
         yield return AnimateFadeOutEventScreen();
         
-        ClearCurrentTargetDisplay();
+        yield return new WaitForSeconds(2.5f);
         
         _highlightedCard = null;
 
@@ -446,7 +479,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private IEnumerator DicePopAnimation(Image diceImg)
     {
         if (!diceImg) yield break;
-
+        
         yield return new WaitForSeconds(2.5f);
         
         diceImg.gameObject.SetActive(true);
@@ -460,7 +493,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             .DOScale(1f, 0.35f)
             .SetEase(Ease.OutBack)
             .OnComplete(() => done = true);
-
+        
         while (!done)
             yield return null;
         
