@@ -13,7 +13,7 @@ public class UM_SetupPhase : UM_BasePhase
     public Transform actorUIParent;
     
     private PlayerDisplayCard _highlightedCard;
-    private List<PlayerDisplayCard> _playerDisplayCards = new();
+    private readonly List<PlayerDisplayCard> _playerDisplayCards = new();
     private PlayerDisplayCard _selectedActorCard;
     private GM_SetupPhase _setupPhase;
 
@@ -30,6 +30,61 @@ public class UM_SetupPhase : UM_BasePhase
     public Ease rerollEase = Ease.InOutSine;
 
     #region Initialize Phase UI
+    
+    protected override void HandleTurnEvent(IGameEvent e)
+    {
+        base.HandleTurnEvent(e);
+        if (e is SetupStageEvent t)
+        {
+            switch (t.stage)
+            {
+                case SetupStage.Roll:
+                    EnqueueUI(OnRollStage());
+                    break;
+                
+                case SetupStage.AllPlayersRolled:
+                    EnqueueUI(AnimateAllDicePopAndThenProcess());
+                    break;
+                
+                case SetupStage.UniqueWinner:
+                    var uniqueWinner = (UniqueWinner)t.payload;
+                    EnqueueUI(AnimateWinner(uniqueWinner.player));
+                    break;
+                
+                case SetupStage.TiedRoll:
+                    var tiedRoll = (TiedRoll)t.payload;
+                    EnqueueUI(AnimateRerollPlayers(tiedRoll.players));
+                    break;
+                
+                case SetupStage.BeginActorAssignment:
+                    //TODO: anims later
+                    EnqueueUI(OnActorAssignStage());
+                    break;
+                
+                case SetupStage.ActorAssigned:
+                    var assigned = (ActorAssigned)t.payload;
+                    EnqueueUI(UpdatePlayerUIWithActor(assigned.player, assigned.actor));
+                    break;
+                
+                case SetupStage.LastActorAssigned:
+                    //TODO:
+                    break;
+                
+            }
+        }
+        else if (e is CardInputEvent c)
+        {
+            switch (c.stage)
+            {
+                case CardInputStage.Clicked:
+                    if (c.payload is ActorCard a)
+                    {
+                        HighlightActorCard(a);
+                    }
+                    break;
+            }
+        }
+    }
 
     protected override void OnPhaseEnabled()
     {
@@ -39,39 +94,6 @@ public class UM_SetupPhase : UM_BasePhase
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
         
         base.OnPhaseEnabled();
-    }
-
-    protected override void SubscribeToPhaseEvents()
-    {
-        _setupPhase.OnPlayerTurnStarted += OnPlayerTurnStarted;
-        _setupPhase.OnPlayerTurnEnded += OnPlayerTurnEnded;
-        _setupPhase.OnAllPlayersRolled += AnimateAllDicePopAndThenProcess;
-        _setupPhase.OnActorAssignStage += OnActorAssignStage;
-        _setupPhase.OnLastActorAssigned += UpdatePlayerUIWithActor;
-        _setupPhase.OnTiedRoll += AnimateRerollPlayers;
-        _setupPhase.OnUniqueWinner += AnimateWinner;
-        
-    }
-
-    protected override void UnsubscribeToPhaseEvents()
-    {
-        base.UnsubscribeToPhaseEvents();
-        if (_setupPhase == null) _setupPhase = game.setupPhase;
-        
-        _setupPhase.OnPlayerTurnStarted -= OnPlayerTurnStarted;
-        _setupPhase.OnPlayerTurnEnded -= OnPlayerTurnEnded;
-        _setupPhase.OnAllPlayersRolled -= AnimateAllDicePopAndThenProcess;
-        _setupPhase.OnActorAssignStage -= OnActorAssignStage;
-        _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
-        _setupPhase.OnTiedRoll -= AnimateRerollPlayers;
-        _setupPhase.OnUniqueWinner -= AnimateWinner;
-
-    }
-
-    private void OnActorAssignStage()
-    {
-        PlayerDisplayCard.OnCardSelected += SelectActorCard;
-        PlayerDisplayCard.OnPlayerCardClicked += AssignSelectedActorToPlayer;
     }
     
     void CreateCardUI(CardDisplayType cardType, Transform parent)
@@ -99,9 +121,12 @@ public class UM_SetupPhase : UM_BasePhase
             if (displayCard)
             {
                 displayCard.displayType = cardType;
-                
+
                 if (cardType == CardDisplayType.UnassignedActor)
+                {
                     displayCard.SetCard(_setupPhase.GetUnassignedActors()[i]);
+                }
+                
                 else
                 {
                     _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
@@ -117,119 +142,67 @@ public class UM_SetupPhase : UM_BasePhase
     
     #region Turn State UI
 
+    private IEnumerator OnRollStage()
+    {
+        rollDiceButton.gameObject.SetActive(true);
+        diceImage.gameObject.SetActive(true);
+        yield break;
+    }
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
-        
-        EnableDiceButton(true);
-        
-        bool isAssignStage = GameManager.Instance.setupPhase.CurrentStage == SetupStage.AssignActor;
-        rollDiceButton.gameObject.SetActive(!isAssignStage);
-        
 
-       DicePopInAnimation();
-    }
-
-    public override void OnRollDiceClicked()
-    {
-        base.OnRollDiceClicked();
-        
-        var roll = GameUIManager.Instance.DiceRoll;
-        _setupPhase.PlayerRolledDice(roll);
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        EnqueueUI(EnableDiceButtonRoutine(!isAIPlayer));
     }
 
     #endregion
 
     #region Actor Assignment UI
     
-    public void SelectActorCard(ISelectableDisplayCard card)
+    private IEnumerator OnActorAssignStage()
     {
-        var actorCard = card as PlayerDisplayCard;
-        if (!actorCard)
-        {
-            Debug.Log($"no actor");
-            return;
-        }
-        
-        if (_selectedActorCard == actorCard)
-            return;
+        rollDiceButton.gameObject.SetActive(false);
+        diceImage.gameObject.SetActive(false);
+        _selectedActorCard = null;
+        yield break;
+    }
     
+    private IEnumerator HighlightActorCard(ActorCard actorCard)
+    {
         if (_selectedActorCard)
             _selectedActorCard.SetIsSelected(false);
-    
-        _selectedActorCard = actorCard;
+        
+        _selectedActorCard = FindDisplayCardForUnassignedActor(actorCard);
         _selectedActorCard?.SetIsSelected(true);
 
         // Selection feedback
-        _selectedActorCard.transform.DOPunchScale(Vector3.one * 0.15f, 0.25f, 8, 1f);
+        _selectedActorCard?.transform.DOPunchScale(Vector3.one * 0.15f, 0.25f, 8, 1f);
 
-        Debug.Log($"Selected actor: {_selectedActorCard.GetCard().cardName}");
-    }
-    
-    public void AssignSelectedActorToPlayer(PlayerDisplayCard playerCard)
-    {
-        if (_selectedActorCard == null)
-        {
-            Debug.LogWarning("No actor card selected to assign.");
-            return;
-        }
-    
-        ActorCard actorToAssign = _selectedActorCard.GetCard();
-
-        if (!_setupPhase.TryAssignActorToPlayer(playerCard.owningPlayer, actorToAssign))
-            return;
-
-        // Animate actor card jumping to player
-        AnimateActorAssignment(_selectedActorCard.transform, playerCard.transform);
-
-        // Update UI after short delay
-        DOVirtual.DelayedCall(assignDuration, () =>
-        {
-            RemoveCard(_selectedActorCard);
-            playerCard.ConvertToAssignedActor(actorToAssign);
-            _selectedActorCard = null;
-
-            PlayerDisplayCard.OnCardSelected -= SelectActorCard;
-            PlayerDisplayCard.OnPlayerCardClicked -= AssignSelectedActorToPlayer;
-        });
-    }
-    
-    private void UpdatePlayerUIWithActor(Player lastPlayer, ActorCard lastActor)
-    { 
-        Debug.Log($"Auto-assigning last actor {lastActor.cardName} to Player {lastPlayer.playerID}");
-    
-        var lastActorCard = FindDisplayCardForUnassignedActor(lastActor);
-        var lastPlayerCard = FindDisplayCardForPlayer(lastPlayer);
-
-        AnimateActorAssignment(lastActorCard.transform, lastPlayerCard.transform);
-
-        DOVirtual.DelayedCall(assignDuration, () =>
-        {
-            RemoveCard(lastActorCard);
-            lastPlayerCard.ConvertToAssignedActor(lastActor);
-            _setupPhase.OnLastActorAssigned -= UpdatePlayerUIWithActor;
-            _setupPhase.OnAllActorsAssigned();
-        });
+        Debug.Log($"Selected actor: {_selectedActorCard?.GetCard().cardName}");
+        yield break;
+        
     }
     
     private void RemoveCard(PlayerDisplayCard card)
     {
         Destroy(card.gameObject);
     }
-    
-    public PlayerDisplayCard FindDisplayCardForPlayer(Player player)
+
+    private PlayerDisplayCard FindDisplayCardForPlayer(Player player)
     {
         foreach (Transform child in playerUIParent)
         {
             var display = child.GetComponent<PlayerDisplayCard>();
+            //TODO: continue instead
             if (!display) return null;
             if (display.owningPlayer == player)
                 return display;
         }
         return null;
     }
-    
-    public PlayerDisplayCard FindDisplayCardForUnassignedActor(ActorCard actor)
+
+    private PlayerDisplayCard FindDisplayCardForUnassignedActor(ActorCard actor)
     {
         foreach (Transform child in actorUIParent)
         {
@@ -245,9 +218,11 @@ public class UM_SetupPhase : UM_BasePhase
 
     #region Animations
     
-    private void AnimateAllDicePopAndThenProcess()
+    private IEnumerator AnimateAllDicePopAndThenProcess()
     {
         Debug.Log("🎲 Animating all dice results...");
+        
+        bool done = false;
         
         Sequence group = DOTween.Sequence();
         
@@ -255,33 +230,51 @@ public class UM_SetupPhase : UM_BasePhase
         {
             // Each card gets its own looping pulse sequence
             var diceObj = card.GetDiceTransform();
-            if (diceObj != null)
-            {
-                Sequence pulse = DOTween.Sequence();
-                pulse.Append(diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack));
+            if (diceObj == null) continue;
+            
+            Sequence pulse = DOTween.Sequence();
+            pulse.Append(diceObj.DOPunchScale(Vector3.one * 0.3f, 0.4f, 6, 1).SetEase(Ease.OutBack));
                 
-                group.Join(pulse);
-                
-            }
+            group.Join(pulse);
         }
         
-        group.OnComplete(() =>
-        {
-            Debug.Log("🎬 Dice animation complete — resuming game logic");
-            _setupPhase.ProcessRollResults();
-        });
-        
-    }
+        group.OnComplete(() => done = true);
 
-    private void AnimateActorAssignment(Transform actor, Transform target)
-    {
-        Vector3 targetPos = target.position;
-        Sequence s = DOTween.Sequence();
-        s.Append(actor.DOMove(targetPos, assignDuration).SetEase(Ease.InBack));
-        s.Join(actor.DOScale(1.3f, assignDuration * 0.5f).SetLoops(2, LoopType.Yoyo));
+        while (!done)
+            yield return null;
     }
     
-    private void AnimateRerollPlayers(List<Player> rerollingPlayers)
+    private IEnumerator UpdatePlayerUIWithActor(Player player, ActorCard actor)
+    { 
+        Debug.Log($"Assigning actor {actor.cardName} to Player {player.playerID}");
+    
+        var actorCard = FindDisplayCardForUnassignedActor(actor);
+        var playerCard = FindDisplayCardForPlayer(player);
+        
+        if (!actorCard || !playerCard) yield break;
+        
+        bool done = false;
+        
+        AnimateAssignment(actorCard.transform, playerCard.transform)
+            .OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        RemoveCard(actorCard);
+        playerCard.ConvertToAssignedActor(actor);
+        
+    }
+    
+    private Sequence AnimateAssignment(Transform actor, Transform target)
+    {
+        Sequence s = DOTween.Sequence();
+        s.Append(actor.DOMove(target.position, assignDuration).SetEase(Ease.InBack));
+        s.Join(actor.DOScale(1.3f, assignDuration * 0.5f).SetLoops(2, LoopType.Yoyo));
+        return s;
+    }
+    
+    private IEnumerator AnimateRerollPlayers(List<Player> rerollingPlayers)
     {
         // Create a master sequence
         Sequence group = DOTween.Sequence();
@@ -298,27 +291,34 @@ public class UM_SetupPhase : UM_BasePhase
         }
         
         // 🔥 When all pulses are done, handle tied roll
-        group.OnComplete(() =>
-        {
-            Debug.Log("All reroll animations done");
-            HideCardDices(true);
-            _setupPhase.HandleTiedRoll(rerollingPlayers);
-        });
+        bool finished = false;
+        group.OnComplete(() => finished = true);
+
+        // 🔥 WAIT HERE until the DOTween sequence finishes
+        while (!finished)
+            yield return null;
+
+        Debug.Log("All reroll animations done");
+
+        HideCardDices(true);
     }
 
-    private void AnimateWinner(Player winner)
+    private IEnumerator AnimateWinner(Player winner)
     {
         var card = FindDisplayCardForPlayer(winner);
-        if (card == null) return;
-
-        var s = PulsateCardDice(card);
+        if (card == null) yield break;
         
-        // 🔥 Wait until the animation is fully done
-        s.OnComplete(() =>
+        bool done = false;
+        
+        var seq = PulsateCardDice(card);
+        seq.OnComplete(() =>
         {
             HideCardDices(true);
-            _setupPhase.HandleUniqueWinner(winner);
+            done = true;
         });
+
+        while (!done)
+            yield return null;
     }
 
     private Sequence PulsateCardDice(PlayerDisplayCard card)
@@ -341,8 +341,6 @@ public class UM_SetupPhase : UM_BasePhase
             card.ShowDice(!hide);
         }
     }
-    
-    
 
     #endregion
 }

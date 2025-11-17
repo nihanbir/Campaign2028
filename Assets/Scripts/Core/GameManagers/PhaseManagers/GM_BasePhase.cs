@@ -1,27 +1,41 @@
 
 using System;
+using Random = UnityEngine.Random;
 
 public abstract class GM_BasePhase
 {
     public abstract GamePhase PhaseType { get; }
     
     protected readonly GameManager game;
-    protected readonly GameUIManager uiManager;
     protected readonly AIManager aiManager;
-    
-    public event Action<Player> OnPlayerTurnStarted;
-    public event Action<Player> OnPlayerTurnEnded;
+
+    protected int diceRoll;
     
     protected GM_BasePhase()
     {
         game = GameManager.Instance;
-        uiManager = GameUIManager.Instance;
         aiManager = AIManager.Instance;
         game.OnPhaseChanged += OnPhaseChanged;
+        
     }
 
     protected bool isActive = false;
     
+    protected virtual void HandleTurnEvent(IGameEvent e)
+    {
+        if (!isActive) return;
+
+        if (e is TurnEvent t)
+        {
+            switch (t.stage)
+            {
+                case TurnStage.RollDiceRequest:
+                    HandleRequestedRoll();
+                    break;
+            }
+        }
+    }
+
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
         if (PhaseType == newPhase.PhaseType)
@@ -33,30 +47,32 @@ public abstract class GM_BasePhase
     protected virtual void BeginPhase()
     {
         isActive = true;
+        TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
+        
     }
 
     protected virtual void EndPhase()
     {
         isActive = false;
-    }
-
-    public virtual void StartPlayerTurn()
-    {
-        OnPlayerTurnStarted?.Invoke(game.CurrentPlayer);
+        TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
         
     }
 
-    public virtual void EndPlayerTurn()
+    protected virtual void StartPlayerTurn()
     {
-        OnPlayerTurnEnded?.Invoke(game.CurrentPlayer);
-        
-    }
-    public virtual void MoveToNextPlayer() { }
-
-    public virtual void PlayerRolledDice(int roll)
-    {
-        
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, new PlayerTurnStartedData(game.CurrentPlayer)));
     }
 
-    
+    protected virtual void EndPlayerTurn()
+    {
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, new PlayerTurnEndedData(game.CurrentPlayer)));
+    }
+    protected virtual void MoveToNextPlayer() { }
+
+    protected virtual void HandleRequestedRoll()
+    {
+        diceRoll = Random.Range(1, 7);
+        
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(game.CurrentPlayer, diceRoll)));
+    }
 }

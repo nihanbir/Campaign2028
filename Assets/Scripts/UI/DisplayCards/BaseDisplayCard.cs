@@ -1,4 +1,6 @@
 
+using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -64,6 +66,41 @@ public class BaseDisplayCard<T> : MonoBehaviour, IDisplayCard where T : Card
         // Restore original sibling index
         
         transform.localScale = originalScale;
+    }
+    
+    public IEnumerator HighlightRoutine()
+    {
+        if (isResized) yield break;
+        isResized = true;
+
+        originalScale = transform.localScale;
+        transform.DOKill();
+
+        bool done = false;
+
+        transform.DOScale(originalScale * movefrontScale, 0.25f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+    }
+
+    public IEnumerator RemoveHighlightRoutine()
+    {
+        if (!isResized) yield break;
+        isResized = false;
+
+        transform.DOKill();
+
+        bool done = false;
+
+        transform.DOScale(originalScale, 0.25f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
     }
     
     #endregion

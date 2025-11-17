@@ -16,6 +16,15 @@ public class AIManager : MonoBehaviour
     public AM_MainPhase mainAI;
 
     [HideInInspector] public GameManager game;
+    
+    private IAIPhase _activePhase;
+
+    public void ActivatePhase(IAIPhase phase)
+    {
+        _activePhase?.OnExit();
+        _activePhase = phase;
+        _activePhase.OnEnter();
+    }
 
     private void Awake()
     {
@@ -24,6 +33,7 @@ public class AIManager : MonoBehaviour
 
         game = GameManager.Instance;
         
+        //TODO: have one active at a time
         setupAI = new AM_SetupPhase(this);
         mainAI = new AM_MainPhase(this);
         

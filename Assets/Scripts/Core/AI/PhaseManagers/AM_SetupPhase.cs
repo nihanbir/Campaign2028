@@ -14,6 +14,8 @@ public class AM_SetupPhase
         _aiManager = manager;
         _setupPhase = _aiManager.game.setupPhase;
         _setupUI = GameUIManager.Instance.setupUI;
+        
+        //TODO: have it like phasemanager
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
@@ -22,8 +24,8 @@ public class AM_SetupPhase
         if (_setupPhase == null) _setupPhase = _aiManager.game.setupPhase;
         if (_setupUI == null) _setupUI = GameUIManager.Instance.setupUI;
         
-        // Simulate thinking
-        yield return new WaitForSeconds(1f);
+        // 🟩 IMPORTANT: Wait until all UI animation from previous turn is done
+        yield return _setupUI.WaitUntilUIQueueFree();
         
         if (_setupPhase.CurrentStage == SetupStage.Roll ||
             _setupPhase.CurrentStage == SetupStage.Reroll)
@@ -39,7 +41,9 @@ public class AM_SetupPhase
     private IEnumerator RollDice(AIPlayer aiPlayer)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        _setupUI.OnRollDiceClicked();
+        
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+        
     }
 
     private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
@@ -67,16 +71,23 @@ public class AM_SetupPhase
         int actorIndex = Random.Range(0, availableActors.Count);
         int playerIndex = Random.Range(0, eligiblePlayers.Count);
     
-        var selectedActor = availableActors[actorIndex];
-        var selectedPlayer = eligiblePlayers[playerIndex];
-
-         var actorDisplay = _setupUI.FindDisplayCardForUnassignedActor(selectedActor);
-         var playerDisplay = _setupUI.FindDisplayCardForPlayer(selectedPlayer);
-    
+        ActorCard selectedActor = availableActors[actorIndex];
+        Player selectedPlayer = eligiblePlayers[playerIndex];
+        
+        yield return _setupUI.WaitUntilUIQueueFree();
+        
+        TurnFlowBus.Instance.Raise(
+            new CardInputEvent(CardInputStage.Held, selectedActor));
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
+        
         Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.cardName} to Player {selectedPlayer.playerID}");
+        
+        yield return _setupUI.WaitUntilUIQueueFree();
+        
+        TurnFlowBus.Instance.Raise(
+            new CardInputEvent(CardInputStage.Clicked, selectedPlayer));
     
-        _setupUI.SelectActorCard(actorDisplay);
-        _setupUI.AssignSelectedActorToPlayer(playerDisplay);
     }
     
 }

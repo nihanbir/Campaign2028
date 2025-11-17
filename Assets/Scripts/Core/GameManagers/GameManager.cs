@@ -13,13 +13,12 @@ public class GameManager : GameManagerBase
     public GamePhase CurrentPhase =>  _currentPhaseManager?.PhaseType ?? GamePhase.None;
 
     public event Action<GM_BasePhase> OnPhaseChanged;
-
+    
     protected override void Awake()
     {
         base.Awake();
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-        
     }
 
     private void Start()
@@ -35,6 +34,8 @@ public class GameManager : GameManagerBase
         Debug.Log($"=== Transitioning to {newPhase.GetType().Name} ===");
 
         _currentPhaseManager = newPhase;
+        
+        //TODO:make this a bus later
         OnPhaseChanged?.Invoke(newPhase);
     }
     

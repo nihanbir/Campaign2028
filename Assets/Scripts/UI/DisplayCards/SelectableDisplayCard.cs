@@ -6,29 +6,40 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     IPointerClickHandler, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     where T : Card
 {
-    public static event Action<ISelectableDisplayCard> OnCardSelected;
-    public static event Action<T> OnCardHeld;
-
     [SerializeField] protected float holdDuration = 1f;
     protected bool isClickable;
+    protected bool isHoldable;
     protected bool isHolding;
     protected bool isSelected;
     protected float holdTimer;
+    
+    private bool _wasHoldingSelection;
 
     protected virtual void Update()
     {
-        if (isClickable && isHolding)
+        if (!isHoldable) return;
+        if (!isHolding) return;
+        
+        //TODO: animate
+        holdTimer += Time.deltaTime;
+            
+        if (holdTimer >= holdDuration)
         {
-            holdTimer += Time.deltaTime;
-            if (holdTimer >= holdDuration)
-            {
-                isHolding = false;
-                OnCardHeld?.Invoke(GetCard());
-            }
+            isHolding = false;
+            //TODO: animate
+            
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Held, GetCard())
+            );
+            
+            TurnFlowBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Held, GetCard())
+            );
         }
     }
 
     public virtual void SetClickable(bool value) => isClickable = value;
+    public virtual void SetHoldable(bool value) => isHoldable = value;
 
     public virtual void SetIsSelected(bool value)
     {
@@ -43,29 +54,61 @@ public abstract class SelectableDisplayCard<T> : BaseDisplayCard<T>, ISelectable
     {
         if (!isClickable) return;
 
+        if (_wasHoldingSelection)
+        {
+            _wasHoldingSelection = false;  // reset
+            return;                       // skip click toggle entirely
+        }
+
         SetIsSelected(!isSelected);
 
         if (isSelected)
-            OnCardSelected?.Invoke(this);
+        {
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, this)
+            );
+            
+            TurnFlowBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, GetCard())
+            );
+        }
     }
 
     public virtual void OnPointerDown(PointerEventData eventData)
     {
-        if (!isClickable || !isSelected) return;
+        if (!isHoldable) return;
+
+        _wasHoldingSelection = true;
+        
+        // If card is not selected → select it first, but DO NOT EXIT
+        if (!isSelected)
+        {
+            SetIsSelected(true);
+            SelectableCardBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, this)
+            );
+            
+            TurnFlowBus.Instance.Raise(
+                new CardInputEvent(CardInputStage.Clicked, GetCard())
+            );
+        }
+        
+        // Start hold regardless of previous state
         isHolding = true;
         holdTimer = 0f;
     }
 
     public virtual void OnPointerUp(PointerEventData eventData)
     {
-        if (!isClickable || !isSelected) return;
+        if (!isHoldable) return;
         isHolding = false;
         holdTimer = 0f;
     }
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
-        if (!isClickable) return;
+        if (!isHoldable) return;
+        
         isHolding = false;
         holdTimer = 0f;
     }

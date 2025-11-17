@@ -119,17 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &124821374 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4420054567724687799, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-  m_PrefabInstance: {fileID: 2553868797784039014}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
 --- !u!1 &172211629
 GameObject:
   m_ObjectHideFlags: 0
@@ -679,6 +668,7 @@ MonoBehaviour:
   eventDeck: []
   actorDeck: []
   allegianceDeck: []
+  placeHumanAtIndex: 3
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0
@@ -897,10 +887,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5544439552543579108, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
-      propertyPath: challengeEvent
-      value: 
-      objectReference: {fileID: 124821374}
     - target: {fileID: 8133739447094004840, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

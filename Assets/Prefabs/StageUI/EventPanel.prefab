@@ -107,9 +107,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6802716362751971419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -500, y: -0}
+  m_AnchorMin: {x: 0.24127442, y: 0.5}
+  m_AnchorMax: {x: 0.24127442, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 242.4755, y: 358.5664}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3753719586433489799
@@ -150,6 +150,56 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &3102711098250810298
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2355731425670060775}
+  - component: {fileID: 7920867382125218456}
+  m_Layer: 5
+  m_Name: EventScreen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2355731425670060775
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3102711098250810298}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1210572350680237494}
+  - {fileID: 6802716362751971419}
+  m_Father: {fileID: 4032646870049022151}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &7920867382125218456
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3102711098250810298}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3298725457486808726
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,7 +225,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3298725457486808726}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -184,7 +234,7 @@ RectTransform:
   - {fileID: 1033362522861206300}
   - {fileID: 6196279243546758843}
   - {fileID: 3292069926078741364}
-  m_Father: {fileID: 1210572350680237494}
+  m_Father: {fileID: 2355731425670060775}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -241,7 +291,7 @@ GameObject:
   - component: {fileID: 2051661168701634460}
   - component: {fileID: 99067697336928547}
   m_Layer: 5
-  m_Name: ChallengeUIParent
+  m_Name: StatesScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -254,14 +304,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4271613462701129112}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3967855992564129598}
-  - {fileID: 6802716362751971419}
-  m_Father: {fileID: 4032646870049022151}
+  m_Father: {fileID: 2355731425670060775}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -316,8 +365,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4032646870049022151}
   - component: {fileID: 8996393523042317938}
-  - component: {fileID: 706995816691389397}
-  - component: {fileID: 4583404886209649554}
   - component: {fileID: 3381758312561441647}
   m_Layer: 5
   m_Name: EventPanel
@@ -338,7 +385,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1210572350680237494}
+  - {fileID: 2355731425670060775}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -354,48 +401,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5789861288748144512}
   m_CullTransparentMesh: 1
---- !u!114 &706995816691389397
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5789861288748144512}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!225 &4583404886209649554
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5789861288748144512}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!114 &3381758312561441647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -408,15 +413,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f11c681fa35f4d868e06ac1e7e6f51d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChallengeStateUIManager
+  statesScreen: {fileID: 0}
   stateCardsUIParent: {fileID: 3967855992564129598}
   spacingBetweenStateCards: 150
   duelScreen: {fileID: 3298725457486808726}
   rightCardUI: {fileID: 1033362522861206300}
   leftCardUI: {fileID: 6746398929419256253}
   midCardUI: {fileID: 6196279243546758843}
-  eventScreen: {fileID: 5789861288748144512}
+  eventScreen: {fileID: 3102711098250810298}
   rollDiceButton: {fileID: 4016181547966507740}
   diceImage: {fileID: 4190949239517227204}
+  canvasGroup: {fileID: 7920867382125218456}
 --- !u!1 &6141832280865122820
 GameObject:
   m_ObjectHideFlags: 0
@@ -524,10 +531,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 6802716362751971419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 500, y: -0}
-  m_SizeDelta: {x: 242.4755, y: 358.5664}
+  m_AnchorMin: {x: 0.761449, y: 0.5}
+  m_AnchorMax: {x: 0.761449, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 242.47554, y: 358.5664}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4961543174109195113
 CanvasRenderer:

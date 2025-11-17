@@ -1,14 +1,18 @@
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
+/// <summary>
+/// UI for Challenge/AltStates/Duel. Now reacts primarily to GameEventBus.
+/// Keeps existing animations and visuals intact.
+/// </summary>
 public class EUM_ChallengeEvent : MonoBehaviour
 {
+    [Header("Challenge Any State")]
+    [SerializeField] private GameObject statesScreen;
     [SerializeField] private Transform stateCardsUIParent;
     [SerializeField] private float spacingBetweenStateCards = 150f;
     
@@ -18,248 +22,283 @@ public class EUM_ChallengeEvent : MonoBehaviour
     [SerializeField] private Transform leftCardUI;
     [SerializeField] private Transform midCardUI;
 
-    private StateDisplayCard _highlightedCard;
     
+    [Header("Event Screen")]
     [SerializeField] protected GameObject eventScreen;
     [SerializeField] protected Button rollDiceButton;
     [SerializeField] protected Image diceImage;
+    
+    [Header("CanvasGroup")] 
+    [SerializeField] private CanvasGroup canvasGroup;
 
     private GM_MainPhase _mainPhase;
     private UM_MainPhase _mainUI;
-    private EventManager _eventManager;
+    
+    private StateDisplayCard _highlightedCard;
 
-    private Player _currentPlayer;
+    private bool _challengeStates = false;
+    
+    private readonly Queue<IEnumerator> _queue = new();
+    private bool _queueRunning;
 
+    private void EnqueueUI(IEnumerator routine)
+    {
+        _queue.Enqueue(routine);
+        if (!_queueRunning)
+            StartCoroutine(ProcessQueue());
+    }
+
+    private IEnumerator ProcessQueue()
+    {
+        _queueRunning = true;
+
+        while (_queue.Count > 0)
+            yield return StartCoroutine(_queue.Dequeue());
+    
+        _queueRunning = false;
+    }
+
+    public IEnumerator WaitUntilQueueFree()
+    {
+        while (_queueRunning)
+            yield return null;
+    }
 
     private void Awake()
     {
         eventScreen.SetActive(false);
+        statesScreen.SetActive(false);
+        duelScreen.SetActive(false);
     }
-    
+
     public void Initialize()
     {
         _mainPhase = GameManager.Instance?.mainPhase;
-
         if (_mainPhase == null)
         {
             Debug.LogError("MainPhaseGameManager not found. Ensure it's initialized before UI.");
             return;
         }
+
         _mainUI = GameUIManager.Instance.mainUI;
-        _eventManager = _mainPhase.EventManager;
         
-        rollDiceButton.onClick.RemoveAllListeners();
+        EventCardBus.Instance.OnEvent += HandleGameEvent;
+        
         if (rollDiceButton)
-            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
-        
-        _currentPlayer = GameManager.Instance?.CurrentPlayer;
-        
-        _eventManager.OnChallengeState += ShowStateCards;
-        _eventManager.OnDuelActive += ShowDuel;
-        _eventManager.OnDuelCompleted += ReturnToMainPhaseUI;
-        _eventManager.OnAltStatesActive += ShowAltStates;
-    }
-    
-    private void AnimateEventUI(out Sequence seq)
-    {
-        _mainUI.gameObject.SetActive(false);
-
-        seq = null;
-        
-        CanvasGroup cg = eventScreen.GetComponent<CanvasGroup>();
-        if (!cg) cg = eventScreen.AddComponent<CanvasGroup>();
-
-        cg.alpha = 0f;
-        eventScreen.transform.localScale = Vector3.one * 0.85f;
-
-        seq = DOTween.Sequence();
-        seq.Append(cg.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
-        seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
-    }
-
-
-    public void OnRollDiceClicked()
-    {
-        GameUIManager.Instance.DiceRoll = Random.Range(1, 7);
-        
-        var roll = GameUIManager.Instance.DiceRoll;
-        
-        GameUIManager.Instance.SetDiceSprite(diceImage);
-        
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
-        
-        currentPlayer.PlayerDisplayCard.SetRolledDiceImage();
-        
-        // Roll button bounce feedback
-        diceImage.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.8f);
-        
-        _eventManager.OnPlayerRolledDice(roll);
-        
-    }
-
-    #region AltStates
-    
-    private void ShowAltStates(Player player, StateCard card1, StateCard card2)
-    {
-        Debug.Log("show alt states");
-        _currentPlayer = player;
-        
-        CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
-        
-        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI, card1);
-        
-        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
-        
-        eventScreen.SetActive(true);
-        
-        AnimateEventUI(out var anim);
-
-        if (anim != null)
         {
-            anim.OnComplete(() =>
-            {
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
-            });
+            rollDiceButton.onClick.RemoveAllListeners();
+            rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+        }
+    }
+
+    private void HandleGameEvent(EventCardEvent e)
+    {
+        switch (e.stage)
+        {
+            case EventStage.DuelCompleted:
+                ReturnToMainPhaseUI();
+                break;
+            
+            default:
+                StartCoroutine(HandleGameEventRoutine(e));
+                break;
         }
     }
     
+    private IEnumerator HandleGameEventRoutine(EventCardEvent e)
+    {
+        // 🔥 WAIT FOR MAIN PHASE UI ANIMATIONS to finish
+        if (_mainUI != null)
+            yield return _mainUI.WaitUntilUIQueueFree();
+        
+        eventScreen.SetActive(true);
+        
+        switch (e.stage)
+        {
+            case EventStage.DuelCompleted:
+            {
+                ReturnToMainPhaseUI();
+                break;
+            }
+            
+            case EventStage.ChallengeStatesDetermined:
+            {
+                var payload = (ChallengeStatesData)e.payload;
+                EnqueueUI(AnimateFadeInEventScreen());
+                ShowStateCards(payload.Player, payload.States);
+                break;
+            }
+
+            case EventStage.DuelStarted:
+            {
+                var duel = (DuelData)e.payload;
+                EnqueueUI(AnimateFadeInEventScreen());
+                ShowDuel(duel.Attacker, duel.Defender, duel.ChosenCard);
+                break;
+            }
+
+            case EventStage.AltStatesShown:
+            {
+                var p = (AltStatesData)e.payload;
+                ShowAltStates(p.Player, p.State1, p.State2);
+                break;
+            }
+
+            case EventStage.PlayerRolled:
+            {
+                var p = (PlayerRolledData)e.payload;
+                OnPlayerRolled(p.Player, p.Roll);
+                break;
+            }
+        }
+    }
+    
+    private void HandleCardInputEvent(CardInputEvent e)
+    {
+        if (!eventScreen.activeSelf) return;
+        
+        switch (e.stage)
+        {
+            case CardInputStage.Clicked:
+                ToggleHighlightedCard((StateDisplayCard)e.payload);
+                break;
+        }
+    }
+
+    private IEnumerator AnimateEventUIRoutine()
+    {
+        canvasGroup.alpha = 0f;
+        eventScreen.transform.localScale = Vector3.one * 0.85f;
+
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(1f, 0.4f).SetEase(Ease.OutCubic));
+        seq.Join(eventScreen.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+    }
+
+    
+    private void OnRollDiceClicked()
+    {
+        EventCardBus.Instance.Raise(
+            new EventCardEvent(EventStage.RollDiceRequest)
+        );
+    }
+    
+    private void OnPlayerRolled(Player player, int roll)
+    {
+        diceImage.sprite = GameUIManager.Instance.diceFaces[roll - 1];
+        EnqueueUI(DicePopAnimation(diceImage));
+    }
+    
+
+    #region AltStates
+    private void ShowAltStates(Player player, StateCard card1, StateCard card2)
+    {
+        EnqueueUI(ShowAltStatesRoutine(player, card1, card2));
+    }
+
+    private IEnumerator ShowAltStatesRoutine(Player player, StateCard card1, StateCard card2)
+    {
+        duelScreen.SetActive(true);
+
+        CreateCardInTransform<PlayerDisplayCard>(player.PlayerDisplayCard.gameObject, midCardUI, player.assignedActor);
+        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, leftCardUI, card1);
+        CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
+
+        yield return AnimateEventUIRoutine();
+    }
+
     #endregion
     
     #region Challenge State
-    private void HandleCardHeld()
+
+    private void ShowStateCards(Player attacker, List<StateCard> statesToDisplay)
     {
-        // Prevent double selection
-        foreach (Transform child in stateCardsUIParent)
-            if (child.TryGetComponent(out StateDisplayCard display))
-                display.SetClickable(false);
-        
-        StateDisplayCard.OnCardSelected -= OnCardSelected;
-        
-        //TODO:make loc func
-        StateDisplayCard.OnCardHeld -= _ => HandleCardHeld();
-        
-        stateCardsUIParent.gameObject.SetActive(false);
+        EnqueueUI(ShowStateCardsRoutine(attacker, statesToDisplay));
     }
-    
-    private void ShowStateCards(List<StateCard> statesToDisplay)
+
+    private IEnumerator ShowStateCardsRoutine(Player attacker, List<StateCard> statesToDisplay)
     {
-        Debug.Log("showing states");
-        _mainUI.gameObject.SetActive(false);
-        eventScreen.SetActive(true);
-        duelScreen.SetActive(false);
-        stateCardsUIParent.gameObject.SetActive(true);
+        _challengeStates = true;
         
-        _currentPlayer = GameManager.Instance.CurrentPlayer;
-        
-        StateDisplayCard.OnCardSelected += OnCardSelected;
-        StateDisplayCard.OnCardHeld += _ => HandleCardHeld();
-        
+        statesScreen.SetActive(true);
+
+        SelectableCardBus.Instance.OnEvent += HandleCardInputEvent;
+
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
-        
-        AnimateEventUI(out var anim);
 
-        //TODO:fix a bit
-        if (anim != null)
-        {
-            anim.OnComplete(() =>
-            {
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                if (AIManager.Instance.IsAIPlayer(_currentPlayer))
-                {
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(_currentPlayer);
-                    DOVirtual.DelayedCall(1.2f, () =>
-                    {
-                        GameManager.Instance.StartCoroutine(
-                            AIManager.Instance.mainAI.ExecuteChooseState(aiPlayer, statesToDisplay)
-                        );
-                    });
-                }
-            });
-        }
+        yield return AnimateEventUIRoutine();
+
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
 
-    private void OnCardSelected(ISelectableDisplayCard card)
+    private void ToggleHighlightedCard(StateDisplayCard card)
     {
-        var newHighlightedCard = card as StateDisplayCard;
-        if (!newHighlightedCard) return;
+        if (_highlightedCard)
+            _highlightedCard.SetIsSelected(false);
         
-        if (!_highlightedCard)
-        {
-            _highlightedCard = newHighlightedCard;
-        }
-
-        if (_highlightedCard == newHighlightedCard) return;
-        
-        _highlightedCard.SetIsSelected(false);
-        
-        _highlightedCard = newHighlightedCard;
-        _highlightedCard.SetIsSelected(true);
-
+        _highlightedCard = card;
+        _highlightedCard?.SetIsSelected(true);
     }
 
-    private void ShowDuel(Player defender, Card chosenCard)
+    private void ShowDuel(Player attacker, Player defender, Card chosenCard)
     {
-        stateCardsUIParent.gameObject.SetActive(false);
+        EnqueueUI(ShowDuelRoutine(attacker, defender, chosenCard));
+    }
+
+    private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
+    {
+        statesScreen.SetActive(false);
+        duelScreen.SetActive(true);
         
-        _currentPlayer = GameManager.Instance.CurrentPlayer;
-        
-        if (AIManager.Instance.IsAIPlayer(_currentPlayer))
+        if (_challengeStates)
         {
-            rollDiceButton.interactable = false;
+            SelectableCardBus.Instance.OnEvent -= HandleCardInputEvent;
+            
+            foreach (Transform child in stateCardsUIParent)
+                Destroy(child.gameObject);
+
+            _challengeStates = false;
         }
         
-        // Spawn current player
-        CreateCardInTransform<PlayerDisplayCard>(_currentPlayer.PlayerDisplayCard.gameObject, leftCardUI, _currentPlayer.assignedActor);
-        
-        // Spawn defender player
-        CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
-        
-        // Spawn chosen card
+        // attacker card
+        CreateCardInTransform<PlayerDisplayCard>(attacker.PlayerDisplayCard.gameObject, leftCardUI, attacker.assignedActor);
+
+        // defender card
+        if (defender)
+            CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
+
+        // mid card
         switch (chosenCard)
         {
-            case StateCard stateCard:
-                
-                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, stateCard);
+            case StateCard s:
+                CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, midCardUI, s);
                 break;
-            
-            case InstitutionCard institutionCard:
-                
-                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, institutionCard);
+            case InstitutionCard inst:
+                CreateCardInTransform<InstitutionDisplayCard>(_mainUI.institutionCardPrefab, midCardUI, inst);
                 break;
         }
-        
-        Debug.Log($"[ChallengeUI] Showing duel between attacker {_currentPlayer.playerID} and defender {defender.playerID} for state {chosenCard.cardName}");
 
+        yield return AnimateEventUIRoutine();
         
-        duelScreen.SetActive(true);
-        AnimateEventUI(out var anim);
+        rollDiceButton.onClick.RemoveAllListeners();
+        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
 
-        if (anim != null)
-        {
-            anim.OnComplete(() =>
-            {
-                rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(_currentPlayer);
-                DOVirtual.DelayedCall(1.2f, () => _eventManager.RollDiceForAI());
-            });
-        }
-       
+        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
     }
     
     private void CreateChallengeStatesUI(List<StateCard> statesToDisplay, float spacing, float verticalSpacing = 40f)
     {
-        
         int count = statesToDisplay.Count;
-        Debug.Log($"available states passed to UI: {statesToDisplay.Count}");
         if (count == 0) return;
-
-        // Clear previous children
-        foreach (Transform child in stateCardsUIParent)
-            Destroy(child.gameObject);
 
         List<RectTransform> cardRects = new();
 
-        // 1️⃣ Instantiate all cards
         for (int i = 0; i < count; i++)
         {
             GameObject uiInstance = Instantiate(_mainUI.stateCardPrefab, stateCardsUIParent);
@@ -270,7 +309,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
             }
 
             displayCard.SetCard(statesToDisplay[i]);
+            
             displayCard.SetClickable(true);
+            displayCard.SetHoldable(true);
 
             if (uiInstance.TryGetComponent(out RectTransform rt))
                 cardRects.Add(rt);
@@ -284,48 +325,41 @@ public class EUM_ChallengeEvent : MonoBehaviour
             return;
         }
 
-        RectTransform parentRT = stateCardsUIParent.GetComponent<RectTransform>();
-        float parentWidth = parentRT.rect.width;
-        float parentHeight = parentRT.rect.height;
-        float cardWidth = cardRects[0].rect.width;
-        float cardHeight = cardRects[0].rect.height;
+        RectTransform parentRT   = stateCardsUIParent.GetComponent<RectTransform>();
+        float parentWidth        = parentRT.rect.width;
+        float parentHeight       = parentRT.rect.height;
+        float cardWidth          = cardRects[0].rect.width;
+        float cardHeight         = cardRects[0].rect.height;
 
-        // 2️⃣ Compute grid size
         int cardsPerRow = Mathf.Max(1, Mathf.FloorToInt((parentWidth + spacing) / (cardWidth + spacing)));
-        int rowCount = Mathf.CeilToInt((float)count / cardsPerRow);
+        int rowCount    = Mathf.CeilToInt((float)count / cardsPerRow);
 
-        // 3️⃣ Auto-shrink if needed
         float totalGridHeight = rowCount * cardHeight + (rowCount - 1) * verticalSpacing;
-        float widthScale = Mathf.Min(1f, parentWidth / ((cardWidth + spacing) * cardsPerRow - spacing));
-        float heightScale = Mathf.Min(1f, parentHeight / totalGridHeight);
-        float scaleFactor = Mathf.Min(widthScale, heightScale);
+        float widthScale      = Mathf.Min(1f, parentWidth  / ((cardWidth + spacing) * cardsPerRow - spacing));
+        float heightScale     = Mathf.Min(1f, parentHeight / totalGridHeight);
+        float scaleFactor     = Mathf.Min(widthScale, heightScale);
 
         foreach (var rt in cardRects)
             rt.localScale = Vector3.one * scaleFactor;
 
-        float scaledCardWidth = cardWidth * scaleFactor;
+        float scaledCardWidth  = cardWidth * scaleFactor;
         float scaledCardHeight = cardHeight * scaleFactor;
-        float scaledHSpacing = spacing * scaleFactor;
-        float scaledVSpacing = verticalSpacing * scaleFactor;
+        float scaledHSpacing   = spacing * scaleFactor;
+        float scaledVSpacing   = verticalSpacing * scaleFactor;
 
         float totalHeight = rowCount * scaledCardHeight + (rowCount - 1) * scaledVSpacing;
-        float startY = totalHeight / 2f - scaledCardHeight / 2f;
+        float startY      = totalHeight / 2f - scaledCardHeight / 2f;
 
-        // 4️⃣ Place cards row by row
         int cardIndex = 0;
         for (int row = 0; row < rowCount; row++)
         {
-            // Calculate how many cards are actually in this row
-            int cardsInThisRow = Mathf.Min(cardsPerRow, count - cardIndex);
+            int cardsInRow = Mathf.Min(cardsPerRow, count - cardIndex);
+            float rowWidth = cardsInRow * scaledCardWidth + (cardsInRow - 1) * scaledHSpacing;
+            float startX   = -rowWidth / 2f + scaledCardWidth / 2f;
 
-            // Compute this row’s total width so we can center it
-            float rowWidth = cardsInThisRow * scaledCardWidth + (cardsInThisRow - 1) * scaledHSpacing;
-            float startX = -rowWidth / 2f + scaledCardWidth / 2f;
-
-            for (int col = 0; col < cardsInThisRow; col++)
+            for (int col = 0; col < cardsInRow; col++)
             {
-                if (cardIndex >= cardRects.Count)
-                    break;
+                if (cardIndex >= cardRects.Count) break;
 
                 RectTransform rt = cardRects[cardIndex];
                 rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
@@ -334,54 +368,24 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 float yPos = startY - row * (scaledCardHeight + scaledVSpacing);
 
                 rt.anchoredPosition = new Vector2(xPos, yPos);
-
                 cardIndex++;
             }
         }
-        
-        Debug.Log($"[ChallengeUI] Placed {count} state cards in {rowCount} rows × {cardsPerRow} max columns (centered rows, scale={scaleFactor:F2}).");
     }
-
     #endregion
-
-    private void ReturnToMainPhaseUI()
-    {
-        //TODO:animations
-        
-        _mainUI.gameObject.SetActive(true);
-        eventScreen.SetActive(false);
-        
-        NullifyVariables();
-        
-        ToggleGOs();
-        
-    }
-
-    private void NullifyVariables()
-    {
-        _currentPlayer = null;
-        _highlightedCard = null;
-    }
-
-    private void ToggleGOs()
-    {
-        duelScreen.SetActive(false);
-        stateCardsUIParent.gameObject.SetActive(false);
-    }
-
+    
     private void CreateCardInTransform<T>(GameObject prefab, Transform uiParent, Card cardToSet)
         where T : MonoBehaviour, IDisplayCard
     {
-        // Clear previous card(s)
         foreach (Transform child in uiParent)
             Destroy(child.gameObject);
 
         if (cardToSet == null) return;
         
-        var cardGO = Instantiate(prefab, uiParent);
-        cardGO.SetActive(true);
+        var go = Instantiate(prefab, uiParent);
+        go.SetActive(true);
 
-        if (cardGO.TryGetComponent(out T displayCard))
+        if (go.TryGetComponent(out T displayCard))
         {
             displayCard.SetCard(cardToSet);
         }
@@ -389,10 +393,92 @@ public class EUM_ChallengeEvent : MonoBehaviour
         {
             Debug.LogError($"{prefab.name} is missing {typeof(T).Name} component.");
         }
-        
-        if (displayCard.TryGetComponent(out RectTransform rt))
-        {
+
+        if (go.TryGetComponent(out RectTransform rt))
             rt.anchoredPosition = Vector2.zero;
-        }
+    }
+    
+    private void ReturnToMainPhaseUI()
+    {
+        rollDiceButton.onClick.RemoveAllListeners();
+        
+        EnqueueUI(ReturnToMainPhaseUIRoutine());
+    }
+
+    private IEnumerator ReturnToMainPhaseUIRoutine()
+    {
+        // Fade out event screen if needed
+        yield return AnimateFadeOutEventScreen();
+        
+        _highlightedCard = null;
+
+        eventScreen.SetActive(false);
+        duelScreen.SetActive(false);
+        statesScreen.SetActive(false);
+    }
+    
+    private IEnumerator AnimateFadeOutEventScreen()
+    {
+        bool done = false;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(0f, 0.3f).SetEase(Ease.InCubic));
+        seq.Join(eventScreen.transform.DOScale(0.9f, 0.3f).SetEase(Ease.InBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        eventScreen.transform.localScale = Vector3.one;
+    }
+    
+    private IEnumerator AnimateFadeInEventScreen()
+    {
+        bool done = false;
+
+        // Ensure starting state (invisible + shrunk)
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        eventScreen.transform.localScale = Vector3.one * 0.9f;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Append(canvasGroup.DOFade(1f, 0.3f).SetEase(Ease.OutCubic));
+        seq.Join(eventScreen.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
+
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
+
+        // Ensure final state is perfect
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+        eventScreen.transform.localScale = Vector3.one;
+    }
+    
+    private IEnumerator DicePopAnimation(Image diceImg)
+    {
+        if (!diceImg) yield break;
+
+        diceImg.gameObject.SetActive(true);
+
+        diceImg.transform.DOKill();
+        diceImg.transform.localScale = Vector3.zero;
+
+        bool done = false;
+
+        diceImg.transform
+            .DOScale(1f, 0.35f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
     }
 }

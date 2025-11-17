@@ -24,4 +24,4 @@ MonoBehaviour:
   benefitingTeam: 2
   mustPlayImmediately: 0
   canSave: 1
-  canReturnToDeck: 0
+  canReturnToDeck: 1

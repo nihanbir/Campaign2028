@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -10,44 +11,18 @@ public class GameUIManager : MonoBehaviour
     public static GameUIManager Instance { get; private set; }
 
     [Header("Dice & Actions")]
-    [SerializeField] private Sprite[] diceFaces;
+    [SerializeField] public Sprite[] diceFaces;
     [SerializeField] private TextMeshProUGUI phaseText;
     
     [Header("Phase UIs")]
     [SerializeField] public UM_SetupPhase setupUI;
     [SerializeField] public UM_MainPhase mainUI;
     
-    
-    
     // Add others (CivilWarUI, GameOverUI) as needed
-
-    public int DiceRoll { get; set; }
-
+    
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
-        
     }
-
-    //TODO: have one button available at a time and connect that button to here
-    
-    //TODO: add an event for roll dice clicked
-
-    #region Dice & Actions
-
-    // public void OnRollDiceClicked(Button diceButton)
-    // {
-    //     DiceRoll = Random.Range(1, 7);
-    //     SetDiceSprite(diceImage);
-    //     
-    //     //TODO: async or something
-    // }
-
-    public void SetDiceSprite(Image diceImage)
-    {
-        diceImage.sprite = diceFaces[DiceRoll - 1];
-    }
-
-    #endregion
 }
