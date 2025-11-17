@@ -5,20 +5,17 @@ using UnityEngine;
 public class AMP_EventResponse
 {
     private readonly AIManager _ai;
-    private readonly AM_MainPhase _main;
-    private EUM_ChallengeEvent _ui;
+    private readonly EUM_ChallengeEvent _ui;
     
     public AMP_EventResponse(AIManager ai, AM_MainPhase main)
     {
         _ai = ai;
-        _main = main;
+        _ui = GameUIManager.Instance.mainUI.eventUI;
     }
 
     public void Enable()
     {
         EventCardBus.Instance.OnEvent += OnEvent;
-        Debug.Log("Enabled");
-        if (!_ui) _ui = GameUIManager.Instance.mainUI.eventUI;
     }
 
     private void Disable()  => EventCardBus.Instance.OnEvent -= OnEvent;

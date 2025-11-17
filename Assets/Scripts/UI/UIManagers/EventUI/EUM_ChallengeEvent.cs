@@ -250,8 +250,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
         if (_challengeStates)
         {
             SelectableCardBus.Instance.OnEvent -= HandleCardInputEvent;
+
+            yield return AnimateEventUIRoutine();
             
-            EnqueueUI(AnimateFadeOutEventScreen());
             statesScreen.SetActive(false);
             
             foreach (Transform child in stateCardsUIParent)
