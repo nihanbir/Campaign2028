@@ -75,6 +75,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         eventScreen.SetActive(false);
         statesScreen.SetActive(false);
         duelScreen.SetActive(false);
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
     }
 
     public void Initialize()
@@ -116,7 +118,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
             case EventStage.ChallengeStatesDetermined:
             {
                 var payload = (ChallengeStatesData)e.payload;
-                // EnqueueUI(AnimateFadeInEventScreen());
                 ShowStateCards(payload.Player, payload.States);
                 break;
             }
@@ -226,17 +227,44 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         _challengeStates = true;
         
-        statesScreen.SetActive(true);
-
         SelectableCardBus.Instance.OnEvent += HandleCardInputEvent;
 
         CreateChallengeStatesUI(statesToDisplay, spacingBetweenStateCards);
+        
+        statesScreen.SetActive(true);
+        yield return AnimateFadeInEventScreen();
 
-        yield return AnimateEventUIRoutine();
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(attacker);
 
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
+        rollDiceButton.interactable = !isAIPlayer;
+        
+        canvasGroup.interactable = !isAIPlayer;
+        canvasGroup.blocksRaycasts = !isAIPlayer;
     }
 
+    private StateDisplayCard FindSelectedState(Card card)
+    {
+        if (card == null || stateCardsUIParent.childCount == 0)
+            return null;
+
+        if (card is not StateCard stateCard) 
+            return null;
+        
+        for (int i = 0; i < stateCardsUIParent.childCount; i++)
+        {
+            var child = stateCardsUIParent.GetChild(i);
+            
+            if (!child.TryGetComponent(out StateDisplayCard display)) 
+                continue;
+            
+            // Match the underlying card
+            if (display.GetCard() == stateCard)
+                return display;
+        }
+        
+        return null;
+    }
+    
     private void ToggleHighlightedCard(StateDisplayCard card)
     {
         if (_highlightedCard)
@@ -253,12 +281,18 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ShowDuelRoutine(Player attacker, Player defender, Card chosenCard)
     {
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(attacker);
+        
         if (_challengeStates)
         {
             SelectableCardBus.Instance.OnEvent -= HandleCardInputEvent;
 
-            yield return AnimateEventUIRoutine();
+            if (isAIPlayer) 
+                _highlightedCard = FindSelectedState(chosenCard);
             
+            yield return PlayZoomPulse(_highlightedCard.transform);
+            
+            yield return AnimateFadeOutEventScreen();
             statesScreen.SetActive(false);
             
             foreach (Transform child in stateCardsUIParent)
@@ -275,7 +309,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
         
         duelScreen.SetActive(true);
-        yield return AnimateEventUIRoutine();
+        yield return AnimateFadeInEventScreen();
 
         GameObject targetDisplay = null;
         
@@ -298,8 +332,26 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         rollDiceButton.onClick.RemoveAllListeners();
         rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+
+        rollDiceButton.interactable = !isAIPlayer;
         
-        rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
+        canvasGroup.interactable = !isAIPlayer;
+        canvasGroup.blocksRaycasts = !isAIPlayer;
+    }
+    
+    private IEnumerator PlayZoomPulse(Transform target)
+    {
+        Vector3 original = target.localScale;
+        
+        bool done = false;
+        
+        Sequence seq = DOTween.Sequence();
+        seq.Append(target.DOScale(original * 1.1f, 0.15f).SetEase(Ease.OutQuad));
+        seq.Append(target.DOScale(original, 0.15f).SetEase(Ease.InQuad));
+        seq.OnComplete(() => done = true);
+
+        while (!done)
+            yield return null;
     }
     
     private IEnumerator CardOwnerChangedRoutine(Player owner,Player newOwner, Card card)
@@ -477,8 +529,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
         // Ensure final state is perfect
         canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
         eventScreen.transform.localScale = Vector3.one;
     }
     
