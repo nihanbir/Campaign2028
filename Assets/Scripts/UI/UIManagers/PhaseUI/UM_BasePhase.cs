@@ -21,6 +21,8 @@ public abstract class UM_BasePhase : MonoBehaviour
     public Ease enterEase = Ease.OutBack;
     public Ease exitEase = Ease.InBack;
 
+    protected UM_BasePhase previouslyActiveUI = null;
+
     protected bool isAIPlayer = false;
     protected Player currentPlayer = null;
     protected bool isScreenActive = false;
@@ -86,15 +88,19 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     private void OnPhaseChanged(GM_BasePhase newPhase)
     {
-        if (PhaseType == newPhase.PhaseType)
-            OnPhaseEnabled();
-        else if (PhaseType != newPhase.PhaseType && isCurrent)
+        if (isCurrent && PhaseType != newPhase.PhaseType)
             OnPhaseDisabled();
+        
+        else if (PhaseType == newPhase.PhaseType)
+            OnPhaseEnabled();
     }
 
     protected virtual void OnPhaseEnabled()
     {
-        //TODO: might need to change how this happens
+        if(previouslyActiveUI)
+            EnqueueUI(previouslyActiveUI.WaitUntilScreenInactive());
+        
+        //TODO: might need to change how this happens (have a parent with the script, like in EUM)
         gameObject.SetActive(true);
         
         isCurrent = true;
@@ -105,11 +111,12 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         // Animate UI entry
         EnqueueUI(AnimatePhaseEntry());
-        
     }
-
+    
     protected virtual void OnPhaseDisabled()
     {
+        previouslyActiveUI = this;
+        
         isCurrent = false;
         
         UnsubscribeToPhaseEvents();
@@ -162,17 +169,23 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
-        currentPlayer = player;
-        isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        EnqueueUI(SetCurrentPlayerInfoRoutine(player));
         
         var card = player.PlayerDisplayCard;
         if (card)
             EnqueueUI(card.HighlightRoutine());
     }
+
+    private IEnumerator SetCurrentPlayerInfoRoutine(Player player)
+    {
+        currentPlayer = player;
+        isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        yield break;
+    }
     
     protected virtual void OnPlayerTurnEnded(Player player)
     {
-        EnableDiceButton(false);
+        EnqueueUI(EnableDiceButtonRoutine(false));
         
         var card = player.PlayerDisplayCard;
         if (card)

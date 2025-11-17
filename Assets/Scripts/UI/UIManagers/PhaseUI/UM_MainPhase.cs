@@ -42,6 +42,8 @@ public class UM_MainPhase : UM_BasePhase
     private EventDisplayCard _currentEventDisplayCard;
     private PlayerDisplayCard _currentPlayerDisplayCard;
 
+    private bool _playerResolvedEvent = false;
+
     private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
     
@@ -51,8 +53,6 @@ public class UM_MainPhase : UM_BasePhase
         
         ClearCurrentEventCard();
         ClearCurrentTargetCard();
-        
-        SetEventButtonsInteractable(false);
         
         if (_mainPhase == null)
         {
@@ -70,6 +70,8 @@ public class UM_MainPhase : UM_BasePhase
         InitializePlayersForTesting();
         
         base.OnPhaseEnabled();
+        
+        SetEventButtonsInteractable(false);
     }
 
     protected override void HandleTurnEvent(IGameEvent e)
@@ -193,36 +195,38 @@ public class UM_MainPhase : UM_BasePhase
     {
         base.OnPlayerTurnStarted(player);
         
-        _currentPlayerDisplayCard = player.PlayerDisplayCard;
-
-        UpdateRollButtonState();
-        EnqueueUI(EnableDrawButtons());
+        EnqueueUI(OnPlayerTurnStartedRoutine(player));
     }
 
-    private IEnumerator EnableDrawButtons()
+    private IEnumerator OnPlayerTurnStartedRoutine(Player player)
     {
-        if (!isAIPlayer)
-        {
-            if (_currentTargetDisplayCard.IsNull())
-                drawTargetButton.interactable = true;
-            
-            drawEventButton.interactable = true;
-        }
-        yield break;
+        _playerResolvedEvent = false;
+        
+        _currentPlayerDisplayCard = player.PlayerDisplayCard;
+
+        yield return UpdateRollButtonState();
+        EnableDrawButtons();
+    }
+
+    private void EnableDrawButtons()
+    {
+        if (_currentTargetDisplayCard.IsNull())
+            drawTargetButton.interactable = !isAIPlayer;
+        
+        drawEventButton.interactable = !isAIPlayer;
     }
 
     protected override void OnPlayerTurnEnded(Player player)
     {
        base.OnPlayerTurnEnded(player);
 
-       _currentPlayerDisplayCard = null;
-       
-       EnqueueUI(HidePlayerDiceImg(player));
+       EnqueueUI(OnPlayerTurnEndedRoutine(player));
     }
 
-    private IEnumerator HidePlayerDiceImg(Player player)
-    {
-       player.PlayerDisplayCard.ShowDice(false);
+    private IEnumerator OnPlayerTurnEndedRoutine(Player player)
+    { 
+        _currentPlayerDisplayCard = null;
+        player.PlayerDisplayCard.ShowDice(false);
         yield break;
     }
     
@@ -230,7 +234,7 @@ public class UM_MainPhase : UM_BasePhase
     {
         base.OnPlayerRolledDice(player, roll);
         
-        UpdateRollButtonState();
+        EnqueueUI(UpdateRollButtonState());
     }
 
     #endregion Turn Flow
@@ -301,6 +305,9 @@ public class UM_MainPhase : UM_BasePhase
     private void SetEventButtonsInteractable(bool interactable)
     {
         bool canSave = false;
+
+        if (isAIPlayer)
+            interactable = false;
         
         if (_currentTargetDisplayCard.IsNull()) 
             interactable = false;
@@ -308,8 +315,8 @@ public class UM_MainPhase : UM_BasePhase
         if (_currentEventDisplayCard == null) 
             interactable = false;
         
-        else
-            canSave = _currentEventDisplayCard.GetCard().canSave && interactable;
+        else if (interactable)
+            canSave = _currentEventDisplayCard.GetCard().canSave;
         
 
         saveEventButton.interactable = canSave;
@@ -405,7 +412,7 @@ public class UM_MainPhase : UM_BasePhase
             _currentPlayerDisplayCard.transform
         );
         
-        UpdateRollButtonState();
+        yield return UpdateRollButtonState();
     }
     
 #endregion Card Feedback
@@ -569,7 +576,7 @@ public class UM_MainPhase : UM_BasePhase
 
     #region Buttons
     
-    private void UpdateRollButtonState()
+    private IEnumerator UpdateRollButtonState()
     {
         // 🔒 Disable by default
         bool enable = false;
@@ -592,6 +599,7 @@ public class UM_MainPhase : UM_BasePhase
         }
         
         EnableDiceButton(enable);
+        yield break;
     }
 
     #endregion
