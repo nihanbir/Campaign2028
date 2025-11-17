@@ -120,6 +120,11 @@ protected override void StartPlayerTurn()
         }
     }
 
+    public void DuelCompleted()
+    {
+        EndPlayerTurn();
+    }
+    
     protected override void EndPlayerTurn()
     {
         Player current = game.CurrentPlayer;

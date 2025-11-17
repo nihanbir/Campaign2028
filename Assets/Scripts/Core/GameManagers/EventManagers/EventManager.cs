@@ -105,7 +105,7 @@ public class EventManager
         
         CompleteEvent();
         
-        //TODO endplayer turn maybe
+        _mainPhase.DuelCompleted();
     }
     
     public void CancelEvent(EventCard card)
