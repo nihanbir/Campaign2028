@@ -288,6 +288,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         yield return AnimateEventUIRoutine();
         duelScreen.SetActive(true);
+
+        yield return AnimateCardCaptured(_targetDisplay.transform, midCardUI);
     }
 
     private void ClearCurrentTargetDisplay()
@@ -445,6 +447,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         if (!diceImg) yield break;
 
+        yield return new WaitForSeconds(2.5f);
+        
         diceImg.gameObject.SetActive(true);
 
         diceImg.transform.DOKill();
@@ -460,6 +464,5 @@ public class EUM_ChallengeEvent : MonoBehaviour
         while (!done)
             yield return null;
         
-        yield return new WaitForSeconds(2.5f);
     }
 }
