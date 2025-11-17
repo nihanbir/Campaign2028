@@ -326,9 +326,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         int count = statesToDisplay.Count;
         if (count == 0) return;
-
-        List<RectTransform> cardRects = new();
-
+        
         for (int i = 0; i < count; i++)
         {
             GameObject uiInstance = Instantiate(_mainUI.stateCardPrefab, stateCardsUIParent);
@@ -342,65 +340,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
             
             displayCard.SetClickable(true);
             displayCard.SetHoldable(true);
-
-            if (uiInstance.TryGetComponent(out RectTransform rt))
-                cardRects.Add(rt);
+            
         }
 
         Canvas.ForceUpdateCanvases();
-
-        if (cardRects.Count == 0)
-        {
-            Debug.LogWarning("No valid card rects found.");
-            return;
-        }
-
-        RectTransform parentRT   = stateCardsUIParent.GetComponent<RectTransform>();
-        float parentWidth        = parentRT.rect.width;
-        float parentHeight       = parentRT.rect.height;
-        float cardWidth          = cardRects[0].rect.width;
-        float cardHeight         = cardRects[0].rect.height;
-
-        int cardsPerRow = Mathf.Max(1, Mathf.FloorToInt((parentWidth + spacing) / (cardWidth + spacing)));
-        int rowCount    = Mathf.CeilToInt((float)count / cardsPerRow);
-
-        float totalGridHeight = rowCount * cardHeight + (rowCount - 1) * verticalSpacing;
-        float widthScale      = Mathf.Min(1f, parentWidth  / ((cardWidth + spacing) * cardsPerRow - spacing));
-        float heightScale     = Mathf.Min(1f, parentHeight / totalGridHeight);
-        float scaleFactor     = Mathf.Min(widthScale, heightScale);
-
-        foreach (var rt in cardRects)
-            rt.localScale = Vector3.one * scaleFactor;
-
-        float scaledCardWidth  = cardWidth * scaleFactor;
-        float scaledCardHeight = cardHeight * scaleFactor;
-        float scaledHSpacing   = spacing * scaleFactor;
-        float scaledVSpacing   = verticalSpacing * scaleFactor;
-
-        float totalHeight = rowCount * scaledCardHeight + (rowCount - 1) * scaledVSpacing;
-        float startY      = totalHeight / 2f - scaledCardHeight / 2f;
-
-        int cardIndex = 0;
-        for (int row = 0; row < rowCount; row++)
-        {
-            int cardsInRow = Mathf.Min(cardsPerRow, count - cardIndex);
-            float rowWidth = cardsInRow * scaledCardWidth + (cardsInRow - 1) * scaledHSpacing;
-            float startX   = -rowWidth / 2f + scaledCardWidth / 2f;
-
-            for (int col = 0; col < cardsInRow; col++)
-            {
-                if (cardIndex >= cardRects.Count) break;
-
-                RectTransform rt = cardRects[cardIndex];
-                rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
-
-                float xPos = startX + col * (scaledCardWidth + scaledHSpacing);
-                float yPos = startY - row * (scaledCardHeight + scaledVSpacing);
-
-                rt.anchoredPosition = new Vector2(xPos, yPos);
-                cardIndex++;
-            }
-        }
     }
     #endregion
     
