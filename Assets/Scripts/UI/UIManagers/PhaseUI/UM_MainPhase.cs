@@ -380,7 +380,7 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator HandleChangeFromEventScreen()
     {
-        yield return eventUI.EventScreenActive();
+        yield return eventUI.WaitUntilScreenState(false);
 
         isScreenActive = true;
         

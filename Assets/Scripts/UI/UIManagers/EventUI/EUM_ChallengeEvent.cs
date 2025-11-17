@@ -64,10 +64,18 @@ public class EUM_ChallengeEvent : MonoBehaviour
             yield return null;
     }
 
-    public IEnumerator EventScreenActive()
+    public IEnumerator WaitUntilScreenState(bool active)
     {
-        while (isActive)
-            yield return null;
+        if (active)
+        {
+            while (!isActive)
+                yield return null;
+        }
+        else
+        {
+            while (isActive)
+                yield return null;
+        }
     }
 
     private void Awake()

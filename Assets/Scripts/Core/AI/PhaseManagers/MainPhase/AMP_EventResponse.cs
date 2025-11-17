@@ -69,7 +69,8 @@ public class AMP_EventResponse
     #region Challenge Any State (AI choice)
     private IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     { 
-        yield return _mainUI.WaitUntilUIQueueFree();
+        yield return _ui.WaitUntilScreenState(true);
+
         yield return _ui.WaitUntilQueueFree();
         
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
@@ -84,7 +85,8 @@ public class AMP_EventResponse
 
     private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
     {
-        yield return _mainUI.WaitUntilUIQueueFree();
+        yield return _ui.WaitUntilScreenState(true);
+        
         yield return _ui.WaitUntilQueueFree();
         
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
