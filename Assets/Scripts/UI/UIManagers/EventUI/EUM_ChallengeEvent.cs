@@ -36,6 +36,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private StateDisplayCard _highlightedCard;
 
     private bool _challengeStates = false;
+    private bool isActive = false;
     
     private readonly Queue<IEnumerator> _queue = new();
     private bool _queueRunning;
@@ -60,6 +61,12 @@ public class EUM_ChallengeEvent : MonoBehaviour
     public IEnumerator WaitUntilQueueFree()
     {
         while (_queueRunning)
+            yield return null;
+    }
+
+    public IEnumerator EventScreenActive()
+    {
+        while (isActive)
             yield return null;
     }
 
@@ -99,9 +106,10 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         // 🔥 WAIT FOR MAIN PHASE UI ANIMATIONS to finish
         if (_mainUI != null)
-            yield return _mainUI.WaitUntilUIQueueFree();
+            yield return _mainUI.WaitUntilScreenInactive();
         
         eventScreen.SetActive(true);
+        isActive = true;
         
         switch (e.stage)
         {
@@ -227,8 +235,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
         yield return AnimateEventUIRoutine();
 
         rollDiceButton.interactable = !AIManager.Instance.IsAIPlayer(attacker);
-        
-        yield return new WaitForSeconds(2.5f);
     }
 
     private void ToggleHighlightedCard(StateDisplayCard card)
@@ -380,7 +386,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             
         }
 
-        Canvas.ForceUpdateCanvases();
+        // Canvas.ForceUpdateCanvases();
     }
     #endregion
     
@@ -419,17 +425,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ReturnToMainPhaseUIRoutine()
     {
-        
         // Fade out event screen if needed
         yield return AnimateFadeOutEventScreen();
-        
-        yield return new WaitForSeconds(2.5f);
         
         _highlightedCard = null;
 
         eventScreen.SetActive(false);
         duelScreen.SetActive(false);
         statesScreen.SetActive(false);
+
+        isActive = false;
     }
     
     private IEnumerator AnimateFadeOutEventScreen()
@@ -480,8 +485,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private IEnumerator DicePopAnimation(Image diceImg)
     {
         if (!diceImg) yield break;
-        
-        yield return new WaitForSeconds(2.5f);
         
         diceImg.gameObject.SetActive(true);
 

@@ -22,12 +22,20 @@ public abstract class UM_BasePhase : MonoBehaviour
     public Ease exitEase = Ease.InBack;
 
     protected bool isAIPlayer = false;
-    protected bool isActive = false;
+    protected Player currentPlayer = null;
+    protected bool isScreenActive = false;
+    protected bool isCurrent = false;
     
     private readonly Queue<IEnumerator> _uiQueue = new();
     private bool _uiQueueRunning;
     protected bool IsQueueRunning => _uiQueueRunning;
 
+    public IEnumerator WaitUntilScreenInactive()
+    {
+        while (isScreenActive)
+            yield return null;
+    }
+    
     #region Object
 
     private void Awake()
@@ -80,15 +88,16 @@ public abstract class UM_BasePhase : MonoBehaviour
     {
         if (PhaseType == newPhase.PhaseType)
             OnPhaseEnabled();
-        else if (PhaseType != newPhase.PhaseType && isActive)
+        else if (PhaseType != newPhase.PhaseType && isCurrent)
             OnPhaseDisabled();
     }
 
     protected virtual void OnPhaseEnabled()
     {
+        //TODO: might need to change how this happens
         gameObject.SetActive(true);
         
-        isActive = true;
+        isCurrent = true;
         
         SubscribeToPhaseEvents();
         
@@ -101,7 +110,7 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseDisabled()
     {
-        isActive = false;
+        isCurrent = false;
         
         UnsubscribeToPhaseEvents();
 
@@ -123,7 +132,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void HandleTurnEvent(IGameEvent e)
         {
-            if (!isActive) return;
+            if (!isCurrent) return;
             if (e is TurnEvent t)
             {
                 switch (t.stage)
@@ -153,6 +162,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
+        currentPlayer = player;
         isAIPlayer = AIManager.Instance.IsAIPlayer(player);
         
         var card = player.PlayerDisplayCard;
@@ -204,6 +214,8 @@ public abstract class UM_BasePhase : MonoBehaviour
     #region Animations
     protected virtual IEnumerator AnimatePhaseEntry()
     {
+        isScreenActive = true;
+        
         transform.localPosition += new Vector3(-1200f, 0f, 0f);
 
         bool done = false;
@@ -236,7 +248,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         });
         
         while (!finished) yield return null;
-        
+
+        isScreenActive = false;
         gameObject.SetActive(false);
     }
     

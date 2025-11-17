@@ -52,7 +52,6 @@ public class UM_MainPhase : UM_BasePhase
         ClearCurrentEventCard();
         ClearCurrentTargetCard();
         
-        UpdateRollButtonState();
         SetEventButtonsInteractable(false);
         
         if (_mainPhase == null)
@@ -77,7 +76,7 @@ public class UM_MainPhase : UM_BasePhase
     {
         base.HandleTurnEvent(e);
 
-        if (!isActive) return;
+        if (!isCurrent) return;
         
         if (e is MainStageEvent m)
         {
@@ -193,9 +192,10 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
-
+        
         _currentPlayerDisplayCard = player.PlayerDisplayCard;
 
+        UpdateRollButtonState();
         EnqueueUI(EnableDrawButtons());
     }
 
@@ -374,11 +374,16 @@ public class UM_MainPhase : UM_BasePhase
         UpdateRollButtonState();
         
         yield return AnimateFadeOutScreen();
+
+        isScreenActive = false;
     }
 
     private IEnumerator HandleChangeFromEventScreen()
     {
-        yield return eventUI.WaitUntilQueueFree();
+        yield return eventUI.EventScreenActive();
+
+        isScreenActive = true;
+        
         yield return AnimateFadeInScreen();
     }
 
@@ -434,6 +439,9 @@ public class UM_MainPhase : UM_BasePhase
     }
     private IEnumerator AnimateFadeOutScreen()
     {
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+        
         bool done = false;
 
         Sequence seq = DOTween.Sequence();
@@ -446,8 +454,6 @@ public class UM_MainPhase : UM_BasePhase
             yield return null;
 
         canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
         gameObject.transform.localScale = Vector3.one;
     }
     
@@ -565,8 +571,6 @@ public class UM_MainPhase : UM_BasePhase
     
     private void UpdateRollButtonState()
     {
-        var currentPlayer = GameManager.Instance.CurrentPlayer;
-
         // 🔒 Disable by default
         bool enable = false;
 

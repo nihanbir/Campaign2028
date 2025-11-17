@@ -104,6 +104,8 @@ public class EventManager
         TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
         
         CompleteEvent();
+        
+        //TODO endplayer turn maybe
     }
     
     public void CancelEvent(EventCard card)
