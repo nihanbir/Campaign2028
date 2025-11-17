@@ -18,7 +18,7 @@ public class AM_MainPhase
 
     private AIPlayer _currentAI;
 
-    private bool _eventResolvedWait;
+    private bool _canRoll;
 
     private EventCard _drawnEvent;
     private Card _drawnTarget;
@@ -61,7 +61,18 @@ public class AM_MainPhase
 
     #region Regular Turn Execution
     
-    private void Enable() => TurnFlowBus.Instance.OnEvent += OnTurnEvent;
+    private void Enable()
+    {
+        _gm ??= GameManager.Instance.mainPhase;
+        _eventManager ??= _gm.EventManager;
+        _mainUI ??= GameUIManager.Instance.mainUI;
+        
+        TurnFlowBus.Instance.OnEvent += OnTurnEvent;
+        
+        _drawnEvent = null;
+        _drawnTarget = null;
+        _canRoll = false;
+    } 
     
     private void Disable()
     {
@@ -69,14 +80,11 @@ public class AM_MainPhase
         _currentAI = null;
         _drawnTarget = null;
         _drawnEvent = null;
+        _canRoll = false;
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
-        _gm ??= GameManager.Instance.mainPhase;
-        _eventManager ??= _gm.EventManager;
-        _mainUI ??= GameUIManager.Instance.mainUI;
-        
         Enable();
         
         yield return _mainUI.WaitUntilUIQueueFree();
@@ -99,8 +107,10 @@ public class AM_MainPhase
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawEventCardRequest));
         
         yield return _ai.StartCoroutine(WaitUntilCardsReady());
+
+        yield return _ai.StartCoroutine(WaitUntilEventResolved());
         
-        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventActive)
+        if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventScreen)
         {
             yield return _ai.StartCoroutine(RollDice(aiPlayer));
         }
@@ -142,18 +152,29 @@ public class AM_MainPhase
     private IEnumerator ApplyOrSave(AIPlayer aiPlayer, EventCard card)
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
-        TurnFlowBus.Instance.Raise(
-            ShouldSaveEvent(aiPlayer, card)
-                ? new MainStageEvent(MainStage.SaveEventCardRequest)
-                : new MainStageEvent(MainStage.ApplyEventCardRequest)
-        );
+        if (ShouldSaveEvent(aiPlayer, card))
+        {
+            TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest));
+        }
+        else
+        {
+            _aiEventManager.Enable();
+            TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.ApplyEventCardRequest));
+        }
+
+        _canRoll = true;
     }
     
     private IEnumerator WaitUntilCardsReady()
     {
         // Wait until BOTH cards are present
         while (_drawnTarget == null || _drawnEvent == null)
+            yield return null;
+    }
+
+    private IEnumerator WaitUntilEventResolved()
+    {
+        while (!_canRoll)
             yield return null;
     }
 

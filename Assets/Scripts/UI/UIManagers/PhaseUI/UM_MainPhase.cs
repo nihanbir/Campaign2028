@@ -578,7 +578,7 @@ public class UM_MainPhase : UM_BasePhase
         {
             var eventManager = _eventManager ?? _mainPhase.EventManager;
 
-            bool eventInactive = !eventManager.IsEventActive;
+            bool eventInactive = !eventManager.IsEventScreen;
             bool playerHasResolvedEvent = _currentEventDisplayCard == null;
             bool targetCardDrawn = !_currentTargetDisplayCard.IsNull();
             

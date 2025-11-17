@@ -356,7 +356,7 @@ protected override void StartPlayerTurn()
 
         CurrentEventCard = card;
         
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.EventCardDrawn, card));
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.EventCardDrawn, CurrentEventCard));
         
     }
     

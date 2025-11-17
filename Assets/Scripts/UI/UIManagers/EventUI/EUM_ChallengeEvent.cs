@@ -419,7 +419,6 @@ public class EUM_ChallengeEvent : MonoBehaviour
     
     private IEnumerator AnimateFadeOutEventScreen()
     {
-        Debug.Log("out");
         bool done = false;
 
         Sequence seq = DOTween.Sequence();
@@ -431,7 +430,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         while (!done)
             yield return null;
 
-        canvasGroup.alpha = 1f;
+        canvasGroup.alpha = 0f;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;
         eventScreen.transform.localScale = Vector3.one;

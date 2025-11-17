@@ -30,6 +30,8 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
             Cancel(card);
             return;
         }
+        
+        parent.IsEventScreen = true;
         TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.ChangeToEventScreen));
         
         _parentHandler.SetChosenCard(chosenCard);

@@ -14,56 +14,54 @@ public class MP_EventResponse
         _main = main;
     }
 
-    private void Enable()
+    public void Enable()
     {
+        EventCardBus.Instance.OnEvent += OnEvent;
+        Debug.Log("Enabled");
         if (!_ui) _ui = GameUIManager.Instance.mainUI.eventUI;
-        TurnFlowBus.Instance.OnEvent += OnEvent;
     }
 
-    private void Disable()  => TurnFlowBus.Instance.OnEvent -= OnEvent;
+    private void Disable()  => EventCardBus.Instance.OnEvent -= OnEvent;
     
-    private void OnEvent(IGameEvent e)
+    private void OnEvent(EventCardEvent e)
     {
-        if (e is EventCardEvent c)
+        // Only reacts to events, never active logic
+        switch (e.stage)
         {
-            // Only reacts to events, never active logic
-            switch (c.stage)
+            case EventStage.EventCanceled:
+                Disable();
+                break;
+        
+            case EventStage.DuelCompleted:
+                Disable();
+                break;
+            
+            case EventStage.EventCompleted:
+                Disable();
+                break;
+        
+            case EventStage.ChallengeStatesDetermined:
             {
-                case EventStage.EventCanceled:
-                    Disable();
-                    break;
-            
-                case EventStage.DuelCompleted:
-                    Disable();
-                    break;
-                
-                case EventStage.EventCompleted:
-                    Disable();
-                    break;
-            
-                case EventStage.ChallengeStatesDetermined:
-                {
-                    var data = (ChallengeStatesData)c.payload;
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                    _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
-                    break;
-                }
+                var data = (ChallengeStatesData)e.payload;
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                _ai.StartCoroutine(ExecuteChooseState(aiPlayer, data.States));
+                break;
+            }
 
-                case EventStage.DuelStarted:
-                {
-                    var data = (DuelData)c.payload;
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
-                    _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
-                    break;
-                }
+            case EventStage.DuelStarted:
+            {
+                var data = (DuelData)e.payload;
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
+                _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                break;
+            }
 
-                case EventStage.AltStatesShown:
-                {
-                    var data = (AltStatesData)c.payload;
-                    var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                    _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
-                    break;
-                }
+            case EventStage.AltStatesShown:
+            {
+                var data = (AltStatesData)e.payload;
+                var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
+                _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                break;
             }
         }
        
@@ -72,13 +70,13 @@ public class MP_EventResponse
     #region Challenge Any State (AI choice)
     private IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
-        yield return _ui.WaitUntilQueueFree();
-        
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
 
         Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
+        
+        yield return _ui.WaitUntilQueueFree();
         
         SelectableCardBus.Instance.Raise(
             new CardInputEvent(CardInputStage.Held, chosenState));
@@ -86,11 +84,12 @@ public class MP_EventResponse
 
     private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
     {
-        yield return _ui.WaitUntilQueueFree();
-        
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
-        TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.RollDiceRequest));
+        yield return _ui.WaitUntilQueueFree();
+        
+        EventCardBus.Instance.Raise(
+            new EventCardEvent(EventStage.RollDiceRequest));
     }
     
     private StateCard GetBestAvailableState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)

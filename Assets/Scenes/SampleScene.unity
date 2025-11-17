@@ -668,7 +668,7 @@ MonoBehaviour:
   eventDeck: []
   actorDeck: []
   allegianceDeck: []
-  placeHumanAtIndex: 0
+  placeHumanAtIndex: 3
   maxPlayers: 6
   players: []
   currentPlayerIndex: 0

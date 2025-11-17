@@ -25,6 +25,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
 
         _currentPlayer = player;
         
+        parent.IsEventScreen = true;
         TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.ChangeToEventScreen));
 
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.ChallengeStatesDetermined, new ChallengeStatesData(player, availableStates, card)));

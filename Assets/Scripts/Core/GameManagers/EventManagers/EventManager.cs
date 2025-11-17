@@ -16,8 +16,9 @@ public class EventManager
     private Player _currentPlayer;
     private EventCard _currentEventCard;
     private EventType _effectiveType;
-    
-    public bool IsEventActive { get; private set; }
+
+    private bool _isEventActive = false;
+    public bool IsEventScreen { get; set; }
     
     public EventManager(GM_MainPhase gm)
     {
@@ -43,7 +44,7 @@ public class EventManager
         
         if (e.stage == EventStage.PlayerRolled)
         {
-            if (!IsEventActive) return;
+            if (!_isEventActive) return;
 
             var data = (PlayerRolledData)e.payload;
 
@@ -67,7 +68,7 @@ public class EventManager
         {
             EventCardBus.Instance.OnEvent += OnEventCardEvent;
             
-            IsEventActive = true;
+            _isEventActive = true;
             handler.Handle(player, card, _effectiveType);
         }
         else
@@ -87,7 +88,7 @@ public class EventManager
     {
         EventCardBus.Instance.OnEvent -= OnEventCardEvent;
         
-        IsEventActive = false;
+        _isEventActive = false;
         
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.EventCompleted, new EventCompletedData(_effectiveType, _currentPlayer, _currentEventCard)));
         
@@ -96,6 +97,8 @@ public class EventManager
 
     public void CompleteDuel()
     {
+        IsEventScreen = false;
+        
         EventCardBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
         
         TurnFlowBus.Instance.Raise(new EventCardEvent(EventStage.DuelCompleted));
@@ -107,7 +110,7 @@ public class EventManager
     {
         EventCardBus.Instance.OnEvent -= OnEventCardEvent;
         
-        IsEventActive = false;
+        _isEventActive = false;
         
         Debug.Log("Event cannot be applied.");
         if (card != null && card.canReturnToDeck)
@@ -128,7 +131,7 @@ public class EventManager
 
     private void OnPlayerRequestedRoll()
     {
-        if (!IsEventActive) return;
+        if (!_isEventActive) return;
         
         var roll = Random.Range(1, 7);
         
