@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 public class AM_MainPhase
 {
     private readonly AIManager _ai;
-    private MP_EventResponse _aiEventManager;
+    private AMP_EventResponse _aiEventManager;
 
     private GM_MainPhase _gm;
     private UM_MainPhase _mainUI;
@@ -26,7 +26,7 @@ public class AM_MainPhase
     public AM_MainPhase(AIManager ai)
     {
         _ai = ai;
-        _aiEventManager = new MP_EventResponse(ai, this);
+        _aiEventManager = new AMP_EventResponse(ai, this);
         _mainUI = GameUIManager.Instance.mainUI;
         
     }

@@ -28,6 +28,7 @@ public enum EventStage
     AltStatesShown,        // Alt states UI should appear
     PlayerRolled,           // Player rolled value (for UI dice feedback)
     RollDiceRequest,
+    CardOwnerChanged,
 
 }
 

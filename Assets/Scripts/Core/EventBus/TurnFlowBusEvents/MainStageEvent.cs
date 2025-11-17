@@ -18,7 +18,6 @@ public enum MainStage
     StateDiscarded,
     CardCaptured,
     CardLost,
-    CardOwnerChanged,
     CardReturnedToDeck,
     
     DrawEventCardRequest,

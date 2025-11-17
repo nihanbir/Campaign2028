@@ -265,15 +265,15 @@ protected override void StartPlayerTurn()
 
         Debug.Log($"Player {player.playerID} captured {card.cardName}");
 
-        //TODO: pay attention to this, since it's raised after removing the card from the deck, UI might not be able to find it
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardCaptured, new CardCapturedData(player, card)));
+        if (CurrentTargetCard != null && card == CurrentTargetCard)
+        {
+            TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardCaptured, new CardCapturedData(player, card)));
 
-        ClearCurrentTargetCard();
+            ClearCurrentTargetCard();
+        }
     }
     
-    //TODO: should we have bus here
-    //TODO: does it make sense to have updatecardownership bus, because capture card has it for ui too, maybe need a bool param there
-    private void UncaptureCard(Card card, bool returnToDeck = false)
+    public void UncaptureCard(Card card, bool returnToDeck = false)
     {
         if (card == null || !IsCardHeld(card))
             return;
@@ -305,21 +305,6 @@ protected override void StartPlayerTurn()
 
         if (returnToDeck)
             ReturnCardToDeck(card);
-    }
-    
-    public void UpdateCardOwnership(Player newOwner, Card card)
-    {
-        // Remove card from its current owner first
-        UncaptureCard(card);
-
-        // Add to new owner's list
-        CaptureCard(newOwner, card);
-        
-        //This is only here to notify the UI
-        Player owner = GetCardHolder(card);
-        
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CardOwnerChanged, new CardOwnerChangedData(owner, newOwner, card)));
-        
     }
     
     public void DiscardState(StateCard stateToDiscard)

@@ -52,7 +52,7 @@ public class EM_ChallengeHandler : BaseEventHandler
            
         if (success)
         {
-            phase.UpdateCardOwnership(player, _chosenCard);
+            UpdateCardOwnership(player, _chosenCard);
         }
         else
         {
@@ -62,5 +62,19 @@ public class EM_ChallengeHandler : BaseEventHandler
         
         _chosenCard = null;
         parent.CompleteDuel();
+    }
+    
+    private void UpdateCardOwnership(Player newOwner, Card card)
+    {
+        //This is only here to notify the UI
+        Player owner = phase.GetCardHolder(card);
+        
+        // Remove card from its current owner first
+        phase.UncaptureCard(card);
+
+        // Add to new owner's list
+        phase.CaptureCard(newOwner, card);
+        
+        EventCardBus.Instance.Raise(new EventCardEvent(EventStage.CardOwnerChanged, new CardOwnerChangedData(owner, newOwner, card)));
     }
 }

@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MP_EventResponse
+public class AMP_EventResponse
 {
     private readonly AIManager _ai;
     private readonly AM_MainPhase _main;
     private EUM_ChallengeEvent _ui;
     
-    public MP_EventResponse(AIManager ai, AM_MainPhase main)
+    public AMP_EventResponse(AIManager ai, AM_MainPhase main)
     {
         _ai = ai;
         _main = main;
@@ -70,13 +70,13 @@ public class MP_EventResponse
     #region Challenge Any State (AI choice)
     private IEnumerator ExecuteChooseState(AIPlayer aiPlayer, List<StateCard> statesToChooseFrom)
     {
+        yield return _ui.WaitUntilQueueFree();
+        
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
 
         var chosenState = GetBestAvailableState(aiPlayer, statesToChooseFrom);
 
         Debug.Log($"{chosenState.cardName} chosen by {aiPlayer.playerID}");
-        
-        yield return _ui.WaitUntilQueueFree();
         
         SelectableCardBus.Instance.Raise(
             new CardInputEvent(CardInputStage.Held, chosenState));
@@ -84,9 +84,9 @@ public class MP_EventResponse
 
     private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
     {
-        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
-        
         yield return _ui.WaitUntilQueueFree();
+        
+        yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
         EventCardBus.Instance.Raise(
             new EventCardEvent(EventStage.RollDiceRequest));
