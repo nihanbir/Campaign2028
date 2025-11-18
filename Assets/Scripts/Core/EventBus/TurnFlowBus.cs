@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class TurnFlowBus
@@ -16,4 +17,12 @@ public sealed class TurnFlowBus
     }
 
     public void Clear() => OnEvent = null;
+    
+    private HashSet<int> fired = new();
+
+    public void RaiseOnce(IGameEvent e)
+    {
+        if (!fired.Add(e.EventId)) return;
+        Raise(e);
+    }
 }

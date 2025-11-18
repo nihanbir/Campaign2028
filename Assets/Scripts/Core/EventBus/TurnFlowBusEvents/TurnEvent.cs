@@ -8,6 +8,7 @@ public class TurnEvent : GameEventBase
         this.stage = stage;
     }
 
+    public override int EventId => (int)stage;
     public override string GetName() => $"TurnEvent({stage})";
 }
 

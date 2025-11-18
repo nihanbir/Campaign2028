@@ -9,12 +9,14 @@ public class MainStageEvent : GameEventBase
     {
         this.stage = stage;
     }
-
+    public override int EventId => (int)stage;
     public override string GetName() => $"MainStageEvent({stage})";
 }
 
 public enum MainStage
 {
+    NoMoreEventCards,
+    
     StateDiscarded,
     CardCaptured,
     CardLost,

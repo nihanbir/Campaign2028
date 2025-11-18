@@ -8,6 +8,7 @@ public class CardInputEvent : GameEventBase
         this.stage = stage;
     }
 
+    public override int EventId => (int)stage;
     public override string GetName() => $"CardInputEvent({stage})";
 }
 

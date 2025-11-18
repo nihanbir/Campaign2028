@@ -10,6 +10,7 @@ public class EventCardEvent : GameEventBase
         this.stage = stage;
     }
 
+    public override int EventId => (int)stage;
     public override string GetName() => $"EventCardEvent({stage})";
     
 }

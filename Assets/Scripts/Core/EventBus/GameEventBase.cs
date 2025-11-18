@@ -6,7 +6,7 @@ public abstract class GameEventBase : IGameEvent
     {
         this.payload = payload;
     }
-
+    public abstract int EventId { get; }
     public abstract string GetName();
 
     public override string ToString()
