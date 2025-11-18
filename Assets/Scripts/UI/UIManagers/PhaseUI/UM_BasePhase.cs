@@ -172,7 +172,10 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnPlayerTurnStarted(Player player)
     {
-        EnqueueUI(SetCurrentPlayerInfoRoutine(player));
+        currentPlayer = player;
+        isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        
+        // EnqueueUI(SetCurrentPlayerInfoRoutine(player));
         
         var card = player.PlayerDisplayCard;
         if (card)

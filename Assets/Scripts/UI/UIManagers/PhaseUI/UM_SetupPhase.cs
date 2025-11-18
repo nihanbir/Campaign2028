@@ -154,9 +154,14 @@ public class UM_SetupPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
-
-        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        
         EnqueueUI(EnableDiceButtonRoutine(!isAIPlayer));
+    }
+
+    protected override void OnPlayerRolledDice(Player player, int roll)
+    {
+        EnqueueUI(EnableDiceButtonRoutine(false));
+        base.OnPlayerRolledDice(player, roll);
     }
 
     #endregion
