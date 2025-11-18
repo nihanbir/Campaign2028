@@ -65,10 +65,10 @@ public class UM_MainPhase : UM_BasePhase
         
         eventUI.Initialize();
         
-        // RelocatePlayerCards(playerUIParent);
+        RelocatePlayerCards(playerUIParent);
         
         //TODO: dont forget to remove
-        InitializePlayersForTesting();
+        // InitializePlayersForTesting();
         
         base.OnPhaseEnabled();
         

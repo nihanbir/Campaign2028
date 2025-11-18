@@ -69,7 +69,7 @@ public class GM_MainPhase : GM_BasePhase
         _mainDeck.ShuffleInPlace();
         
         //TODO: don't forget to remove this
-        AssignTestCardsToPlayers(_mainDeck);
+        // AssignTestCardsToPlayers(_mainDeck);
         
         Debug.Log("🟢 Mainphase UI Ready — starting player turns");
         StartPlayerTurn();
