@@ -43,6 +43,7 @@ public class UM_MainPhase : UM_BasePhase
     private PlayerDisplayCard _currentPlayerDisplayCard;
 
     private bool _playerResolvedEvent = false;
+    private bool _noMoreEventCards = false;
 
     private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
@@ -73,6 +74,15 @@ public class UM_MainPhase : UM_BasePhase
         
         SetEventButtonsInteractable(false);
     }
+    
+    private void ListenForRaisedOnce(IGameEvent e)
+    {
+        if (e is not MainStageEvent m) return;
+        if (m.stage != MainStage.NoMoreEventCards) return;
+        
+        EnqueueUI(HandleNoMoreEventCardsRoutine());
+        TurnFlowBus.Instance.OnOneTimeEvent -= ListenForRaisedOnce;
+    }
 
     protected override void HandleTurnEvent(IGameEvent e)
     {
@@ -91,10 +101,6 @@ public class UM_MainPhase : UM_BasePhase
                 case MainStage.TargetCardDrawn:
                     EnqueueUI(SpawnTargetCard((Card)m.payload));
                     break;
-                
-                // case MainStage.StateDiscarded:
-                //     ClearCurrentTargetCard();
-                //     break;
                 
                 case MainStage.EventCardSaved:
                     EnqueueUI(EventSaved((EventCard)m.payload));
@@ -126,9 +132,23 @@ public class UM_MainPhase : UM_BasePhase
         }
     }
 
+    private IEnumerator HandleNoMoreEventCardsRoutine()
+    {
+        drawEventButton.interactable = false;
+        drawEventButton.onClick.RemoveAllListeners();
+
+        _noMoreEventCards = true;
+        SetEventButtonsInteractable(false);
+        
+        //let the player roll for target if it exists
+        yield break;
+    }
+
     protected override void SubscribeToPhaseEvents()
     {
         base.SubscribeToPhaseEvents();
+        
+        TurnFlowBus.Instance.OnOneTimeEvent += ListenForRaisedOnce;
         
         playerPanelButton.onClick.AddListener(TogglePlayerPanel);
         drawEventButton.onClick.AddListener(OnSpawnEventClicked);
@@ -193,6 +213,8 @@ public class UM_MainPhase : UM_BasePhase
 
     protected override void OnPlayerTurnStarted(Player player)
     {
+        _playerResolvedEvent = _noMoreEventCards;
+        
         base.OnPlayerTurnStarted(player);
         
         EnqueueUI(OnPlayerTurnStartedRoutine(player));
@@ -200,10 +222,8 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator OnPlayerTurnStartedRoutine(Player player)
     {
-        _playerResolvedEvent = false;
-        
         _currentPlayerDisplayCard = player.PlayerDisplayCard;
-
+        
         yield return UpdateRollButtonState();
         EnableDrawButtons();
     }
@@ -213,7 +233,7 @@ public class UM_MainPhase : UM_BasePhase
         if (_currentTargetDisplayCard.IsNull())
             drawTargetButton.interactable = !isAIPlayer;
         
-        drawEventButton.interactable = !isAIPlayer;
+        drawEventButton.interactable = !isAIPlayer && !_noMoreEventCards;
     }
 
     protected override void OnPlayerTurnEnded(Player player)
@@ -301,28 +321,6 @@ public class UM_MainPhase : UM_BasePhase
         
         SetEventButtonsInteractable(true);
     }
-    
-    private void SetEventButtonsInteractable(bool interactable)
-    {
-        bool canSave = false;
-
-        if (isAIPlayer)
-            interactable = false;
-        
-        if (_currentTargetDisplayCard.IsNull()) 
-            interactable = false;
-        
-        if (_currentEventDisplayCard == null) 
-            interactable = false;
-        
-        else if (interactable)
-            canSave = _currentEventDisplayCard.GetCard().canSave;
-        
-
-        saveEventButton.interactable = canSave;
-        
-        playEventButton.interactable = interactable;
-    }
 
     #endregion Card Spawning
     
@@ -342,7 +340,7 @@ public class UM_MainPhase : UM_BasePhase
         );
         
         ClearCurrentTargetCard();
-        UpdateRollButtonState();
+        yield return UpdateRollButtonState();
     }
 
     private void ClearCurrentEventCard()
@@ -373,12 +371,13 @@ public class UM_MainPhase : UM_BasePhase
     private IEnumerator HandleEventApplied()
     {
         yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
+        _playerResolvedEvent = true;
     }
 
     private IEnumerator HandleChangeToEventScreen()
     {
         ClearCurrentEventCard();
-        UpdateRollButtonState();
+        yield return UpdateRollButtonState();
         
         yield return AnimateFadeOutScreen();
 
@@ -393,12 +392,6 @@ public class UM_MainPhase : UM_BasePhase
         
         yield return AnimateFadeInScreen();
     }
-
-    private void OnClickEventSave()
-    {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
-    }
-
     private IEnumerator EventSaved(EventCard card)
     {
         if (_currentEventDisplayCard.GetCard() != card)
@@ -411,7 +404,8 @@ public class UM_MainPhase : UM_BasePhase
             _currentEventDisplayCard.gameObject,
             _currentPlayerDisplayCard.transform
         );
-        
+
+        _playerResolvedEvent = true;
         yield return UpdateRollButtonState();
     }
     
@@ -576,6 +570,11 @@ public class UM_MainPhase : UM_BasePhase
 
     #region Buttons
     
+    private void OnClickEventSave()
+    {
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
+    }
+
     private IEnumerator UpdateRollButtonState()
     {
         // 🔒 Disable by default
@@ -590,16 +589,41 @@ public class UM_MainPhase : UM_BasePhase
             var eventManager = _eventManager ?? _mainPhase.EventManager;
 
             bool eventInactive = !eventManager.IsEventScreen;
-            bool playerHasResolvedEvent = _currentEventDisplayCard == null;
+            bool playerHasResolvedEvent = _playerResolvedEvent;
             bool targetCardDrawn = !_currentTargetDisplayCard.IsNull();
             
             bool canRoll = currentPlayer.CanRoll();
-
+            
             enable = eventInactive && playerHasResolvedEvent && canRoll && targetCardDrawn;
         }
         
         EnableDiceButton(enable);
         yield break;
+    }
+    
+    private void SetEventButtonsInteractable(bool interactable)
+    {
+        bool canSave = false;
+
+        if (_noMoreEventCards)
+            interactable = false;
+        
+        if (isAIPlayer)
+            interactable = false;
+        
+        if (_currentTargetDisplayCard.IsNull()) 
+            interactable = false;
+        
+        if (_playerResolvedEvent) 
+            interactable = false;
+        
+        else if (interactable)
+            canSave = _currentEventDisplayCard.GetCard().canSave;
+        
+
+        saveEventButton.interactable = canSave;
+        
+        playEventButton.interactable = interactable;
     }
 
     #endregion

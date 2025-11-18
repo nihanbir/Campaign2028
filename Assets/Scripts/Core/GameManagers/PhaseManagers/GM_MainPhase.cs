@@ -102,14 +102,13 @@ public class GM_MainPhase : GM_BasePhase
 
 protected override void StartPlayerTurn()
     {
-        base.StartPlayerTurn();
-        
         if (_eventDeck.Count == 0)
         {
-            //TODO: bus
+            TurnFlowBus.Instance.RaiseOnce(new MainStageEvent(MainStage.NoMoreEventCards));
             Debug.Log("No more event cards!");
-            return;
         }
+        
+        base.StartPlayerTurn();
         
         Player current = game.CurrentPlayer;
         Debug.Log($"--- Player {current.playerID} turn started. Player team: {current.assignedActor.team}---");
@@ -200,7 +199,6 @@ protected override void StartPlayerTurn()
         stateDiscarded = false;
     }
     
-    //TODO: maybe raise a bus after rolling to see if we should run this
     private void EvaluateCapture(Player player, int roll)
     {
        var success = CurrentTargetCard switch
@@ -348,7 +346,6 @@ protected override void StartPlayerTurn()
         CurrentEventCard = card;
         
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.EventCardDrawn, CurrentEventCard));
-        
     }
     
     private void SaveEvent(EventCard card)
@@ -376,8 +373,6 @@ protected override void StartPlayerTurn()
     {
         if (CurrentEventCard == null) return;
         
-        //TODO: check if needed
-        // TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.CurrentEventCardCleared, CurrentEventCard));
         CurrentEventCard = null;
     }
     
