@@ -47,7 +47,8 @@ public class UM_MainPhase : UM_BasePhase
 
     private GM_MainPhase _mainPhase;
     private EventManager _eventManager;
-    
+
+    #region Phase Generics
     protected override void OnPhaseEnabled()
     {
         _mainPhase = game.mainPhase;
@@ -75,88 +76,6 @@ public class UM_MainPhase : UM_BasePhase
         SetEventButtonsInteractable(false);
     }
     
-    private void ListenForRaisedOnce(IGameEvent e)
-    {
-        if (e is not MainStageEvent m) return;
-        if (m.stage != MainStage.NoMoreEventCards) return;
-        
-        EnqueueUI(HandleNoMoreEventCardsRoutine());
-        TurnFlowBus.Instance.OnOneTimeEvent -= ListenForRaisedOnce;
-    }
-
-    protected override void HandleTurnEvent(IGameEvent e)
-    {
-        base.HandleTurnEvent(e);
-
-        if (!isCurrent) return;
-        
-        if (e is MainStageEvent m)
-        {
-            switch (m.stage)
-            {
-                case MainStage.EventCardDrawn:
-                    EnqueueUI(SpawnEventCard((EventCard)m.payload));
-                    break;
-                
-                case MainStage.TargetCardDrawn:
-                    EnqueueUI(SpawnTargetCard((Card)m.payload));
-                    break;
-                
-                case MainStage.EventCardSaved:
-                    EnqueueUI(EventSaved((EventCard)m.payload));
-                    break;
-                
-                case MainStage.CardCaptured:
-                    var captured = (CardCapturedData)m.payload;
-                    EnqueueUI(CardCaptured(captured.player, captured.card));
-                    break;
-                
-                case MainStage.StateDiscarded:
-                    var discarded = (StateCard)m.payload;
-                    EnqueueUI(StateDiscardedRoutine(discarded));
-                    break;
-            }
-        }
-
-        if (e is EventCardEvent c)
-        {
-            switch (c.stage)
-            {
-                case EventStage.EventApplied:
-                    EnqueueUI(HandleEventApplied());
-                    break;
-                
-                case EventStage.ChangeToEventScreen:
-                    EnqueueUI(HandleChangeToEventScreen());
-                    break;
-                    
-                case EventStage.DuelCompleted:
-                    EnqueueUI(HandleChangeFromEventScreen());
-                    break;
-            }
-        }
-    }
-
-    private IEnumerator StateDiscardedRoutine(StateCard discarded)
-    {
-        if (!_currentTargetDisplayCard.IsTarget(discarded)) yield break;
-
-        yield return CurrentTargetDiscardedAnimation();
-    }
-
-    private IEnumerator HandleNoMoreEventCardsRoutine()
-    {
-        drawEventButton.interactable = false;
-        drawEventButton.onClick.RemoveAllListeners();
-
-        Debug.Log("Here now");
-        _noMoreEventCards = true;
-        SetEventButtonsInteractable(false);
-        
-        //let the player roll for target if it exists
-        yield break;
-    }
-
     protected override void SubscribeToPhaseEvents()
     {
         base.SubscribeToPhaseEvents();
@@ -185,11 +104,86 @@ public class UM_MainPhase : UM_BasePhase
         saveEventButton.onClick.RemoveAllListeners();
         playEventButton.onClick.RemoveAllListeners();
     }
-    
-    private void TogglePlayerPanel()
+
+    #endregion
+   
+
+    #region BusEvents
+
+    private void ListenForRaisedOnce(IGameEvent e)
     {
-        ownedCardsPanel.TogglePanel();
+        if (e is not MainStageEvent m) return;
+        if (m.stage != MainStage.NoMoreEventCards) return;
+        
+        EnqueueUI(HandleNoMoreEventCardsRoutine());
+        TurnFlowBus.Instance.OnOneTimeEvent -= ListenForRaisedOnce;
     }
+
+    protected override void HandleTurnEvent(IGameEvent e)
+    {
+        base.HandleTurnEvent(e);
+
+        if (!isCurrent) return;
+        
+        switch (e)
+        {
+            case MainStageEvent m:
+                HandleMainStageEvent(m);
+                break;
+            
+            case EventCardEvent c:
+                HandleEventCardEvent(c);
+                break;
+        }
+    }
+
+    private void HandleEventCardEvent(EventCardEvent c)
+    {
+        switch (c.stage)
+        {
+            case EventStage.EventApplied:
+                EnqueueUI(HandleEventApplied());
+                break;
+                
+            case EventStage.ChangeToEventScreen:
+                EnqueueUI(HandleChangeToEventScreen());
+                break;
+                    
+            case EventStage.DuelCompleted:
+                EnqueueUI(HandleChangeFromEventScreen());
+                break;
+        }
+    }
+
+    private void HandleMainStageEvent(MainStageEvent m)
+    {
+        switch (m.stage)
+        {
+            case MainStage.EventCardDrawn:
+                EnqueueUI(SpawnEventCard((EventCard)m.payload));
+                break;
+                
+            case MainStage.TargetCardDrawn:
+                EnqueueUI(SpawnTargetCard((Card)m.payload));
+                break;
+                
+            case MainStage.EventCardSaved:
+                EnqueueUI(EventSaved((EventCard)m.payload));
+                break;
+                
+            case MainStage.CardCaptured:
+                var captured = (CardCapturedData)m.payload;
+                EnqueueUI(CardCaptured(captured.player, captured.card));
+                break;
+                
+            case MainStage.StateDiscarded:
+                var discarded = (StateCard)m.payload;
+                EnqueueUI(StateDiscardedRoutine(discarded));
+                break;
+        }
+    }
+
+    #endregion
 
     #region Player Management
     
@@ -219,6 +213,11 @@ public class UM_MainPhase : UM_BasePhase
             displayCard.gameObject.SetActive(true);
         }
     }
+    
+    private void TogglePlayerPanel()
+    {
+        ownedCardsPanel.TogglePanel();
+    }
 
     #endregion Player Management
 
@@ -240,14 +239,6 @@ public class UM_MainPhase : UM_BasePhase
         
         yield return UpdateRollButtonState();
         EnableDrawButtons();
-    }
-
-    private void EnableDrawButtons()
-    {
-        if (_currentTargetDisplayCard.IsNull())
-            drawTargetButton.interactable = !isAIPlayer;
-        
-        drawEventButton.interactable = !isAIPlayer && !_noMoreEventCards;
     }
 
     protected override void OnPlayerTurnEnded(Player player)
@@ -318,6 +309,17 @@ public class UM_MainPhase : UM_BasePhase
         SetEventButtonsInteractable(true);
     }
 
+    private IEnumerator HandleNoMoreEventCardsRoutine()
+    {
+        drawEventButton.interactable = false;
+        drawEventButton.onClick.RemoveAllListeners();
+        
+        _noMoreEventCards = true;
+        
+        //let the player roll for target if it exists
+        yield break;
+    }
+    
     private void OnSpawnEventClicked()
     {
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawEventCardRequest));
@@ -356,25 +358,34 @@ public class UM_MainPhase : UM_BasePhase
         ClearCurrentTargetCard();
         yield return UpdateRollButtonState();
     }
-
-    private void ClearCurrentEventCard()
-    {
-        if (_currentEventDisplayCard == null) return;
-        
-        if (_currentEventDisplayCard && _currentEventDisplayCard.gameObject)
-        {
-            Destroy(_currentEventDisplayCard.gameObject);
-            _currentEventDisplayCard = null;
-        }
-        
-        SetEventButtonsInteractable(false);
-    }
     
     private void ClearCurrentTargetCard()
     {
         if (_currentTargetDisplayCard.IsNull()) return;
         
         _currentTargetDisplayCard.Clear();
+    }
+    
+    private void OnClickEventSave()
+    {
+        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
+    }
+    
+    private IEnumerator EventSaved(EventCard card)
+    {
+        if (_currentEventDisplayCard.GetCard() != card)
+        {
+            Debug.LogWarning($"Tried to animate {card.cardName} save but current displayed event was {_currentEventDisplayCard}");
+            yield break;
+        }
+        
+        yield return AnimateEventSaved(
+            _currentEventDisplayCard.gameObject,
+            _currentPlayerDisplayCard.transform
+        );
+
+        _playerResolvedEvent = true;
+        yield return UpdateRollButtonState();
     }
     
     private void OnClickEventApply()
@@ -386,6 +397,19 @@ public class UM_MainPhase : UM_BasePhase
     {
         yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
         _playerResolvedEvent = true;
+    }
+    
+    private void ClearCurrentEventCard()
+    {
+        if (_currentEventDisplayCard == null) return;
+        
+        if (_currentEventDisplayCard && _currentEventDisplayCard.gameObject)
+        {
+            Destroy(_currentEventDisplayCard.gameObject);
+            _currentEventDisplayCard = null;
+        }
+        
+        SetEventButtonsInteractable(false);
     }
 
     private IEnumerator HandleChangeToEventScreen()
@@ -406,21 +430,12 @@ public class UM_MainPhase : UM_BasePhase
         
         yield return AnimateFadeInScreen();
     }
-    private IEnumerator EventSaved(EventCard card)
+    
+    private IEnumerator StateDiscardedRoutine(StateCard discarded)
     {
-        if (_currentEventDisplayCard.GetCard() != card)
-        {
-            Debug.LogWarning($"Tried to animate {card.cardName} save but current displayed event was {_currentEventDisplayCard}");
-            yield break;
-        }
-        
-        yield return AnimateEventSaved(
-            _currentEventDisplayCard.gameObject,
-            _currentPlayerDisplayCard.transform
-        );
+        if (!_currentTargetDisplayCard.IsTarget(discarded)) yield break;
 
-        _playerResolvedEvent = true;
-        yield return UpdateRollButtonState();
+        yield return CurrentTargetDiscardedAnimation();
     }
     
 #endregion Card Feedback
@@ -560,57 +575,15 @@ public class UM_MainPhase : UM_BasePhase
     }
     
     #endregion
-
-    #region Testing Helper
-
-    private void InitializePlayersForTesting()
-    {
-        var gm = GameManager.Instance;
-        var ui = GameUIManager.Instance;
-
-        if (gm == null || gm.players.Count == 0)
-        {
-            Debug.LogError("GameManager or players missing!");
-            return;
-        }
-
-        // Remove these
-        var allActors = new List<ActorCard>(gm.actorDeck);
-        if (allActors.Count == 0)
-        {
-            Debug.LogError("No actor cards found in GameManager!");
-            return;
-        }
-
-        for (int i = 0; i < gm.players.Count; i++)
-        {
-            var player = gm.players[i];
-            var actor = allActors[i % allActors.Count];
-
-            player.assignedActor = actor;
-
-            // Spawn player display card for this actor
-            var displayGo = Instantiate(ui.setupUI.cardDisplayPrefab, playerUIParent);
-            var displayCard = displayGo.GetComponent<PlayerDisplayCard>();
-
-            if (displayCard != null)
-            {
-                displayCard.SetCard(actor);
-                displayCard.displayType = CardDisplayType.AssignedActor;
-                player.SetDisplayCard(displayCard);
-            }
-        }
-
-        // RelocatePlayerCards(playerUIParent);
-        Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
-    }
-#endregion Testing Helper
-
-    #region Buttons
     
-    private void OnClickEventSave()
+    #region Button Helpers
+    
+    private void EnableDrawButtons()
     {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
+        if (_currentTargetDisplayCard.IsNull())
+            drawTargetButton.interactable = !isAIPlayer;
+        
+        drawEventButton.interactable = !isAIPlayer && !_noMoreEventCards;
     }
 
     private IEnumerator UpdateRollButtonState()
@@ -665,5 +638,50 @@ public class UM_MainPhase : UM_BasePhase
     }
 
     #endregion
+    
+    #region Testing Helper
+    
+        private void InitializePlayersForTesting()
+        {
+            var gm = GameManager.Instance;
+            var ui = GameUIManager.Instance;
+    
+            if (gm == null || gm.players.Count == 0)
+            {
+                Debug.LogError("GameManager or players missing!");
+                return;
+            }
+    
+            // Remove these
+            var allActors = new List<ActorCard>(gm.actorDeck);
+            if (allActors.Count == 0)
+            {
+                Debug.LogError("No actor cards found in GameManager!");
+                return;
+            }
+    
+            for (int i = 0; i < gm.players.Count; i++)
+            {
+                var player = gm.players[i];
+                var actor = allActors[i % allActors.Count];
+    
+                player.assignedActor = actor;
+    
+                // Spawn player display card for this actor
+                var displayGo = Instantiate(ui.setupUI.cardDisplayPrefab, playerUIParent);
+                var displayCard = displayGo.GetComponent<PlayerDisplayCard>();
+    
+                if (displayCard != null)
+                {
+                    displayCard.SetCard(actor);
+                    displayCard.displayType = CardDisplayType.AssignedActor;
+                    player.SetDisplayCard(displayCard);
+                }
+            }
+    
+            // RelocatePlayerCards(playerUIParent);
+            Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
+        }
+    #endregion Testing Helper
    
 }
