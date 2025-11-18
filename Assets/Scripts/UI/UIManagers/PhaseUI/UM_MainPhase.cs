@@ -69,7 +69,7 @@ public class UM_MainPhase : UM_BasePhase
         EnqueueUI(PhaseEnabledRoutine());
         
         //TODO: dont forget to remove
-        // InitializePlayersForTesting();
+        InitializePlayersForTesting();
         
         EnableDrawButtons(false);
         SetEventButtonsInteractable(false);
@@ -82,7 +82,8 @@ public class UM_MainPhase : UM_BasePhase
         if (gameUI.previouslyActiveUI)
             yield return gameUI.previouslyActiveUI.WaitUntilScreenState(false);
         
-        RelocatePlayerCards(playerUIParent);
+        //TODO: dont forget to uncomment
+        // RelocatePlayerCards(playerUIParent);
     }
     
     protected override void SubscribeToPhaseEvents()
@@ -123,7 +124,11 @@ public class UM_MainPhase : UM_BasePhase
         if (e is not MainStageEvent m) return;
         if (m.stage != MainStage.NoMoreEventCards) return;
         
-        EnqueueUI(HandleNoMoreEventCardsRoutine());
+        drawEventButton.interactable = false;
+        drawEventButton.onClick.RemoveAllListeners();
+        
+        _noMoreEventCards = true;
+        
         TurnFlowBus.Instance.OnOneTimeEvent -= HandleRaisedOnce;
     }
 
@@ -150,11 +155,11 @@ public class UM_MainPhase : UM_BasePhase
         switch (c.stage)
         {
             case EventStage.EventApplied:
-                EnqueueUI(HandleEventApplied());
+                HandleEventApplied();
                 break;
                 
             case EventStage.ChangeToEventScreen:
-                EnqueueUI(HandleChangeToEventScreen());
+                HandleChangeToEventScreenRoutine();
                 break;
                     
             case EventStage.DuelCompleted:
@@ -168,20 +173,20 @@ public class UM_MainPhase : UM_BasePhase
         switch (m.stage)
         {
             case MainStage.EventCardDrawn:
-                EnqueueUI(SpawnEventCard((EventCard)m.payload));
+                SpawnEventCardRoutine((EventCard)m.payload);
                 break;
                 
             case MainStage.TargetCardDrawn:
-                EnqueueUI(SpawnTargetCard((Card)m.payload));
+                SpawnTargetCardRoutine((Card)m.payload);
                 break;
                 
             case MainStage.EventCardSaved:
-                EnqueueUI(EventSaved((EventCard)m.payload));
+                EventSavedRoutine((EventCard)m.payload);
                 break;
                 
             case MainStage.CardCaptured:
                 var captured = (CardCapturedData)m.payload;
-                EnqueueUI(CardCaptured(captured.player, captured.card));
+                CardCapturedRoutine(captured.player, captured.card);
                 break;
                 
             case MainStage.StateDiscarded:
@@ -234,7 +239,8 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         _playerResolvedEvent = _noMoreEventCards;
-        
+
+        Debug.Log("Started now");
         base.OnPlayerTurnStarted(player);
         
         EnqueueUI(OnPlayerTurnStartedRoutine(player));
@@ -244,7 +250,11 @@ public class UM_MainPhase : UM_BasePhase
     {
         _currentPlayerDisplayCard = player.PlayerDisplayCard;
         
-        yield return UpdateRollButtonState();
+        if (!_currentTargetDisplayCard.IsNull() && _noMoreEventCards)
+        {
+            yield return EnableDiceButtonRoutine(true);
+        }
+        
         EnableDrawButtons(true);
     }
 
@@ -264,9 +274,10 @@ public class UM_MainPhase : UM_BasePhase
     
     protected override void OnPlayerRolledDice(Player player, int roll)
     {
-        base.OnPlayerRolledDice(player, roll);
+        if (!player.CanRoll())
+            EnableDiceButton(false);
         
-        EnqueueUI(UpdateRollButtonState());
+        base.OnPlayerRolledDice(player, roll);
     }
 
     #endregion Turn Flow
@@ -278,13 +289,15 @@ public class UM_MainPhase : UM_BasePhase
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawTargetCardRequest));
     }
 
-    private IEnumerator SpawnTargetCard(Card card)
+    private void SpawnTargetCardRoutine(Card card)
     {
-        if (card == null) 
-            yield break;
-        
+        if (card == null) return;
         drawTargetButton.interactable = false;
         
+        EnqueueUI(SpawnTargetCard(card));
+    }
+    private IEnumerator SpawnTargetCard(Card card)
+    {
         GameObject prefab = card switch
         {
             InstitutionCard => institutionCardPrefab,
@@ -312,19 +325,9 @@ public class UM_MainPhase : UM_BasePhase
         }
         
         yield return AnimateCardSpawn(_currentTargetDisplayCard.Transform, 0.1f);
-        
-        SetEventButtonsInteractable(true);
-    }
 
-    private IEnumerator HandleNoMoreEventCardsRoutine()
-    {
-        drawEventButton.interactable = false;
-        drawEventButton.onClick.RemoveAllListeners();
-        
-        _noMoreEventCards = true;
-        
-        //let the player roll for target if it exists
-        yield break;
+        if (_noMoreEventCards)
+            yield return EnableDiceButtonRoutine(true);
     }
     
     private void OnSpawnEventClicked()
@@ -332,38 +335,44 @@ public class UM_MainPhase : UM_BasePhase
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawEventCardRequest));
     }
 
-    private IEnumerator SpawnEventCard(EventCard card)
+    private void SpawnEventCardRoutine(EventCard card)
     {
         drawEventButton.interactable = false;
-        
+        EnqueueUI(SpawnEventCard(card));
+    }
+    private IEnumerator SpawnEventCard(EventCard card)
+    {
         var eventDisplay = Instantiate(eventCardPrefab, eventArea);
         _currentEventDisplayCard = eventDisplay.GetComponent<EventDisplayCard>();
         _currentEventDisplayCard?.SetCard(card);
         
         yield return AnimateCardSpawn(eventDisplay.transform, 0.1f);
-        
-        SetEventButtonsInteractable(true);
     }
 
     #endregion Card Spawning
     
     #region Card Feedback
 
-    private IEnumerator CardCaptured(Player player, Card card)
+    private void CardCapturedRoutine(Player player, Card card)
     {
         if (!_currentTargetDisplayCard.IsTarget(card))
         {
-            Debug.LogWarning($"Tried to animate {card.cardName} capture but current displayed target was {_currentTargetDisplayCard}");
-            yield break;
+            Debug.LogWarning($"Tried to capture {card.cardName} but current displayed target was {_currentTargetDisplayCard}");
+            return;
         }
+        EnableDiceButton(false);
         
+        EnqueueUI(CardCaptured(player, card));
+        
+    }
+    private IEnumerator CardCaptured(Player player, Card card)
+    {
         yield return AnimateCardCaptured(
             _currentTargetDisplayCard.Transform,
             player.PlayerDisplayCard.transform
         );
         
         ClearCurrentTargetCard();
-        yield return UpdateRollButtonState();
     }
     
     private void ClearCurrentTargetCard()
@@ -377,33 +386,36 @@ public class UM_MainPhase : UM_BasePhase
     {
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
     }
-    
-    private IEnumerator EventSaved(EventCard card)
+
+    private void EventSavedRoutine(EventCard card)
     {
         if (_currentEventDisplayCard.GetCard() != card)
         {
-            Debug.LogWarning($"Tried to animate {card.cardName} save but current displayed event was {_currentEventDisplayCard}");
-            yield break;
+            Debug.LogWarning($"Tried to save {card.cardName} but current displayed event was {_currentEventDisplayCard}");
+            return;
         }
-        
-        yield return AnimateEventSaved(
+        _playerResolvedEvent = true;
+        EnqueueUI(EventSaved(card));
+    }
+    private IEnumerator EventSaved(EventCard card)
+    {
+       yield return AnimateEventSaved(
             _currentEventDisplayCard.gameObject,
             _currentPlayerDisplayCard.transform
         );
 
-        _playerResolvedEvent = true;
-        yield return UpdateRollButtonState();
+        EnableDiceButton(true);
     }
     
     private void OnClickEventApply()
     {
         TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.ApplyEventCardRequest, _currentEventDisplayCard.GetCard()));
     }
-
-    private IEnumerator HandleEventApplied()
+    
+    private void HandleEventApplied()
     {
-        yield return AnimateEventApplied(_currentEventDisplayCard.gameObject);
         _playerResolvedEvent = true;
+        EnqueueUI(AnimateEventApplied(_currentEventDisplayCard.gameObject));
     }
     
     private void ClearCurrentEventCard()
@@ -419,21 +431,21 @@ public class UM_MainPhase : UM_BasePhase
         SetEventButtonsInteractable(false);
     }
 
+    private void HandleChangeToEventScreenRoutine()
+    {
+        EnableDiceButton(false);
+        EnqueueUI(HandleChangeToEventScreen());
+    }
     private IEnumerator HandleChangeToEventScreen()
     {
         ClearCurrentEventCard();
-        yield return UpdateRollButtonState();
         
         yield return AnimateFadeOutScreen();
-
-        isScreenActive = false;
     }
 
     private IEnumerator HandleChangeFromEventScreen()
     {
         yield return eventUI.WaitUntilScreenState(false);
-
-        isScreenActive = true;
         
         yield return AnimateFadeInScreen();
     }
@@ -451,6 +463,8 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator AnimateFadeInScreen()
     {
+        isScreenActive = true;
+        
         bool done = false;
 
         // Ensure starting state (invisible + shrunk)
@@ -492,6 +506,8 @@ public class UM_MainPhase : UM_BasePhase
 
         canvasGroup.alpha = 0f;
         gameObject.transform.localScale = Vector3.one;
+        
+        isScreenActive = false;
     }
     
     private IEnumerator AnimateCardSpawn(Transform card, float delay)
@@ -507,6 +523,8 @@ public class UM_MainPhase : UM_BasePhase
 
         while (!done)
             yield return null;
+        
+        SetEventButtonsInteractable(true);
     }
     
     private IEnumerator AnimateEventApplied(GameObject eventGO)
@@ -523,6 +541,14 @@ public class UM_MainPhase : UM_BasePhase
 
         while (!done)
             yield return null;
+        
+        ClearCurrentEventCard();
+
+        //TODO: consider this more
+        if (!_eventManager.IsEventScreen)
+        {
+            yield return EnableDiceButtonRoutine(true);
+        }
     }
     
     private IEnumerator AnimateEventSaved(GameObject eventGO, Transform target)
@@ -560,7 +586,6 @@ public class UM_MainPhase : UM_BasePhase
     private Sequence CurrentTargetDiscardedAnimation()
     {
         if (_currentTargetDisplayCard.IsNull()) return null;
-
         
         var t = _currentTargetDisplayCard.Transform;
         t.DOKill();
@@ -595,6 +620,7 @@ public class UM_MainPhase : UM_BasePhase
 
     private IEnumerator UpdateRollButtonState()
     {
+        Debug.Log("rolled");
         // 🔒 Disable by default
         bool enable = false;
 
