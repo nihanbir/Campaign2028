@@ -34,6 +34,9 @@ public class UM_SetupPhase : UM_BasePhase
     protected override void HandleTurnEvent(IGameEvent e)
     {
         base.HandleTurnEvent(e);
+
+        if (!isCurrent) return;
+        
         if (e is SetupStageEvent t)
         {
             switch (t.stage)

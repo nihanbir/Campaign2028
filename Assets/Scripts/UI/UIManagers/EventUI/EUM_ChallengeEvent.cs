@@ -116,7 +116,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         // 🔥 WAIT FOR MAIN PHASE UI ANIMATIONS to finish
         if (_mainUI != null)
-            yield return _mainUI.WaitUntilScreenInactive();
+            yield return _mainUI.WaitUntilScreenState(false);
         
         eventScreen.SetActive(true);
         isActive = true;

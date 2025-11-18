@@ -11,6 +11,9 @@ public abstract class UM_BasePhase : MonoBehaviour
     protected GameUIManager gameUI;
     
     public abstract GamePhase PhaseType { get; }
+
+    [Header("Phase Screen")] 
+    public GameObject phaseScreen;
     
     [Header("Buttons")]     
     public Button rollDiceButton;
@@ -21,8 +24,6 @@ public abstract class UM_BasePhase : MonoBehaviour
     public Ease enterEase = Ease.OutBack;
     public Ease exitEase = Ease.InBack;
 
-    protected UM_BasePhase previouslyActiveUI = null;
-
     protected bool isAIPlayer = false;
     protected Player currentPlayer = null;
     protected bool isScreenActive = false;
@@ -31,11 +32,19 @@ public abstract class UM_BasePhase : MonoBehaviour
     private readonly Queue<IEnumerator> _uiQueue = new();
     private bool _uiQueueRunning;
     protected bool IsQueueRunning => _uiQueueRunning;
-
-    public IEnumerator WaitUntilScreenInactive()
+    
+    public IEnumerator WaitUntilScreenState(bool active)
     {
-        while (isScreenActive)
-            yield return null;
+        if (active)
+        {
+            while (!isScreenActive)
+                yield return null;
+        }
+        else
+        {
+            while (isScreenActive)
+                yield return null;
+        }
     }
     
     #region Object
@@ -45,7 +54,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         game = GameManager.Instance;
         gameUI = GameUIManager.Instance;
         
-        gameObject.SetActive(false);
+        phaseScreen.SetActive(false);
         
         game.OnPhaseChanged += OnPhaseChanged;
         
@@ -97,12 +106,6 @@ public abstract class UM_BasePhase : MonoBehaviour
 
     protected virtual void OnPhaseEnabled()
     {
-        if(previouslyActiveUI)
-            EnqueueUI(previouslyActiveUI.WaitUntilScreenInactive());
-        
-        //TODO: might need to change how this happens (have a parent with the script, like in EUM)
-        gameObject.SetActive(true);
-        
         isCurrent = true;
         
         SubscribeToPhaseEvents();
@@ -110,18 +113,18 @@ public abstract class UM_BasePhase : MonoBehaviour
         EnableDiceButton(false);
         
         // Animate UI entry
-        EnqueueUI(AnimatePhaseEntry());
+        EnqueueUI(AnimatePhaseEntryRoutine());
     }
     
     protected virtual void OnPhaseDisabled()
     {
-        previouslyActiveUI = this;
+        gameUI.previouslyActiveUI = this;
         
         isCurrent = false;
         
         UnsubscribeToPhaseEvents();
 
-        EnqueueUI(AnimatePhaseExit());
+        EnqueueUI(AnimatePhaseExitRoutine());
     }
     
     protected virtual void SubscribeToPhaseEvents()
@@ -225,10 +228,10 @@ public abstract class UM_BasePhase : MonoBehaviour
     }
     
     #region Animations
-    protected virtual IEnumerator AnimatePhaseEntry()
+    protected virtual IEnumerator AnimatePhaseEntryRoutine()
     {
-        isScreenActive = true;
-        
+        phaseScreen.SetActive(true);
+       
         transform.localPosition += new Vector3(-1200f, 0f, 0f);
 
         bool done = false;
@@ -240,9 +243,11 @@ public abstract class UM_BasePhase : MonoBehaviour
         seq.OnComplete(() => done = true);
 
         while (!done) yield return null;
+        
+        isScreenActive = true;
     }
     
-    protected virtual IEnumerator AnimatePhaseExit()
+    protected virtual IEnumerator AnimatePhaseExitRoutine()
     {
         bool finished = false;
         
@@ -263,7 +268,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         while (!finished) yield return null;
 
         isScreenActive = false;
-        gameObject.SetActive(false);
+        phaseScreen.SetActive(false);
     }
     
     private IEnumerator DicePopAnimation(Image diceImg)

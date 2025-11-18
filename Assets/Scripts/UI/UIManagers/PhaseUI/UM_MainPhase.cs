@@ -66,21 +66,30 @@ public class UM_MainPhase : UM_BasePhase
         
         eventUI.Initialize();
         
-        RelocatePlayerCards(playerUIParent);
+        EnqueueUI(PhaseEnabledRoutine());
         
         //TODO: dont forget to remove
         // InitializePlayersForTesting();
         
-        base.OnPhaseEnabled();
-        
+        EnableDrawButtons(false);
         SetEventButtonsInteractable(false);
+        
+        base.OnPhaseEnabled();
+    }
+
+    private IEnumerator PhaseEnabledRoutine()
+    {
+        if (gameUI.previouslyActiveUI)
+            yield return gameUI.previouslyActiveUI.WaitUntilScreenState(false);
+        
+        RelocatePlayerCards(playerUIParent);
     }
     
     protected override void SubscribeToPhaseEvents()
     {
         base.SubscribeToPhaseEvents();
         
-        TurnFlowBus.Instance.OnOneTimeEvent += ListenForRaisedOnce;
+        TurnFlowBus.Instance.OnOneTimeEvent += HandleRaisedOnce;
         
         playerPanelButton.onClick.AddListener(TogglePlayerPanel);
         drawEventButton.onClick.AddListener(OnSpawnEventClicked);
@@ -106,17 +115,16 @@ public class UM_MainPhase : UM_BasePhase
     }
 
     #endregion
-   
-
+    
     #region BusEvents
 
-    private void ListenForRaisedOnce(IGameEvent e)
+    private void HandleRaisedOnce(IGameEvent e)
     {
         if (e is not MainStageEvent m) return;
         if (m.stage != MainStage.NoMoreEventCards) return;
         
         EnqueueUI(HandleNoMoreEventCardsRoutine());
-        TurnFlowBus.Instance.OnOneTimeEvent -= ListenForRaisedOnce;
+        TurnFlowBus.Instance.OnOneTimeEvent -= HandleRaisedOnce;
     }
 
     protected override void HandleTurnEvent(IGameEvent e)
@@ -226,7 +234,6 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         _playerResolvedEvent = _noMoreEventCards;
-        Debug.Log($"no more event cards: {_noMoreEventCards}");
         
         base.OnPlayerTurnStarted(player);
         
@@ -238,7 +245,7 @@ public class UM_MainPhase : UM_BasePhase
         _currentPlayerDisplayCard = player.PlayerDisplayCard;
         
         yield return UpdateRollButtonState();
-        EnableDrawButtons();
+        EnableDrawButtons(true);
     }
 
     protected override void OnPlayerTurnEnded(Player player)
@@ -578,12 +585,12 @@ public class UM_MainPhase : UM_BasePhase
     
     #region Button Helpers
     
-    private void EnableDrawButtons()
+    private void EnableDrawButtons(bool enable)
     {
         if (_currentTargetDisplayCard.IsNull())
-            drawTargetButton.interactable = !isAIPlayer;
+            drawTargetButton.interactable = enable && !isAIPlayer;
         
-        drawEventButton.interactable = !isAIPlayer && !_noMoreEventCards;
+        drawEventButton.interactable = enable && !isAIPlayer && !_noMoreEventCards;
     }
 
     private IEnumerator UpdateRollButtonState()

@@ -98,6 +98,8 @@ public class AM_MainPhase
     {
         Enable();
         
+        yield return _mainUI.WaitUntilScreenState(true);
+        
         yield return _mainUI.WaitUntilUIQueueFree();
         
         _currentAI = aiPlayer;

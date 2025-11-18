@@ -17,7 +17,8 @@ public class GameUIManager : MonoBehaviour
     [Header("Phase UIs")]
     [SerializeField] public UM_SetupPhase setupUI;
     [SerializeField] public UM_MainPhase mainUI;
-    
+
+    public UM_BasePhase previouslyActiveUI = null;
     // Add others (CivilWarUI, GameOverUI) as needed
     
     private void Awake()

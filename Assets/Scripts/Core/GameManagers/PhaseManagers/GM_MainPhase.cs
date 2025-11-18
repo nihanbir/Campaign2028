@@ -49,7 +49,7 @@ public class GM_MainPhase : GM_BasePhase
                     break;
                 
                 case MainStage.SaveEventCardRequest:
-                    SaveEvent((EventCard)m.payload);
+                    SaveEvent(CurrentEventCard);
                     break;
                 
                 case MainStage.ApplyEventCardRequest:
@@ -71,7 +71,6 @@ public class GM_MainPhase : GM_BasePhase
         //TODO: don't forget to remove this
         // AssignTestCardsToPlayers(_mainDeck);
         
-        Debug.Log("🟢 Mainphase UI Ready — starting player turns");
         StartPlayerTurn();
     }
 
@@ -350,11 +349,6 @@ protected override void StartPlayerTurn()
     
     private void SaveEvent(EventCard card)
     {
-        if (card != CurrentEventCard)
-        {
-            Debug.LogWarning($"Tried to save {card.cardName} but current event is {CurrentEventCard.cardName}");
-            return;
-        }
         var player = game.CurrentPlayer;
 
         if (_heldEvents.ContainsKey(player))
