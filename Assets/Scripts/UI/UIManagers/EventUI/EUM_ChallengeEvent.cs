@@ -153,7 +153,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
             
             case EventStage.CardOwnerChanged:
                 var data = (CardOwnerChangedData)e.payload;
-                EnqueueUI(CardOwnerChangedRoutine(data.owner,data.newOwner,data.card));
+                var newOwnerTransform = data.newOwner.PlayerDisplayCard.transform;
+                EnqueueUI(MoveCardToOwnerRoutine(newOwnerTransform));
                 break;
             
             case EventStage.DuelCompleted:
@@ -362,7 +363,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             yield return null;
     }
     
-    private IEnumerator CardOwnerChangedRoutine(Player owner,Player newOwner, Card card)
+    private IEnumerator MoveCardToOwnerRoutine(Transform owner)
     {
         GameObject targetDisplay = null;
         
@@ -374,10 +375,11 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         yield return AnimateCardCaptured(
             targetDisplay.transform,
-            newOwner.PlayerDisplayCard.transform
+            owner
         );
         
         Destroy(targetDisplay);
+        Destroy(midCardUI.GetChild(0).gameObject);
     }
     
     private IEnumerator AnimateCardCaptured(Transform card, Transform target)
@@ -485,6 +487,9 @@ public class EUM_ChallengeEvent : MonoBehaviour
 
     private IEnumerator ReturnToMainPhaseUIRoutine()
     {
+        if (midCardUI.childCount > 0)
+            yield return MoveCardToOwnerRoutine(rightCardUI);
+            
         // Fade out event screen if needed
         yield return AnimateFadeOutEventScreen();
         
