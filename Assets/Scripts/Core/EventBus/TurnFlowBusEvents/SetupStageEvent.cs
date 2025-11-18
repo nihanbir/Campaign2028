@@ -14,28 +14,37 @@ public class SetupStageEvent : GameEventBase
     public override string GetName() => $"SetupStageEvent({stage})";
 }
 
-public sealed class UniqueWinner
+public sealed class UniqueWinnerData
 {
     public Player player;
-    public UniqueWinner(Player p) { player = p;}
+    public UniqueWinnerData(Player p) { player = p;}
 }
 
-public sealed class TiedRoll
+public sealed class TiedRollData
 {
     public List<Player> players;
-    public TiedRoll(List<Player> p) { players = p;}
+    public TiedRollData(List<Player> p) { players = p;}
 }
 
-public sealed class ActorAssigned
+public sealed class ActorAssignedData
 {
     public Player player;
     public ActorCard actor;
-    public ActorAssigned(Player p, ActorCard a) { player = p; actor = a; }
+    public ActorAssignedData(Player p, ActorCard a) { player = p; actor = a; }
+}
+
+public sealed class BeginPhaseData
+{
+    public List<Player> unassignedPlayers;
+    public List<ActorCard> unassignedActors;
+    
+    public BeginPhaseData(List<Player> p, List<ActorCard> a) { unassignedPlayers = p; unassignedActors = a; }
 }
 
 public enum SetupStage
 {
     None,
+    BeginPhase,
     Roll,
     AllPlayersRolled,
     UniqueWinner,

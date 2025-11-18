@@ -68,7 +68,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         base.BeginPhase();
 
-        Debug.Log("🟢 SetupPhase UI Ready — starting player turns");
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginPhase, new BeginPhaseData(_unassignedPlayers, _unassignedActors)));
         
         CurrentStage = SetupStage.Roll;
     }
@@ -163,7 +163,7 @@ public class GM_SetupPhase : GM_BasePhase
         {
             Debug.Log($"Player {winnersOfRoll[0].playerID} won with roll {highestRoll}");
             
-            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.UniqueWinner, new UniqueWinner(winnersOfRoll[0])));
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.UniqueWinner, new UniqueWinnerData(winnersOfRoll[0])));
             
             HandleUniqueWinner(winnersOfRoll[0]);
         }
@@ -171,7 +171,7 @@ public class GM_SetupPhase : GM_BasePhase
         {
             Debug.Log($"Roll {highestRoll} is tied between: {winnersOfRoll.GetPlayerIDList()}");
             
-            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.TiedRoll, new TiedRoll(winnersOfRoll)));
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.TiedRoll, new TiedRollData(winnersOfRoll)));
             
             HandleTiedRoll(winnersOfRoll);
         }
@@ -352,7 +352,7 @@ public class GM_SetupPhase : GM_BasePhase
         _unassignedActors.Remove(actorToAssign);
         _unassignedPlayers.Remove(player);
         
-        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.ActorAssigned, new ActorAssigned(player, actorToAssign)));
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.ActorAssigned, new ActorAssignedData(player, actorToAssign)));
     }
     
     private bool ShouldAutoAssignLastActor()

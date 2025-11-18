@@ -47,12 +47,12 @@ public class UM_SetupPhase : UM_BasePhase
                     break;
                 
                 case SetupStage.UniqueWinner:
-                    var uniqueWinner = (UniqueWinner)t.payload;
+                    var uniqueWinner = (UniqueWinnerData)t.payload;
                     EnqueueUI(AnimateWinner(uniqueWinner.player));
                     break;
                 
                 case SetupStage.TiedRoll:
-                    var tiedRoll = (TiedRoll)t.payload;
+                    var tiedRoll = (TiedRollData)t.payload;
                     EnqueueUI(AnimateRerollPlayers(tiedRoll.players));
                     break;
                 
@@ -62,7 +62,7 @@ public class UM_SetupPhase : UM_BasePhase
                     break;
                 
                 case SetupStage.ActorAssigned:
-                    var assigned = (ActorAssigned)t.payload;
+                    var assigned = (ActorAssignedData)t.payload;
                     EnqueueUI(UpdatePlayerUIWithActor(assigned.player, assigned.actor));
                     break;
                 
@@ -79,7 +79,7 @@ public class UM_SetupPhase : UM_BasePhase
                 case CardInputStage.Clicked:
                     if (c.payload is ActorCard a)
                     {
-                        HighlightActorCard(a);
+                        EnqueueUI(HighlightActorCard(a));
                     }
                     break;
             }
