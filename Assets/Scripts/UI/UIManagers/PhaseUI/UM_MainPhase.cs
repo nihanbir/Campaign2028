@@ -110,6 +110,11 @@ public class UM_MainPhase : UM_BasePhase
                     var captured = (CardCapturedData)m.payload;
                     EnqueueUI(CardCaptured(captured.player, captured.card));
                     break;
+                
+                case MainStage.StateDiscarded:
+                    var discarded = (StateCard)m.payload;
+                    EnqueueUI(StateDiscardedRoutine(discarded));
+                    break;
             }
         }
 
@@ -132,11 +137,19 @@ public class UM_MainPhase : UM_BasePhase
         }
     }
 
+    private IEnumerator StateDiscardedRoutine(StateCard discarded)
+    {
+        if (!_currentTargetDisplayCard.IsTarget(discarded)) yield break;
+
+        yield return CurrentTargetDiscardedAnimation();
+    }
+
     private IEnumerator HandleNoMoreEventCardsRoutine()
     {
         drawEventButton.interactable = false;
         drawEventButton.onClick.RemoveAllListeners();
 
+        Debug.Log("Here now");
         _noMoreEventCards = true;
         SetEventButtonsInteractable(false);
         
@@ -214,6 +227,7 @@ public class UM_MainPhase : UM_BasePhase
     protected override void OnPlayerTurnStarted(Player player)
     {
         _playerResolvedEvent = _noMoreEventCards;
+        Debug.Log($"no more event cards: {_noMoreEventCards}");
         
         base.OnPlayerTurnStarted(player);
         
@@ -488,6 +502,25 @@ public class UM_MainPhase : UM_BasePhase
         while (!done)
             yield return null;
     }
+    
+    private IEnumerator AnimateEventSaved(GameObject eventGO, Transform target)
+    {
+        bool done = false;
+
+        var t = eventGO.transform;
+
+        var seq = DOTween.Sequence();
+        seq.Append(t.DOMove(target.position, 0.5f).SetEase(Ease.InBack));
+        seq.Join(t.DOScale(1.3f, 0.25f).SetLoops(2, LoopType.Yoyo));
+        seq.OnComplete(() =>
+        {
+            done = true;
+            ClearCurrentEventCard();
+        });
+
+        while (!done)
+            yield return null;
+    }
 
     private IEnumerator AnimateCardCaptured(Transform card, Transform target)
     {
@@ -501,24 +534,29 @@ public class UM_MainPhase : UM_BasePhase
         while (!done)
             yield return null;
     }
-
-    private IEnumerator AnimateEventSaved(GameObject eventGO, Transform target)
+    
+    private Sequence CurrentTargetDiscardedAnimation()
     {
-        bool done = false;
+        if (_currentTargetDisplayCard.IsNull()) return null;
 
-        var t = eventGO.transform;
+        
+        var t = _currentTargetDisplayCard.Transform;
+        t.DOKill();
 
-        var seq = DOTween.Sequence();
-        seq.Append(t.DOMove(target.position, 0.5f).SetEase(Ease.InBack));
-        seq.Join(t.DOScale(1.3f, 0.25f).SetLoops(2, LoopType.Yoyo));
-        seq.OnComplete(() =>
-            {
-                done = true;
-                ClearCurrentEventCard();
-            });
+        Sequence s = DOTween.Sequence();
 
-        while (!done)
-            yield return null;
+        // 1. Quick shrink “shock”
+        s.Append(t.DOScale(0.9f, 0.15f).SetEase(Ease.OutBack));
+
+        // 2. Spin + shrink out
+        s.Append(t.DORotate(new Vector3(0, 0, 180f), 0.35f, RotateMode.FastBeyond360)
+            .SetEase(Ease.InCubic));
+        s.Join(t.DOScale(0f, 0.35f).SetEase(Ease.InBack));
+
+        // 3. Cleanup
+        s.OnComplete(ClearCurrentTargetCard);
+
+        return s;
     }
     
     #endregion
