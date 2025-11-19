@@ -18,6 +18,7 @@ public class EventManager
     private EventType _effectiveType;
 
     private bool _isEventActive = false;
+    public bool needTwo = false;
     public bool IsEventScreen { get; set; }
     
     public EventManager(GM_MainPhase gm)
@@ -84,6 +85,13 @@ public class EventManager
         return player.assignedActor.team == ActorTeam.Blue ? card.blueTeam : card.redTeam;
     }
 
+    public bool ConsumeNeedTwo()
+    {
+        if (!needTwo) return false;
+        needTwo = false;
+        return true;
+
+    }
     public void CompleteEvent()
     {
         EventCardBus.Instance.OnEvent -= OnEventCardEvent;

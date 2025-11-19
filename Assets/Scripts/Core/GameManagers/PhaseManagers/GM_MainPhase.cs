@@ -165,7 +165,6 @@ protected override void StartPlayerTurn()
             return;
         }
         
-        //TODO: maybe register to bus after rolling to see which evaluate to run
         Debug.Log($"Rolled: {diceRoll}");
         EvaluateCapture(player, diceRoll);
         
@@ -200,12 +199,21 @@ protected override void StartPlayerTurn()
     
     private void EvaluateCapture(Player player, int roll)
     {
-       var success = CurrentTargetCard switch
+        bool success = false;
+        
+        if (EventManager.ConsumeNeedTwo())
         {
-            StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
-            InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
-            _ => false
-        };
+            success = roll == 2;
+        }
+        else
+        { 
+            success = CurrentTargetCard switch
+            {
+                StateCard s => s.IsSuccessfulRoll(roll, player.assignedActor.team),
+                InstitutionCard i => i.IsSuccessfulRoll(roll, player.assignedActor.team),
+                _ => false
+            };
+        }
         
         if (success)
         {

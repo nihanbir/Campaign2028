@@ -62,7 +62,7 @@ public class AMP_EventResponse
             {
                 var data = (DuelData)e.payload;
                 var aiPlayer = AIManager.Instance.GetAIPlayer(data.Attacker);
-                _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                _ai.StartCoroutine(WaitUntilScreenThenRoll(aiPlayer));
                 break;
             }
 
@@ -70,7 +70,7 @@ public class AMP_EventResponse
             {
                 var data = (AltStatesData)e.payload;
                 var aiPlayer = AIManager.Instance.GetAIPlayer(data.Player);
-                _ai.StartCoroutine(RollDiceForEvent(aiPlayer));
+                _ai.StartCoroutine(WaitUntilScreenThenRoll(aiPlayer));
                 break;
             }
         }
@@ -93,11 +93,16 @@ public class AMP_EventResponse
         SelectableCardBus.Instance.Raise(
             new CardInputEvent(CardInputStage.Held, chosenState));
     }
+    
+    private IEnumerator WaitUntilScreenThenRoll(AIPlayer aiPlayer)
+    {
+        yield return _ui.WaitUntilScreenState(true);
+
+        yield return RollDiceForEvent(aiPlayer);
+    }
 
     private IEnumerator RollDiceForEvent(AIPlayer aiPlayer)
     {
-        yield return _ui.WaitUntilScreenState(true);
-        
         yield return _ui.WaitUntilQueueFree();
         
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
