@@ -105,7 +105,7 @@ public class EventManager
         
         CompleteEvent();
         
-        _mainPhase.DuelCompleted();
+        _mainPhase.EndPlayerTurnFromEvent();
     }
     
     public void CancelEvent(EventCard card)

@@ -5,23 +5,30 @@ using UnityEngine;
 public class AMP_EventResponse
 {
     private readonly AIManager _ai;
+    private readonly AM_MainPhase _main;
     private readonly UM_MainPhase _mainUI;
     private readonly EUM_ChallengeEvent _ui;
     
     public AMP_EventResponse(AIManager ai, AM_MainPhase main)
     {
         _ai = ai;
+        _main = main;
         _mainUI = GameUIManager.Instance.mainUI;
         _ui = _mainUI.eventUI;
     }
 
     public void Enable()
     {
+        _main.eventResolved = false;
         EventCardBus.Instance.OnEvent += OnEvent;
     }
 
-    private void Disable()  => EventCardBus.Instance.OnEvent -= OnEvent;
-    
+    private void Disable()
+    {
+        _main.eventResolved = true;
+        EventCardBus.Instance.OnEvent -= OnEvent;
+    }
+
     private void OnEvent(EventCardEvent e)
     {
         // Only reacts to events, never active logic
@@ -36,6 +43,10 @@ public class AMP_EventResponse
                 break;
             
             case EventStage.EventCompleted:
+                Disable();
+                break;
+            
+            case EventStage.LoseTurn:
                 Disable();
                 break;
         

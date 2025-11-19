@@ -69,7 +69,7 @@ public class GM_MainPhase : GM_BasePhase
         _mainDeck.ShuffleInPlace();
         
         //TODO: don't forget to remove this
-        // AssignTestCardsToPlayers(_mainDeck);
+        AssignTestCardsToPlayers(_mainDeck);
         
         StartPlayerTurn();
     }
@@ -119,7 +119,7 @@ protected override void StartPlayerTurn()
         }
     }
 
-    public void DuelCompleted()
+    public void EndPlayerTurnFromEvent()
     {
         EndPlayerTurn();
     }

@@ -31,6 +31,7 @@ public enum EventStage
     PlayerRolled,           // Player rolled value (for UI dice feedback)
     RollDiceRequest,
     CardOwnerChanged,
+    LoseTurn,
 
 }
 

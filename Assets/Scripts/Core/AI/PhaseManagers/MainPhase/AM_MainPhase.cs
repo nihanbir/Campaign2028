@@ -17,8 +17,9 @@ public class AM_MainPhase
     private EventManager _eventManager;
 
     private AIPlayer _currentAI;
+    private bool _active = false;
 
-    private bool _eventResolved;
+    public bool eventResolved = false;
 
     private EventCard _drawnEvent;
     private Card _drawnTarget;
@@ -82,16 +83,19 @@ public class AM_MainPhase
         
         _drawnEvent = null;
         _drawnTarget = null;
-        _eventResolved = false;
+        eventResolved = false;
+        _active = true;
     } 
     
     private void Disable()
     {
+        _active = false;
+        
         TurnFlowBus.Instance.OnEvent -= OnTurnEvent;
         _currentAI = null;
         _drawnTarget = null;
         _drawnEvent = null;
-        _eventResolved = false;
+        eventResolved = false;
     }
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
@@ -126,6 +130,8 @@ public class AM_MainPhase
         
         if (!_noMoreEventCards)
             yield return _ai.StartCoroutine(WaitUntilEventResolved());
+        
+        if (!_active) yield break;
         
         if (GameManager.Instance.CurrentPlayer == aiPlayer && !_eventManager.IsEventScreen)
         {
@@ -180,8 +186,6 @@ public class AM_MainPhase
             _aiEventManager.Enable();
             TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.ApplyEventCardRequest));
         }
-
-        _eventResolved = true;
     }
     
     private IEnumerator WaitUntilCardsReady()
@@ -198,7 +202,7 @@ public class AM_MainPhase
 
     private IEnumerator WaitUntilEventResolved()
     {
-        while (!_eventResolved)
+        while (!eventResolved)
             yield return null;
     }
 
