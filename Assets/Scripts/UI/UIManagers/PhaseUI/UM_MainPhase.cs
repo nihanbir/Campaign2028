@@ -657,6 +657,9 @@ public class UM_MainPhase : UM_BasePhase
     {
         bool canSave = false;
 
+        if (_currentEventDisplayCard == null)
+            interactable = false;
+        
         if (_noMoreEventCards)
             interactable = false;
         
