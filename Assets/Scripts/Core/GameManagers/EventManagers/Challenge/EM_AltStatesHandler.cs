@@ -41,6 +41,7 @@ public class EM_AltStatesHandler : BaseEventHandler
         if (cardToDiscard != null)
         {
             phase.DiscardState(cardToDiscard);
+            EventCardBus.Instance.Raise(new EventCardEvent(EventStage.StateDiscarded, cardToDiscard));
         }
         else
         {

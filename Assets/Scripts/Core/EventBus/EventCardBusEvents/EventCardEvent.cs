@@ -27,6 +27,7 @@ public enum EventStage
     DuelStarted,           // Attacker vs Defender with chosen card
     DuelCompleted,         // Duel done
     AltStatesShown,        // Alt states UI should appear
+    StateDiscarded,
     PlayerRolled,           // Player rolled value (for UI dice feedback)
     RollDiceRequest,
     CardOwnerChanged,

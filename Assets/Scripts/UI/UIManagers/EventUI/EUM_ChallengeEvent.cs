@@ -36,6 +36,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private StateDisplayCard _highlightedCard;
 
     private bool _challengeStates = false;
+    private bool _altStates = false;
     private bool _isActive = false;
     private bool _cardCaptured = false;
     
@@ -144,6 +145,11 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 ShowAltStates(p.Player, p.State1, p.State2);
                 break;
             }
+            
+            case EventStage.StateDiscarded:
+                var d = (StateCard)e.payload;
+                EnqueueUI(StateDiscardedRoutine(d));
+                break;
 
             case EventStage.PlayerRolled:
             {
@@ -211,6 +217,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     #region AltStates
     private void ShowAltStates(Player player, StateCard card1, StateCard card2)
     {
+        _altStates = true;
         EnqueueUI(ShowAltStatesRoutine(player, card1, card2));
     }
 
@@ -223,6 +230,16 @@ public class EUM_ChallengeEvent : MonoBehaviour
         CreateCardInTransform<StateDisplayCard>(_mainUI.stateCardPrefab, rightCardUI, card2);
 
         yield return AnimateEventUIRoutine();
+        
+        var isAIPlayer = AIManager.Instance.IsAIPlayer(player);
+        
+        rollDiceButton.onClick.RemoveAllListeners();
+        rollDiceButton.onClick.AddListener(OnRollDiceClicked);
+
+        rollDiceButton.interactable = !isAIPlayer;
+        
+        canvasGroup.interactable = !isAIPlayer;
+        canvasGroup.blocksRaycasts = !isAIPlayer;
     }
 
     #endregion
@@ -273,6 +290,33 @@ public class EUM_ChallengeEvent : MonoBehaviour
                 return display;
         }
         
+        return null;
+    }
+    
+    private GameObject FindDiscardedStateCard(StateCard discarded)
+    {
+        // Right side
+        if (rightCardUI.childCount > 0)
+        {
+            var child = rightCardUI.GetChild(0);
+            if (child.TryGetComponent(out StateDisplayCard stateDisplay))
+            {
+                if (stateDisplay.GetCard() == discarded)
+                    return child.gameObject;
+            }
+        }
+
+        // Left side
+        if (leftCardUI.childCount > 0)
+        {
+            var child = leftCardUI.GetChild(0);
+            if (child.TryGetComponent(out StateDisplayCard stateDisplay))
+            {
+                if (stateDisplay.GetCard() == discarded)
+                    return child.gameObject;
+            }
+        }
+
         return null;
     }
     
@@ -396,6 +440,46 @@ public class EUM_ChallengeEvent : MonoBehaviour
             yield return null;
     }
     
+    private IEnumerator StateDiscardedRoutine(StateCard discarded)
+    {
+        GameObject targetDisplay = FindDiscardedStateCard(discarded);
+
+        if (!targetDisplay)
+            yield break;
+
+        yield return CurrentTargetDiscardedAnimation(targetDisplay);
+    }
+    
+    private IEnumerator CurrentTargetDiscardedAnimation(GameObject card)
+    {
+        if (!card) yield break;
+
+        var t = card.transform;
+        t.DOKill();
+
+        bool done = false;
+
+        Sequence s = DOTween.Sequence();
+
+        // 1. Quick shrink shock
+        s.Append(t.DOScale(0.9f, 0.15f).SetEase(Ease.OutBack));
+
+        // 2. Spin + shrink
+        s.Append(t.DORotate(new Vector3(0, 0, 180f), 0.35f, RotateMode.FastBeyond360)
+            .SetEase(Ease.InCubic));
+        s.Join(t.DOScale(0f, 0.35f).SetEase(Ease.InBack));
+
+        s.OnComplete(() =>
+        {
+            done = true;
+            Destroy(card);
+        });
+
+        // 🚀 Now Unity waits until animation really ends
+        while (!done)
+            yield return null;
+    }
+    
     private IEnumerator AnimateCardMoveToMid(GameObject cardGO, RectTransform fromUI, RectTransform toUI)
     {
         RectTransform cardRT = cardGO.transform as RectTransform;
@@ -483,13 +567,12 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         rollDiceButton.onClick.RemoveAllListeners();
 
-        Debug.Log("Method enqueued");
         EnqueueUI(ReturnToMainPhaseUIRoutine());
     }
 
     private IEnumerator ReturnToMainPhaseUIRoutine()
     {
-        if (!_cardCaptured)
+        if (!_cardCaptured && !_altStates)
             yield return MoveCardToOwnerRoutine(rightCardUI);
             
         // Fade out event screen if needed
@@ -497,6 +580,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         
         _highlightedCard = null;
         _cardCaptured = false;
+        _altStates = false;
         
         eventScreen.SetActive(false);
         duelScreen.SetActive(false);
