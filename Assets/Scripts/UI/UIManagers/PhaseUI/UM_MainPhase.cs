@@ -240,7 +240,6 @@ public class UM_MainPhase : UM_BasePhase
     {
         _playerResolvedEvent = _noMoreEventCards;
 
-        Debug.Log("Started now");
         base.OnPlayerTurnStarted(player);
         
         EnqueueUI(OnPlayerTurnStartedRoutine(player));
@@ -583,28 +582,37 @@ public class UM_MainPhase : UM_BasePhase
             yield return null;
     }
     
-    private Sequence CurrentTargetDiscardedAnimation()
+    private IEnumerator CurrentTargetDiscardedAnimation()
     {
-        if (_currentTargetDisplayCard.IsNull()) return null;
-        
+        if (_currentTargetDisplayCard.IsNull()) yield break;
+
         var t = _currentTargetDisplayCard.Transform;
         t.DOKill();
 
+        bool done = false;
+
         Sequence s = DOTween.Sequence();
 
-        // 1. Quick shrink “shock”
+        // 1. Quick shrink shock
         s.Append(t.DOScale(0.9f, 0.15f).SetEase(Ease.OutBack));
 
-        // 2. Spin + shrink out
+        // 2. Spin + shrink
         s.Append(t.DORotate(new Vector3(0, 0, 180f), 0.35f, RotateMode.FastBeyond360)
             .SetEase(Ease.InCubic));
         s.Join(t.DOScale(0f, 0.35f).SetEase(Ease.InBack));
 
         // 3. Cleanup
-        s.OnComplete(ClearCurrentTargetCard);
+        s.OnComplete(() =>
+        {
+            ClearCurrentTargetCard();
+            done = true;
+        });
 
-        return s;
+        // 🚀 Now Unity waits until animation really ends
+        while (!done)
+            yield return null;
     }
+
     
     #endregion
     
