@@ -36,7 +36,8 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private StateDisplayCard _highlightedCard;
 
     private bool _challengeStates = false;
-    private bool isActive = false;
+    private bool _isActive = false;
+    private bool _cardCaptured = false;
     
     private readonly Queue<IEnumerator> _queue = new();
     private bool _queueRunning;
@@ -68,12 +69,12 @@ public class EUM_ChallengeEvent : MonoBehaviour
     {
         if (active)
         {
-            while (!isActive)
+            while (!_isActive)
                 yield return null;
         }
         else
         {
-            while (isActive)
+            while (_isActive)
                 yield return null;
         }
     }
@@ -119,7 +120,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             yield return _mainUI.WaitUntilScreenState(false);
         
         eventScreen.SetActive(true);
-        isActive = true;
+        _isActive = true;
         
         switch (e.stage)
         {
@@ -152,6 +153,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
             }
             
             case EventStage.CardOwnerChanged:
+                _cardCaptured = true;
                 var data = (CardOwnerChangedData)e.payload;
                 var newOwnerTransform = data.newOwner.PlayerDisplayCard.transform;
                 EnqueueUI(MoveCardToOwnerRoutine(newOwnerTransform));
@@ -366,7 +368,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private IEnumerator MoveCardToOwnerRoutine(Transform owner)
     {
         GameObject targetDisplay = null;
-        
+
         if (midCardUI.childCount > 0)
             targetDisplay = midCardUI.GetChild(0).gameObject;
 
@@ -379,12 +381,11 @@ public class EUM_ChallengeEvent : MonoBehaviour
         );
         
         Destroy(targetDisplay);
-        Destroy(midCardUI.GetChild(0).gameObject);
     }
     
     private IEnumerator AnimateCardCaptured(Transform card, Transform target)
     {
-        bool done = false;
+       bool done = false;
 
         var seq = DOTween.Sequence();
         seq.Append(card.DOMove(target.position, 0.5f).SetEase(Ease.InBack));
@@ -481,25 +482,27 @@ public class EUM_ChallengeEvent : MonoBehaviour
     private void ReturnToMainPhaseUI()
     {
         rollDiceButton.onClick.RemoveAllListeners();
-        
+
+        Debug.Log("Method enqueued");
         EnqueueUI(ReturnToMainPhaseUIRoutine());
     }
 
     private IEnumerator ReturnToMainPhaseUIRoutine()
     {
-        if (midCardUI.childCount > 0)
+        if (!_cardCaptured)
             yield return MoveCardToOwnerRoutine(rightCardUI);
             
         // Fade out event screen if needed
         yield return AnimateFadeOutEventScreen();
         
         _highlightedCard = null;
-
+        _cardCaptured = false;
+        
         eventScreen.SetActive(false);
         duelScreen.SetActive(false);
         statesScreen.SetActive(false);
-
-        isActive = false;
+        
+        _isActive = false;
     }
     
     private IEnumerator AnimateFadeOutEventScreen()
