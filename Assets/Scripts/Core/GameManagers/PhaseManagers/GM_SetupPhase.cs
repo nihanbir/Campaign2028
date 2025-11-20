@@ -14,6 +14,7 @@ public class GM_SetupPhase : GM_BasePhase
     
     private List<ActorCard> _unassignedActors;
     private List<Player> _unassignedPlayers;
+    private List<AllegianceCard> _allegianceDeck;
     
     public List<ActorCard> GetUnassignedActors() => _unassignedActors;
     public List<Player> GetUnassignedPlayers() => _unassignedPlayers;
@@ -26,6 +27,8 @@ public class GM_SetupPhase : GM_BasePhase
     {
         _unassignedActors = new List<ActorCard>(game.actorDeck);
         _unassignedPlayers = new List<Player>(game.players);
+        _allegianceDeck = new List<AllegianceCard>(game.allegianceDeck);
+        _allegianceDeck.ShuffleInPlace(); // Shuffle allegiance deck
     }
     
     private SetupStage _currentStage = SetupStage.None;
@@ -352,7 +355,29 @@ public class GM_SetupPhase : GM_BasePhase
         _unassignedActors.Remove(actorToAssign);
         _unassignedPlayers.Remove(player);
         
+        AssignAllegianceToPlayer(player);
+        
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.ActorAssigned, new ActorAssignedData(player, actorToAssign)));
+    }
+    
+    private void AssignAllegianceToPlayer(Player player)
+    {
+        if (_allegianceDeck.Count == 0)
+        {
+            Debug.LogWarning("No allegiance cards remaining!");
+            return;
+        }
+    
+        AllegianceCard allegiance = _allegianceDeck.PopFront();
+        player.assignedAllegiance = allegiance;
+    
+        Debug.Log($"Assigned {allegiance.allegiance} allegiance to Player {player.playerID}");
+    
+        // Notify UI about allegiance assignment
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(
+            SetupStage.AllegianceAssigned, 
+            new AllegianceAssignedData(player, allegiance)
+        ));
     }
     
     private bool ShouldAutoAssignLastActor()

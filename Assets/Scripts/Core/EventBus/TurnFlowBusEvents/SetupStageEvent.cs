@@ -33,6 +33,13 @@ public sealed class ActorAssignedData
     public ActorAssignedData(Player p, ActorCard a) { player = p; actor = a; }
 }
 
+public sealed class AllegianceAssignedData
+{
+    public Player player;
+    public AllegianceCard allegiance;
+    public AllegianceAssignedData(Player p, AllegianceCard a) { player = p; allegiance = a; }
+}
+
 public sealed class BeginPhaseData
 {
     public List<Player> unassignedPlayers;
@@ -52,5 +59,6 @@ public enum SetupStage
     Reroll,
     BeginActorAssignment,
     ActorAssigned,
+    AllegianceAssigned,
     LastActorAssigned
 }

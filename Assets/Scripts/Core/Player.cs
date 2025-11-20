@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
 
     public int playerID;
     public ActorCard assignedActor;
+    public AllegianceCard assignedAllegiance { get; set; }
 
     // === Cards ===
     private readonly List<StateCard> _heldStates = new();

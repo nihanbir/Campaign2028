@@ -57,14 +57,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c94e9b5df7ae0b640b2e98f11311b063, type: 2}
   - {fileID: 11400000, guid: 9f51f1d856c6b6f46b1d7f4f6b4cc966, type: 2}
   allEvents:
-  - {fileID: 11400000, guid: b77aac1173ef29144a4679bdee0c1d96, type: 2}
-  - {fileID: 11400000, guid: 60f79d8490fc36b4783ba6253896b7f2, type: 2}
-  - {fileID: 11400000, guid: ee04fbbff2e7a454faa0c923b8faa87c, type: 2}
+  - {fileID: 11400000, guid: bc9ac2210e4389042bc1da0e202bf230, type: 2}
+  - {fileID: 11400000, guid: 9b96f2fd0a507cf488da9a268bc2287a, type: 2}
+  - {fileID: 11400000, guid: f52dddd1feb50f04c803f40c2581935d, type: 2}
+  - {fileID: 11400000, guid: 3507f405f0a7d8c418682ef6520e5bc9, type: 2}
   extraRollEvents: []
   needTwoEvents: []
-  challengeEvents:
-  - {fileID: 11400000, guid: b77aac1173ef29144a4679bdee0c1d96, type: 2}
+  challengeEvents: []
   loseTurnEvents: []
   noImpactEvents: []
   alternativeStatesEvents: []
-  teamBasedEvents: []
+  teamBasedEvents:
+  - {fileID: 11400000, guid: bc9ac2210e4389042bc1da0e202bf230, type: 2}
+  - {fileID: 11400000, guid: 9b96f2fd0a507cf488da9a268bc2287a, type: 2}
+  - {fileID: 11400000, guid: f52dddd1feb50f04c803f40c2581935d, type: 2}
+  - {fileID: 11400000, guid: 3507f405f0a7d8c418682ef6520e5bc9, type: 2}

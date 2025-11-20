@@ -69,6 +69,11 @@ public class UM_SetupPhase : UM_BasePhase
                     EnqueueUI(UpdatePlayerUIWithActor(assigned.player, assigned.actor));
                     break;
                 
+                case SetupStage.AllegianceAssigned:
+                    var allegianceData = (AllegianceAssignedData)t.payload;
+                    EnqueueUI(UpdatePlayerUIWithAllegiance(allegianceData.player, allegianceData.allegiance));
+                    break;
+                
                 case SetupStage.LastActorAssigned:
                     //TODO:
                     break;
@@ -280,6 +285,27 @@ public class UM_SetupPhase : UM_BasePhase
         s.Append(actor.DOMove(target.position, assignDuration).SetEase(Ease.InBack));
         s.Join(actor.DOScale(1.3f, assignDuration * 0.5f).SetLoops(2, LoopType.Yoyo));
         return s;
+    }
+    
+    private IEnumerator UpdatePlayerUIWithAllegiance(Player player, AllegianceCard allegiance)
+    {
+        var playerCard = FindDisplayCardForPlayer(player);
+        if (!playerCard) yield break;
+    
+        // Update the player display card with allegiance info
+        playerCard.SetAllegiance(allegiance);
+    
+        // Optional: Add visual feedback for allegiance assignment
+        bool done = false;
+    
+        // Pulse animation to show allegiance was assigned
+        playerCard.transform.DOPunchScale(Vector3.one * 0.1f, 0.3f, 2)
+            .OnComplete(() => done = true);
+    
+        while (!done)
+            yield return null;
+    
+        Debug.Log($"UI updated: Player {player.playerID} has {allegiance.allegiance} allegiance");
     }
     
     private IEnumerator AnimateRerollPlayers(List<Player> rerollingPlayers)

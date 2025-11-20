@@ -16,6 +16,11 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     public TextMeshProUGUI evScoreText;
     public TextMeshProUGUI instScoreText;
     
+    [Header("Allegiance Display")]
+    public Image allegianceIcon;
+    public Sprite usaAllegianceSprite;
+    public Sprite chinaAllegianceSprite;
+    
     void Start()
     {
         if (GameManager.Instance == null || GameManager.Instance.players.Count == 0)
@@ -119,6 +124,28 @@ public class PlayerDisplayCard : SelectableDisplayCard<ActorCard>
     
 #endregion Click Handler
 
+#region Allegiance
+
+public void SetAllegiance(AllegianceCard allegiance)
+{
+    if (allegianceIcon == null) return;
+    
+    switch (allegiance.allegiance)
+    {
+        case AllegianceType.USA:
+            allegianceIcon.sprite = usaAllegianceSprite;
+            allegianceIcon.color = Color.white;
+            break;
+        case AllegianceType.China:
+            allegianceIcon.sprite = chinaAllegianceSprite;
+            allegianceIcon.color = Color.red;
+            break;
+    }
+    
+    allegianceIcon.gameObject.SetActive(true);
+}
+
+#endregion
 
 #region Helper Methods
 
