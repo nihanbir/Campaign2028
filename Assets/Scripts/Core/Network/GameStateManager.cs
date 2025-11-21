@@ -35,6 +35,8 @@ public class GameStateManager
     // Setup phase state
     private readonly Dictionary<int, int> _setupRolls = new();
     private List<int> _playersToRoll = new();
+    public SetupStage SetupStage { get; private set; }
+    public string SelectedActorCardId { get; private set; }
     
     // Events for state changes
     public event Action<GamePhase> OnPhaseChanged;
@@ -44,6 +46,15 @@ public class GameStateManager
     public event Action<int, int> OnPlayerRolled; // playerId, roll
     public event Action<string> OnTargetCardDrawn;
     public event Action<string> OnEventCardDrawn;
+    
+    // Setup phase events
+    public event Action<SetupStage> OnSetupStageChanged;
+    public event Action<int, int> OnSetupRoll; // playerId, roll
+    public event Action OnAllPlayersRolled;
+    public event Action<int> OnUniqueWinner; // playerId
+    public event Action<List<int>> OnTiedRoll; // playerIds
+    public event Action<string> OnActorSelected; // actorCardId
+    public event Action<int, string> OnActorAssigned; // playerId, actorCardId
     
     // Reference to existing GameManager (for offline mode compatibility)
     private GameManager _gameManager;
@@ -60,7 +71,10 @@ public class GameStateManager
     {
         _gameManager = gm;
         
-        // Initialize card registry
+        // Initialize card registry - need to get GameDeckSO via reflection or public property
+        // For now, we'll initialize from the already-loaded decks
+        //TODO:
+        // InitializeCardRegistry();
         CardRegistry.Instance.InitializeFromGameDeck(gm.gameDeckData);
         
         // Convert decks to IDs
@@ -337,6 +351,188 @@ public class GameStateManager
     {
         if (_gameManager == null) return null;
         return _gameManager.players.FirstOrDefault(p => p.playerID == playerId);
+    }
+    
+    #endregion
+    
+    #region Setup Phase Methods
+    
+    public void InitializeSetupPhase()
+    {
+        SetupStage = SetupStage.Roll;
+        _setupRolls.Clear();
+        _playersToRoll = _playerStates.Keys.ToList();
+        SelectedActorCardId = null;
+        CurrentPlayerIndex = 0;
+        UpdateCurrentPlayer();
+        
+        OnSetupStageChanged?.Invoke(SetupStage);
+    }
+    
+    public bool CanPlayerRollInSetup(int playerId)
+    {
+        if (SetupStage != SetupStage.Roll && SetupStage != SetupStage.Reroll)
+            return false;
+            
+        return _playersToRoll.Contains(playerId) && CurrentPlayerId == playerId;
+    }
+    
+    public void ProcessSetupRoll(int playerId, int roll)
+    {
+        var playerState = GetPlayerState(playerId);
+        if (playerState == null) return;
+        
+        playerState.LastRoll = roll;
+        _setupRolls[playerId] = roll;
+        _playersToRoll.Remove(playerId);
+        
+        OnSetupRoll?.Invoke(playerId, roll);
+        
+        // Raise bus event for existing UI
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(GetPlayer(playerId), roll)));
+        
+        // Check if all players have rolled
+        if (_playersToRoll.Count == 0)
+        {
+            OnAllPlayersRolled?.Invoke();
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.AllPlayersRolled));
+            
+            ProcessSetupRollResults();
+        }
+        else
+        {
+            MoveToNextSetupPlayer();
+        }
+    }
+    
+    private void ProcessSetupRollResults()
+    {
+        int highestRoll = _setupRolls.Values.Max();
+        var winners = _setupRolls.Where(kvp => kvp.Value == highestRoll).Select(kvp => kvp.Key).ToList();
+        
+        if (winners.Count == 1)
+        {
+            int winnerId = winners[0];
+            OnUniqueWinner?.Invoke(winnerId);
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.UniqueWinner, new UniqueWinnerData(GetPlayer(winnerId))));
+            
+            // Move to actor assignment
+            StartActorAssignment(winnerId);
+        }
+        else
+        {
+            OnTiedRoll?.Invoke(winners);
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.TiedRoll, new TiedRollData(winners.Select(id => GetPlayer(id)).ToList())));
+            
+            // Setup reroll
+            SetupStage = SetupStage.Reroll;
+            _setupRolls.Clear();
+            _playersToRoll = winners;
+            CurrentPlayerIndex = _playerStates.Keys.ToList().IndexOf(winners[0]);
+            UpdateCurrentPlayer();
+            
+            OnSetupStageChanged?.Invoke(SetupStage);
+        }
+    }
+    
+    private void MoveToNextSetupPlayer()
+    {
+        if (SetupStage == SetupStage.Roll || SetupStage == SetupStage.Reroll)
+        {
+            if (_playersToRoll.Count > 0)
+            {
+                int currentIndex = _playersToRoll.IndexOf(CurrentPlayerId);
+                int nextIndex = (currentIndex + 1) % _playersToRoll.Count;
+                var playerIds = _playerStates.Keys.ToList();
+                CurrentPlayerIndex = playerIds.IndexOf(_playersToRoll[nextIndex]);
+                UpdateCurrentPlayer();
+            }
+        }
+        else if (SetupStage == SetupStage.BeginActorAssignment)
+        {
+            // In actor assignment, go back to roll stage for next winner
+            SetupStage = SetupStage.Roll;
+            _setupRolls.Clear();
+            
+            // Get players who still need actors
+            _playersToRoll = _playerStates
+                .Where(kvp => string.IsNullOrEmpty(kvp.Value.AssignedActorCardId))
+                .Select(kvp => kvp.Key)
+                .ToList();
+                
+            if (_playersToRoll.Count > 1)
+            {
+                var playerIds = _playerStates.Keys.ToList();
+                CurrentPlayerIndex = playerIds.IndexOf(_playersToRoll[0]);
+                UpdateCurrentPlayer();
+                
+                OnSetupStageChanged?.Invoke(SetupStage);
+                TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.Roll));
+            }
+        }
+    }
+    
+    private void StartActorAssignment(int winnerId)
+    {
+        SetupStage = SetupStage.BeginActorAssignment;
+        var playerIds = _playerStates.Keys.ToList();
+        CurrentPlayerIndex = playerIds.IndexOf(winnerId);
+        UpdateCurrentPlayer();
+        
+        OnSetupStageChanged?.Invoke(SetupStage);
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginActorAssignment));
+    }
+    
+    public void SelectActor(int playerId, string actorCardId)
+    {
+        if (CurrentPlayerId != playerId) return;
+        if (!IsActorAvailable(actorCardId)) return;
+        
+        SelectedActorCardId = actorCardId;
+        OnActorSelected?.Invoke(actorCardId);
+        
+        // Raise bus event for UI
+        var actorCard = CardRegistry.Instance.GetActorCard(actorCardId);
+        TurnFlowBus.Instance.Raise(new CardInputEvent(CardInputStage.Held, actorCard));
+    }
+    
+    public void ConfirmActorAssignment(int playerId, int targetPlayerId)
+    {
+        if (string.IsNullOrEmpty(SelectedActorCardId)) return;
+        
+        // Assign the actor
+        AssignActor(targetPlayerId, SelectedActorCardId);
+        
+        string assignedActorId = SelectedActorCardId;
+        SelectedActorCardId = null;
+        
+        OnActorAssigned?.Invoke(targetPlayerId, assignedActorId);
+        
+        // Check if only one player remains
+        var unassignedPlayers = _playerStates
+            .Where(kvp => string.IsNullOrEmpty(kvp.Value.AssignedActorCardId))
+            .ToList();
+            
+        if (unassignedPlayers.Count == 1 && _actorDeck.Count >= 1)
+        {
+            // Auto-assign last actor
+            var lastPlayerId = unassignedPlayers[0].Key;
+            var lastActorId = _actorDeck[0];
+            
+            AssignActor(lastPlayerId, lastActorId);
+            OnActorAssigned?.Invoke(lastPlayerId, lastActorId);
+            
+            // Raise last actor assigned event
+            TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.LastActorAssigned));
+            
+            // Transition to main phase
+            SetPhase(GamePhase.MainGame);
+        }
+        else if (unassignedPlayers.Count > 1)
+        {
+            // Go back to roll phase for remaining players
+            MoveToNextSetupPlayer();
+        }
     }
     
     #endregion

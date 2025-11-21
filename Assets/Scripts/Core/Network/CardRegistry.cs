@@ -23,6 +23,27 @@ public class CardRegistry
     private int _nextCardId = 0;
     
     /// <summary>
+    /// Register a card at runtime (from already-loaded decks)
+    /// </summary>
+    public void RegisterCardRuntime(Card card)
+    {
+        if (card == null) return;
+        if (_cardToId.ContainsKey(card)) return; // Already registered
+        
+        string prefix = card switch
+        {
+            StateCard => "STATE",
+            InstitutionCard => "INST",
+            EventCard => "EVENT",
+            ActorCard => "ACTOR",
+            _ => "CARD"
+        };
+        
+        string id = GenerateCardId(prefix);
+        RegisterCard(id, card);
+    }
+    
+    /// <summary>
     /// Initialize the registry with all cards from the game deck.
     /// Call this once at game start.
     /// </summary>
@@ -46,9 +67,17 @@ public class CardRegistry
             RegisterCard(id, card);
         }
         
-        // Register all events
-        gameDeck.BuildAllEventsDeck(); // Assuming this exists
-        foreach (var eventSO in gameDeck.allEvents)
+        // Register all events - build the list first
+        var allEvents = new List<EventCardSO>();
+        allEvents.AddRange(gameDeck.extraRollEvents);
+        allEvents.AddRange(gameDeck.needTwoEvents);
+        allEvents.AddRange(gameDeck.challengeEvents);
+        allEvents.AddRange(gameDeck.loseTurnEvents);
+        allEvents.AddRange(gameDeck.noImpactEvents);
+        allEvents.AddRange(gameDeck.alternativeStatesEvents);
+        allEvents.AddRange(gameDeck.teamBasedEvents);
+        
+        foreach (var eventSO in allEvents)
         {
             var card = eventSO.ToCard();
             string id = GenerateCardId("EVENT");

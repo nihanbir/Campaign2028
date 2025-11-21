@@ -92,6 +92,53 @@ public class NetworkAdapter : MonoBehaviour
     #region Command Wrappers
     
     /// <summary>
+    /// Call this instead of TurnFlowBus.Raise(new TurnEvent(TurnStage.RollDiceRequest)) in Setup Phase
+    /// </summary>
+    public void RequestSetupRollDice(int playerId)
+    {
+        if (!enableCommandSystem)
+        {
+            TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+            return;
+        }
+        
+        var command = new SetupRollDiceCommand(playerId);
+        _commandProcessor.SubmitCommand(command);
+    }
+    
+    /// <summary>
+    /// Call this when an actor card is held/selected
+    /// </summary>
+    public void RequestSelectActor(int playerId, ActorCard actorCard)
+    {
+        if (!enableCommandSystem)
+        {
+            TurnFlowBus.Instance.Raise(new CardInputEvent(CardInputStage.Held, actorCard));
+            return;
+        }
+        
+        string actorCardId = actorCard.ToId();
+        var command = new SelectActorCommand(playerId, actorCardId);
+        _commandProcessor.SubmitCommand(command);
+    }
+    
+    /// <summary>
+    /// Call this when a player is clicked to receive an actor
+    /// </summary>
+    public void RequestConfirmActorAssignment(int playerId, int targetPlayerId)
+    {
+        if (!enableCommandSystem)
+        {
+            var targetPlayer = _gameManager.players.Find(p => p.playerID == targetPlayerId);
+            TurnFlowBus.Instance.Raise(new CardInputEvent(CardInputStage.Clicked, targetPlayer));
+            return;
+        }
+        
+        var command = new ConfirmActorAssignmentCommand(playerId, targetPlayerId);
+        _commandProcessor.SubmitCommand(command);
+    }
+
+    /// <summary>
     /// Call this instead of TurnFlowBus.Raise(new TurnEvent(TurnStage.RollDiceRequest))
     /// </summary>
     public void RequestRollDice(int playerId)

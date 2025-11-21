@@ -222,3 +222,83 @@ public class SelectChallengeStateCommand : GameCommand
         state.SelectChallengeState(PlayerId, StateCardId);
     }
 }
+
+// === Setup Phase Commands ===
+
+public class SetupRollDiceCommand : GameCommand
+{
+    public SetupRollDiceCommand(int playerId) : base(playerId) { }
+    
+    public override bool Validate(GameStateManager state)
+    {
+        if (state.CurrentPhase != GamePhase.Setup)
+            return false;
+            
+        return state.CanPlayerRollInSetup(PlayerId);
+    }
+    
+    public override void Execute(GameStateManager state)
+    {
+        int roll = Random.Range(1, 7);
+        state.ProcessSetupRoll(PlayerId, roll);
+    }
+}
+
+public class SelectActorCommand : GameCommand
+{
+    public string ActorCardId { get; private set; }
+    
+    public SelectActorCommand(int playerId, string actorCardId) : base(playerId)
+    {
+        ActorCardId = actorCardId;
+    }
+    
+    public override bool Validate(GameStateManager state)
+    {
+        if (state.CurrentPhase != GamePhase.Setup)
+            return false;
+            
+        if (state.SetupStage != SetupStage.BeginActorAssignment)
+            return false;
+            
+        return state.IsActorAvailable(ActorCardId);
+    }
+    
+    public override void Execute(GameStateManager state)
+    {
+        state.SelectActor(PlayerId, ActorCardId);
+    }
+}
+
+public class ConfirmActorAssignmentCommand : GameCommand
+{
+    public int TargetPlayerId { get; private set; }
+    
+    public ConfirmActorAssignmentCommand(int playerId, int targetPlayerId) : base(playerId)
+    {
+        TargetPlayerId = targetPlayerId;
+    }
+    
+    public override bool Validate(GameStateManager state)
+    {
+        if (state.CurrentPhase != GamePhase.Setup)
+            return false;
+            
+        if (state.CurrentPlayerId != PlayerId)
+            return false;
+            
+        if (TargetPlayerId == PlayerId)
+            return false;
+            
+        if (string.IsNullOrEmpty(state.SelectedActorCardId))
+            return false;
+            
+        var targetState = state.GetPlayerState(TargetPlayerId);
+        return targetState != null && string.IsNullOrEmpty(targetState.AssignedActorCardId);
+    }
+    
+    public override void Execute(GameStateManager state)
+    {
+        state.ConfirmActorAssignment(PlayerId, TargetPlayerId);
+    }
+}

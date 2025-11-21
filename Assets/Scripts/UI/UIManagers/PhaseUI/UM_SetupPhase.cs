@@ -29,6 +29,9 @@ public class UM_SetupPhase : UM_BasePhase
     public float rerollPulseDuration = 0.5f;
     public Ease rerollEase = Ease.InOutSine;
 
+    // Helper to check if command system is enabled
+    private bool UseCommandSystem => NetworkAdapter.Instance != null && NetworkAdapter.Instance.IsCommandSystemEnabled;
+
     #region Initialize Phase UI
     
     protected override void HandleTurnEvent(IGameEvent e)
@@ -60,7 +63,6 @@ public class UM_SetupPhase : UM_BasePhase
                     break;
                 
                 case SetupStage.BeginActorAssignment:
-                    //TODO: anims later
                     EnqueueUI(OnActorAssignStage());
                     break;
                 
@@ -75,9 +77,7 @@ public class UM_SetupPhase : UM_BasePhase
                     break;
                 
                 case SetupStage.LastActorAssigned:
-                    //TODO:
                     break;
-                
             }
         }
         else if (e is CardInputEvent c)
@@ -134,7 +134,6 @@ public class UM_SetupPhase : UM_BasePhase
                 {
                     displayCard.SetCard(_setupPhase.GetUnassignedActors()[i]);
                 }
-                
                 else
                 {
                     _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
@@ -156,11 +155,24 @@ public class UM_SetupPhase : UM_BasePhase
         diceImage.gameObject.SetActive(true);
         yield break;
     }
+
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
         
         EnqueueUI(EnableDiceButtonRoutine(!isAIPlayer));
+    }
+
+    protected override void OnRollDiceClicked()
+    {
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.RequestSetupRollDice(currentPlayer.playerID);
+        }
+        else
+        {
+            base.OnRollDiceClicked();
+        }
     }
 
     protected override void OnPlayerRolledDice(Player player, int roll)
@@ -194,7 +206,6 @@ public class UM_SetupPhase : UM_BasePhase
 
         Debug.Log($"Selected actor: {_selectedActorCard?.GetCard().cardName}");
         yield break;
-        
     }
     
     private void RemoveCard(PlayerDisplayCard card)
@@ -207,8 +218,7 @@ public class UM_SetupPhase : UM_BasePhase
         foreach (Transform child in playerUIParent)
         {
             var display = child.GetComponent<PlayerDisplayCard>();
-            //TODO: continue instead
-            if (!display) return null;
+            if (!display) continue;
             if (display.owningPlayer == player)
                 return display;
         }
@@ -241,7 +251,6 @@ public class UM_SetupPhase : UM_BasePhase
         
         foreach (var card in _playerDisplayCards)
         {
-            // Each card gets its own looping pulse sequence
             var diceObj = card.GetDiceTransform();
             if (diceObj == null) continue;
             
@@ -276,7 +285,6 @@ public class UM_SetupPhase : UM_BasePhase
 
         RemoveCard(actorCard);
         playerCard.ConvertToAssignedActor(actor);
-        
     }
     
     private Sequence AnimateAssignment(Transform actor, Transform target)
@@ -310,7 +318,6 @@ public class UM_SetupPhase : UM_BasePhase
     
     private IEnumerator AnimateRerollPlayers(List<Player> rerollingPlayers)
     {
-        // Create a master sequence
         Sequence group = DOTween.Sequence();
 
         foreach (var player in rerollingPlayers)
@@ -319,16 +326,12 @@ public class UM_SetupPhase : UM_BasePhase
             if (card == null) continue;
 
             var pulse = PulsateCardDice(card);
-
-            // Add this sequence to the group so they play in parallel
             group.Join(pulse);
         }
         
-        // 🔥 When all pulses are done, handle tied roll
         bool finished = false;
         group.OnComplete(() => finished = true);
 
-        // 🔥 WAIT HERE until the DOTween sequence finishes
         while (!finished)
             yield return null;
 
@@ -359,7 +362,6 @@ public class UM_SetupPhase : UM_BasePhase
     {
         var t = card.transform;
 
-        // Flash + scale pulse to draw attention
         Sequence s = DOTween.Sequence();
         s.Append(t.DOScale(1.1f, rerollPulseDuration).SetEase(rerollEase));
         s.Append(t.DOScale(1f, rerollPulseDuration).SetEase(rerollEase));

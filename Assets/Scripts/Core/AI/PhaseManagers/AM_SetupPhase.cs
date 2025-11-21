@@ -14,17 +14,18 @@ public class AM_SetupPhase
         _aiManager = manager;
         _setupPhase = _aiManager.game.setupPhase;
         _setupUI = GameUIManager.Instance.setupUI;
-        
-        //TODO: have it like phasemanager
     }
+
+    // Helper to check if command system is enabled
+    private bool UseCommandSystem => NetworkAdapter.Instance != null && NetworkAdapter.Instance.IsCommandSystemEnabled;
     
     public IEnumerator ExecuteAITurn(AIPlayer aiPlayer)
     {
-        //Make sure they're assigned
+        // Make sure they're assigned
         if (_setupPhase == null) _setupPhase = _aiManager.game.setupPhase;
         if (_setupUI == null) _setupUI = GameUIManager.Instance.setupUI;
         
-        // 🟩 IMPORTANT: Wait until all UI animation from previous turn is done
+        // Wait until all UI animation from previous turn is done
         yield return _setupUI.WaitUntilUIQueueFree();
         
         if (_setupPhase.CurrentStage == SetupStage.Roll ||
@@ -42,8 +43,14 @@ public class AM_SetupPhase
     {
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
-        
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.RequestSetupRollDice(aiPlayer.playerID);
+        }
+        else
+        {
+            TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+        }
     }
 
     private IEnumerator AssignActorToAnotherPlayer(AIPlayer aiPlayer)
@@ -75,19 +82,31 @@ public class AM_SetupPhase
         Player selectedPlayer = eligiblePlayers[playerIndex];
         
         yield return _setupUI.WaitUntilUIQueueFree();
-        
-        TurnFlowBus.Instance.Raise(
-            new CardInputEvent(CardInputStage.Held, selectedActor));
+
+        // Select the actor (hold)
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.RequestSelectActor(aiPlayer.playerID, selectedActor);
+        }
+        else
+        {
+            TurnFlowBus.Instance.Raise(new CardInputEvent(CardInputStage.Held, selectedActor));
+        }
         
         yield return new WaitForSeconds(Random.Range(aiPlayer.decisionDelayMin, aiPlayer.decisionDelayMax));
         
         Debug.Log($"AI Player {aiPlayer.playerID} assigning {selectedActor.cardName} to Player {selectedPlayer.playerID}");
         
         yield return _setupUI.WaitUntilUIQueueFree();
-        
-        TurnFlowBus.Instance.Raise(
-            new CardInputEvent(CardInputStage.Clicked, selectedPlayer));
-    
+
+        // Confirm the assignment (click on target player)
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.RequestConfirmActorAssignment(aiPlayer.playerID, selectedPlayer.playerID);
+        }
+        else
+        {
+            TurnFlowBus.Instance.Raise(new CardInputEvent(CardInputStage.Clicked, selectedPlayer));
+        }
     }
-    
 }

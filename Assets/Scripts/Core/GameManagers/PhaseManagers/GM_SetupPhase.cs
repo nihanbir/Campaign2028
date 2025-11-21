@@ -46,6 +46,9 @@ public class GM_SetupPhase : GM_BasePhase
         }
     }
 
+    // Helper to check if command system is enabled
+    private bool UseCommandSystem => NetworkAdapter.Instance != null && NetworkAdapter.Instance.IsCommandSystemEnabled;
+
     protected override void HandleTurnEvent(IGameEvent e)
     {
         base.HandleTurnEvent(e);
@@ -72,6 +75,12 @@ public class GM_SetupPhase : GM_BasePhase
         base.BeginPhase();
 
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginPhase, new BeginPhaseData(_unassignedPlayers, _unassignedActors)));
+        
+        // If using command system, let GameStateManager handle setup initialization
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.StateManager.InitializeSetupPhase();
+        }
         
         CurrentStage = SetupStage.Roll;
     }
@@ -100,7 +109,6 @@ public class GM_SetupPhase : GM_BasePhase
     
     private void BeginRollStage()
     {
-        
         Debug.Log("All players will roll dice");
         InitializeRollTracking();
         
@@ -129,6 +137,14 @@ public class GM_SetupPhase : GM_BasePhase
 
     protected override void HandleRequestedRoll()
     {
+        // If command system is enabled, it handles the roll via GameStateManager
+        if (UseCommandSystem)
+        {
+            // Command system will raise the appropriate events
+            return;
+        }
+        
+        // Original logic for when command system is disabled
         base.HandleRequestedRoll();
         
         _rolledPlayers.Add(game.CurrentPlayer, diceRoll);
@@ -147,7 +163,6 @@ public class GM_SetupPhase : GM_BasePhase
         {
             MoveToNextPlayer();
         }
-        
     }
 
     private bool AllPlayersHaveRolled()
@@ -193,9 +208,7 @@ public class GM_SetupPhase : GM_BasePhase
         _playerToSelect = winner;
         _rolledPlayers.Clear();
 
-        //TODO: maybe don't change the stage here
         CurrentStage = SetupStage.BeginActorAssignment;
-        
     }
 
     private void HandleTiedRoll(List<Player> tiedPlayers)
@@ -210,7 +223,6 @@ public class GM_SetupPhase : GM_BasePhase
         }
         else
         {
-            //TODO: maybe don't change the stage here
             CurrentStage = SetupStage.Reroll;
         }
     }
@@ -219,8 +231,6 @@ public class GM_SetupPhase : GM_BasePhase
     
     private void BeginAssignActorStage()
     {
-        // game.currentPlayerIndex = 0;
-        
         game.currentPlayerIndex = game.players.IndexOf(_playerToSelect);
         
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginActorAssignment));
@@ -252,7 +262,6 @@ public class GM_SetupPhase : GM_BasePhase
         base.EndPlayerTurn();
         
         Debug.Log($"Player {current.playerID} turn ended");
-        
     }
 
     protected override void MoveToNextPlayer()
@@ -283,7 +292,14 @@ public class GM_SetupPhase : GM_BasePhase
     {
         if (e.payload is Player player)
         {
-            TryAssignActorToPlayer(player, _selectedActor);
+            if (UseCommandSystem)
+            {
+                NetworkAdapter.Instance.RequestConfirmActorAssignment(game.CurrentPlayer.playerID, player.playerID);
+            }
+            else
+            {
+                TryAssignActorToPlayer(player, _selectedActor);
+            }
         }
     }
     
@@ -294,6 +310,12 @@ public class GM_SetupPhase : GM_BasePhase
         _selectedActor = actorCard;
         
         Debug.Log($"Held actor: {_selectedActor.cardName}");
+        
+        // If using command system, notify it about the selection
+        if (UseCommandSystem)
+        {
+            NetworkAdapter.Instance.RequestSelectActor(game.CurrentPlayer.playerID, actorCard);
+        }
     }
     
     private bool CanAssignActor(Player targetPlayer)
@@ -319,7 +341,6 @@ public class GM_SetupPhase : GM_BasePhase
         if (actorToAssign == null)
         {
             Debug.Log("actor to assign was null");
-            
             return false;
         }
         if (!CanAssignActor(player))
@@ -393,21 +414,49 @@ public class GM_SetupPhase : GM_BasePhase
         AssignActorToPlayer(lastPlayer, lastActor);
         
         OnAllActorsAssigned();
-        
     }
     
     private void OnAllActorsAssigned()
     {
-        // Notify UI to update visuals
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.LastActorAssigned));
         
         Debug.Log("=== All actors assigned! Moving to Main Game Phase ===");
-        //TODO: maybe transition in gamemanager instead
         game.SetPhase(GameManager.Instance.mainPhase);
     }
 
     #endregion
 
-
+    #region Command System Sync
+    
+    /// <summary>
+    /// Called by GameStateManager when using command system to sync local state
+    /// </summary>
+    public void SyncFromStateManager(SetupStage stage, Player playerToSelect, List<Player> playersToRoll)
+    {
+        _currentStage = stage;
+        _playerToSelect = playerToSelect;
+        _playersToRoll.Clear();
+        _playersToRoll.AddRange(playersToRoll);
+    }
+    
+    /// <summary>
+    /// Called by GameStateManager to sync roll results
+    /// </summary>
+    public void SyncRollResult(Player player, int roll)
+    {
+        _rolledPlayers[player] = roll;
+        _playersToRoll.Remove(player);
+    }
+    
+    /// <summary>
+    /// Called by GameStateManager to sync actor assignment
+    /// </summary>
+    public void SyncActorAssignment(Player player, ActorCard actor)
+    {
+        _unassignedActors.Remove(actor);
+        _unassignedPlayers.Remove(player);
+        _selectedActor = null;
+    }
+    
+    #endregion
 }
-
