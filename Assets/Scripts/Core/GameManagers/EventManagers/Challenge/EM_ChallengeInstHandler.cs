@@ -20,12 +20,12 @@ public class EM_ChallengeInstHandler : EM_ChallengeHandler
 
         Player defender = null;
         var cardHolder = phase.GetCardHolder(chosenCard);
-        if (cardHolder && cardHolder != player)
+        if (cardHolder != null && cardHolder != player)
         {
             defender = cardHolder;
         }
         
-        if (!defender)
+        if (defender == null)
         {
             Cancel(card);
             return;

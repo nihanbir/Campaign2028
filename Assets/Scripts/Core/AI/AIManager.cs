@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AIManager : MonoBehaviour
@@ -39,35 +40,12 @@ public class AIManager : MonoBehaviour
         
     }
 
-    public void CreateAIPlayers(int humanPlayerCount)
-    {
-        int aiCount = numberOfAIPlayers - humanPlayerCount;
-        aiCount = Mathf.Clamp(aiCount, 1, 5);
-
-        for (int i = 0; i < aiCount; i++)
-        {
-            CreateAIPlayer(i);
-        }
-
-        Debug.Log($"Created {aiCount} AI players");
-    }
-
-    private void CreateAIPlayer(int index)
-    {
-        GameObject aiObj = aiPlayerPrefab
-            ? Instantiate(aiPlayerPrefab, transform)
-            : new GameObject($"AI_Player_{index}");
-
-        var ai = aiObj.GetComponent<AIPlayer>() ?? aiObj.AddComponent<AIPlayer>();
-        // ai.PlayerID = 100 + index;
-
-        aiPlayers.Add(ai);
-
-        if (GameManager.Instance != null)
-            GameManager.Instance.players.Add(ai);
-    }
-
     public bool IsAIPlayer(Player player) => player is AIPlayer;
 
     public AIPlayer GetAIPlayer(Player player) => player as AIPlayer;
+    
+    public List<AIPlayer> GetAllAIPlayers()
+    {
+        return game.players.OfType<AIPlayer>().ToList();
+    }
 }

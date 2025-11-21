@@ -13,26 +13,45 @@ public abstract class GameManagerBase : MonoBehaviour
     [HideInInspector] public List<AllegianceCard> allegianceDeck;
 
     [Header("Players")]
+    [SerializeField] private int humanPlayerCount = 1;
     [SerializeField] private int placeHumanAtIndex = 0;
     [SerializeField] protected int maxPlayers = 6;
-    [HideInInspector] public List<Player> players;
+    [HideInInspector] public List<Player> players = new();
     [HideInInspector] public int currentPlayerIndex = 0;
 
     public Player CurrentPlayer => players[currentPlayerIndex];
     
     protected virtual void Awake()
     {
-        SetPlayers(placeHumanAtIndex);
-        
+        CreatePlayers(humanPlayerCount);
         LoadDecks();
     }
-
-    private void SetPlayers(int index)
+    
+    private void CreatePlayers(int humanCount)
     {
-        players = new List<Player>(FindObjectsByType<Player>( FindObjectsInactive.Include, FindObjectsSortMode.None));
+        players.Clear();
         
-        // Find the human player (no AI component attached)
-        Player human = players.FirstOrDefault(p => p.GetComponent<AIPlayer>() == null);
+        // Create human players
+        for (int i = 0; i < humanCount; i++)
+        {
+            players.Add(new Player(i, isAI: false));
+        }
+        
+        // Create AI players to fill up to maxPlayers
+        int aiCount = maxPlayers - humanCount;
+        for (int i = 0; i < aiCount; i++)
+        {
+            players.Add(new AIPlayer(humanCount + i));
+        }
+        
+        Debug.Log($"Created {humanCount} human players and {aiCount} AI players");
+        SetHumanAtIndex(placeHumanAtIndex);
+    }
+
+    private void SetHumanAtIndex(int index)
+    {
+        // Find the human player
+        Player human = players.FirstOrDefault(p => !p.IsAI);
 
         if (human != null)
         {

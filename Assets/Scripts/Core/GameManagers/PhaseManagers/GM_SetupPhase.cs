@@ -344,29 +344,29 @@ public class GM_SetupPhase : GM_BasePhase
         _unassignedActors.Remove(actorToAssign);
         _unassignedPlayers.Remove(player);
         
-        AssignAllegianceToPlayer(player);
-        
         TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.ActorAssigned, new ActorAssignedData(player, actorToAssign)));
+        
+        AssignAllegianceToPlayer(player);
     }
     
     private void AssignAllegianceToPlayer(Player player)
     {
-        if (_allegianceDeck.Count == 0)
-        {
-            Debug.LogWarning("No allegiance cards remaining!");
-            return;
-        }
-    
-        AllegianceCard allegiance = _allegianceDeck.PopFront();
-        player.assignedAllegiance = allegiance;
-    
-        Debug.Log($"Assigned {allegiance.allegiance} allegiance to Player {player.playerID}");
-    
-        // Notify UI about allegiance assignment
-        TurnFlowBus.Instance.Raise(new SetupStageEvent(
-            SetupStage.AllegianceAssigned, 
-            new AllegianceAssignedData(player, allegiance)
-        ));
+        // if (_allegianceDeck.Count == 0)
+        // {
+        //     Debug.LogWarning("No allegiance cards remaining!");
+        //     return;
+        // }
+        //
+        // AllegianceCard allegiance = _allegianceDeck.PopFront();
+        // player.AssignedAllegiance = allegiance;
+        //
+        // Debug.Log($"Assigned {allegiance.allegiance} allegiance to Player {player.playerID}");
+        //
+        // // Notify UI about allegiance assignment
+        // TurnFlowBus.Instance.Raise(new SetupStageEvent(
+        //     SetupStage.AllegianceAssigned, 
+        //     new AllegianceAssignedData(player, allegiance)
+        // ));
     }
     
     private bool ShouldAutoAssignLastActor()

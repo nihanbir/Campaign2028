@@ -62,7 +62,7 @@ public class EM_AnyStateHandler : EM_ChallengeHandler
         var defender = phase.GetCardHolder(chosenState);
 
         // Defender could be null if something desynced; cancel safely
-        if (!defender)
+        if (defender == null)
         {
             Cancel(currentEventCard);
             return;

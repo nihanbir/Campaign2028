@@ -360,7 +360,7 @@ public class EUM_ChallengeEvent : MonoBehaviour
         CreateCardInTransform<PlayerDisplayCard>(attacker.PlayerDisplayCard.gameObject, leftCardUI, attacker.assignedActor);
 
         // defender card
-        if (defender)
+        if (defender != null)
             CreateCardInTransform<PlayerDisplayCard>(defender.PlayerDisplayCard.gameObject, rightCardUI, defender.assignedActor);
         
         duelScreen.SetActive(true);

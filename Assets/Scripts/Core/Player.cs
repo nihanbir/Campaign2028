@@ -1,65 +1,96 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class Player : MonoBehaviour
+/// <summary>
+/// Player - pure data class, no MonoBehaviour needed.
+/// </summary>
+[Serializable]
+public class Player
 {
-    // === Identity ===
-    public string PlayerName { get; private set; }
-
     public int playerID;
+    public string PlayerName;
+    
+    // Card data
     public ActorCard assignedActor;
-    public AllegianceCard assignedAllegiance { get; set; }
-
-    // === Cards ===
-    private readonly List<StateCard> _heldStates = new();
-    private readonly List<InstitutionCard> _heldInstitutions = new();
-    public EventCard HeldEvent { get; private set; }
-
-    // === Display ===
-    public PlayerDisplayCard PlayerDisplayCard { get; private set; }
-
-    // === Roll System ===
-    private int _remainingRolls = 1;
-
-    private void Start()
+    public List<StateCard> HeldStateCards = new();
+    public List<InstitutionCard> HeldInstitutionCards = new();
+    public EventCard HeldEvent;
+    
+    // Roll state
+    public int RemainingRolls = 1;
+    public int LastRoll = 0;
+    
+    // Computed scores
+    public int ElectoralVotes = 0;
+    public int InstitutionCount = 0;
+    
+    // Flags
+    public bool IsAI = false;
+    
+    // Display reference (not serialized)
+    [NonSerialized] public PlayerDisplayCard PlayerDisplayCard;
+    
+    public bool CanRoll() => RemainingRolls > 0;
+    
+    public Player(int id, bool isAI = false)
     {
-        HeldEvent = null;
+        playerID = id;
+        IsAI = isAI;
+        PlayerName = $"Player {id}";
     }
-
+    
     public void SetDisplayCard(PlayerDisplayCard displayCard)
     {
         PlayerDisplayCard = displayCard;
         PlayerDisplayCard.SetOwnerPlayer(this);
     }
-
+    
+    // === Roll Management ===
+    public void ResetRollCount()
+    {
+        RemainingRolls = 1;
+    }
+    
+    public void AddExtraRoll()
+    {
+        RemainingRolls++;
+    }
+    
+    public void RegisterRoll()
+    {
+        RemainingRolls = Mathf.Max(0, RemainingRolls - 1);
+    }
+    
     // === Card Management ===
     public void CaptureCard(Card card)
     {
         if (card == null) return;
-
+        
         card.isCaptured = true;
 
         switch (card)
         {
             case StateCard stateCard:
-                _heldStates.Add(stateCard);
-                assignedActor.AddEV(stateCard.electoralVotes);
+                if (!HeldStateCards.Contains(stateCard))
+                {
+                    HeldStateCards.Add(stateCard);
+                    ElectoralVotes += stateCard.electoralVotes;
+                }
                 break;
 
             case InstitutionCard institutionCard:
-                _heldInstitutions.Add(institutionCard);
-                assignedActor.AddInstitution();
+                if (!HeldInstitutionCards.Contains(institutionCard))
+                {
+                    HeldInstitutionCards.Add(institutionCard);
+                    InstitutionCount++;
+                }
                 break;
         }
         
-        //TODO: tie these up nicer
-        PlayerDisplayCard.UpdateScore();
+        PlayerDisplayCard?.UpdateScore();
     }
-
-    //TODO: notify ui to update player info i guess
+    
     public void RemoveCapturedCard(Card card)
     {
         if (card == null) return;
@@ -69,18 +100,22 @@ public class Player : MonoBehaviour
         switch (card)
         {
             case StateCard stateCard:
-                _heldStates.Remove(stateCard);
-                assignedActor.AddEV(-stateCard.electoralVotes);
+                if (HeldStateCards.Remove(stateCard))
+                {
+                    ElectoralVotes -= stateCard.electoralVotes;
+                }
                 break;
 
             case InstitutionCard institutionCard:
-                _heldInstitutions.Remove(institutionCard);
-                assignedActor.RemoveInstitution();
+                if (HeldInstitutionCards.Remove(institutionCard))
+                {
+                    InstitutionCount--;
+                }
                 break;
         }
         
         Debug.Log($"Player {playerID} lost {card.cardName}");
-        PlayerDisplayCard.UpdateScore();
+        PlayerDisplayCard?.UpdateScore();
     }
 
     public void SaveEvent(EventCard eventCard)
@@ -90,19 +125,6 @@ public class Player : MonoBehaviour
 
     public bool HasInstitution(InstitutionCard target)
     {
-        return _heldInstitutions.Contains(target);
+        return HeldInstitutionCards.Contains(target);
     }
-
-    // === Roll System ===
-    public void AddExtraRoll()
-    {
-        _remainingRolls++;
-        Debug.Log($"Player {playerID} gained an extra roll!");
-    }
-
-    public bool CanRoll() => _remainingRolls > 0;
-
-    public void RegisterRoll() => _remainingRolls = Mathf.Max(0, _remainingRolls - 1);
-
-    public void ResetRollCount() => _remainingRolls = 1;
 }
