@@ -285,7 +285,7 @@ public class UM_MainPhase : UM_BasePhase
     
     private void OnSpawnTargetClicked()
     {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawTargetCardRequest));
+        NetworkAdapter.Instance?.RequestDrawTargetCard(game.CurrentPlayer.playerID);
     }
 
     private void SpawnTargetCardRoutine(Card card)
@@ -331,7 +331,7 @@ public class UM_MainPhase : UM_BasePhase
     
     private void OnSpawnEventClicked()
     {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.DrawEventCardRequest));
+        NetworkAdapter.Instance?.RequestDrawEventCard(game.CurrentPlayer.playerID);
     }
 
     private void SpawnEventCardRoutine(EventCard card)
@@ -383,7 +383,7 @@ public class UM_MainPhase : UM_BasePhase
     
     private void OnClickEventSave()
     {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.SaveEventCardRequest , _currentEventDisplayCard.GetCard()));
+        NetworkAdapter.Instance?.RequestSaveEventCard(game.CurrentPlayer.playerID, _currentEventDisplayCard.GetCard());
     }
 
     private void EventSavedRoutine(EventCard card)
@@ -408,7 +408,7 @@ public class UM_MainPhase : UM_BasePhase
     
     private void OnClickEventApply()
     {
-        TurnFlowBus.Instance.Raise(new MainStageEvent(MainStage.ApplyEventCardRequest, _currentEventDisplayCard.GetCard()));
+        NetworkAdapter.Instance?.RequestApplyEventCard(game.CurrentPlayer.playerID, _currentEventDisplayCard.GetCard());
     }
     
     private void HandleEventApplied()

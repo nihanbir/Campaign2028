@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class GameManagerBase : MonoBehaviour
 {
     [Header("Decks")]
-    [SerializeField] protected GameDeckSO gameDeckData;
+    [SerializeField] public GameDeckSO gameDeckData;
     [HideInInspector] public List<StateCard> stateDeck;
     [HideInInspector] public List<InstitutionCard> institutionDeck;
     [HideInInspector] public List<EventCard> eventDeck;

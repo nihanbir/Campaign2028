@@ -424,6 +424,7 @@ MonoBehaviour:
   phaseText: {fileID: 4359298127492457271}
   setupUI: {fileID: 2031575820}
   mainUI: {fileID: 7871011285792013936}
+  previouslyActiveUI: {fileID: 0}
 --- !u!1 &871762788
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,6 +629,7 @@ GameObject:
   - component: {fileID: 1600293382}
   - component: {fileID: 1600293385}
   - component: {fileID: 1600293386}
+  - component: {fileID: 1600293387}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -688,6 +690,19 @@ MonoBehaviour:
   aiPlayerPrefab: {fileID: 6437916321570752279, guid: f95bd9585f86fc24bb4483c0054283ff, type: 3}
   aiPlayers: []
   game: {fileID: 0}
+--- !u!114 &1600293387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600293380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7951d1d4ebd4cfb8682567918cb44b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkAdapter
+  enableCommandSystem: 0
 --- !u!114 &2031575820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2672511314526740918, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}

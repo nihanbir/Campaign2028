@@ -52,7 +52,7 @@ public class GameDeckSO : ScriptableObject
         return deck;
     }
 
-    private void BuildAllEventsDeck()
+    public void BuildAllEventsDeck()
     {
         allEvents.Clear();
         allEvents.AddRange(extraRollEvents);

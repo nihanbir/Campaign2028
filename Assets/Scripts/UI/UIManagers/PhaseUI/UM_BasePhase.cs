@@ -200,7 +200,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnRollDiceClicked()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
+        NetworkAdapter.Instance?.RequestRollDice(game.CurrentPlayer.playerID);
     }
     
     protected virtual void OnPlayerRolledDice(Player player, int roll)
