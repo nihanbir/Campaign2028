@@ -1,3 +1,4 @@
+// REPLACE YOUR EXISTING GM_BasePhase.cs WITH THIS
 
 using System;
 using Random = UnityEngine.Random;
@@ -16,7 +17,6 @@ public abstract class GM_BasePhase
         game = GameManager.Instance;
         aiManager = AIManager.Instance;
         game.OnPhaseChanged += OnPhaseChanged;
-        
     }
 
     protected bool isActive = false;
@@ -48,31 +48,33 @@ public abstract class GM_BasePhase
     {
         isActive = true;
         TurnFlowBus.Instance.OnEvent += HandleTurnEvent;
-        
     }
 
     protected virtual void EndPhase()
     {
         isActive = false;
         TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
-        
     }
 
     protected virtual void StartPlayerTurn()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, new PlayerTurnStartedData(game.CurrentPlayer)));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnStarted, 
+            new PlayerTurnStartedData(game.CurrentPlayer)));
     }
 
     protected virtual void EndPlayerTurn()
     {
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, new PlayerTurnEndedData(game.CurrentPlayer)));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerTurnEnded, 
+            new PlayerTurnEndedData(game.CurrentPlayer)));
     }
+    
     protected virtual void MoveToNextPlayer() { }
 
     protected virtual void HandleRequestedRoll()
     {
         diceRoll = Random.Range(1, 7);
         
-        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, new PlayerRolledData(game.CurrentPlayer, diceRoll)));
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.PlayerRolled, 
+            new PlayerRolledData(game.CurrentPlayer, diceRoll)));
     }
 }

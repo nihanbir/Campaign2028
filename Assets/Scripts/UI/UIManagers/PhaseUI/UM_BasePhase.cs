@@ -112,6 +112,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         EnableDiceButton(false);
         
+        InitUIRoutine();
+        
         // Animate UI entry
         EnqueueUI(AnimatePhaseEntryRoutine());
     }
@@ -139,7 +141,11 @@ public abstract class UM_BasePhase : MonoBehaviour
         rollDiceButton.onClick.RemoveAllListeners();
         TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
     }
-    
+
+    protected virtual void InitUIRoutine()
+    {
+        
+    }
     protected virtual void HandleTurnEvent(IGameEvent e)
     {
         if (!isCurrent) return;
@@ -181,13 +187,6 @@ public abstract class UM_BasePhase : MonoBehaviour
         if (card)
             EnqueueUI(card.HighlightRoutine());
     }
-
-    private IEnumerator SetCurrentPlayerInfoRoutine(Player player)
-    {
-        currentPlayer = player;
-        isAIPlayer = AIManager.Instance.IsAIPlayer(player);
-        yield break;
-    }
     
     protected virtual void OnPlayerTurnEnded(Player player)
     {
@@ -200,7 +199,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     
     protected virtual void OnRollDiceClicked()
     {
-        NetworkAdapter.Instance?.RequestRollDice(game.CurrentPlayer.playerID);
+        TurnFlowBus.Instance.Raise(new TurnEvent(TurnStage.RollDiceRequest));
     }
     
     protected virtual void OnPlayerRolledDice(Player player, int roll)

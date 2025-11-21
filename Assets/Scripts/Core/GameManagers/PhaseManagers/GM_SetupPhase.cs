@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening;
 using UnityEngine;
 
 public class GM_SetupPhase : GM_BasePhase
@@ -46,9 +44,6 @@ public class GM_SetupPhase : GM_BasePhase
         }
     }
 
-    // Helper to check if command system is enabled
-    private bool UseCommandSystem => NetworkAdapter.Instance != null && NetworkAdapter.Instance.IsCommandSystemEnabled;
-
     protected override void HandleTurnEvent(IGameEvent e)
     {
         base.HandleTurnEvent(e);
@@ -73,14 +68,9 @@ public class GM_SetupPhase : GM_BasePhase
     protected override void BeginPhase()
     {
         base.BeginPhase();
-
-        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginPhase, new BeginPhaseData(_unassignedPlayers, _unassignedActors)));
         
-        // If using command system, let GameStateManager handle setup initialization
-        if (UseCommandSystem)
-        {
-            NetworkAdapter.Instance.StateManager.InitializeSetupPhase();
-        }
+        TurnFlowBus.Instance.Raise(new SetupStageEvent(SetupStage.BeginPhase, 
+            new BeginPhaseData(_unassignedPlayers, _unassignedActors)));
         
         CurrentStage = SetupStage.Roll;
     }
@@ -137,14 +127,6 @@ public class GM_SetupPhase : GM_BasePhase
 
     protected override void HandleRequestedRoll()
     {
-        // If command system is enabled, it handles the roll via GameStateManager
-        if (UseCommandSystem)
-        {
-            // Command system will raise the appropriate events
-            return;
-        }
-        
-        // Original logic for when command system is disabled
         base.HandleRequestedRoll();
         
         _rolledPlayers.Add(game.CurrentPlayer, diceRoll);
@@ -292,14 +274,7 @@ public class GM_SetupPhase : GM_BasePhase
     {
         if (e.payload is Player player)
         {
-            if (UseCommandSystem)
-            {
-                NetworkAdapter.Instance.RequestConfirmActorAssignment(game.CurrentPlayer.playerID, player.playerID);
-            }
-            else
-            {
-                TryAssignActorToPlayer(player, _selectedActor);
-            }
+            TryAssignActorToPlayer(player, _selectedActor);
         }
     }
     
@@ -310,12 +285,6 @@ public class GM_SetupPhase : GM_BasePhase
         _selectedActor = actorCard;
         
         Debug.Log($"Held actor: {_selectedActor.cardName}");
-        
-        // If using command system, notify it about the selection
-        if (UseCommandSystem)
-        {
-            NetworkAdapter.Instance.RequestSelectActor(game.CurrentPlayer.playerID, actorCard);
-        }
     }
     
     private bool CanAssignActor(Player targetPlayer)
@@ -353,7 +322,6 @@ public class GM_SetupPhase : GM_BasePhase
 
         EndPlayerTurn();
         
-        // Check if only one player remains without an actor
         if (ShouldAutoAssignLastActor())
         {
             AutoAssignLastActor();
@@ -424,39 +392,5 @@ public class GM_SetupPhase : GM_BasePhase
         game.SetPhase(GameManager.Instance.mainPhase);
     }
 
-    #endregion
-
-    #region Command System Sync
-    
-    /// <summary>
-    /// Called by GameStateManager when using command system to sync local state
-    /// </summary>
-    public void SyncFromStateManager(SetupStage stage, Player playerToSelect, List<Player> playersToRoll)
-    {
-        _currentStage = stage;
-        _playerToSelect = playerToSelect;
-        _playersToRoll.Clear();
-        _playersToRoll.AddRange(playersToRoll);
-    }
-    
-    /// <summary>
-    /// Called by GameStateManager to sync roll results
-    /// </summary>
-    public void SyncRollResult(Player player, int roll)
-    {
-        _rolledPlayers[player] = roll;
-        _playersToRoll.Remove(player);
-    }
-    
-    /// <summary>
-    /// Called by GameStateManager to sync actor assignment
-    /// </summary>
-    public void SyncActorAssignment(Player player, ActorCard actor)
-    {
-        _unassignedActors.Remove(actor);
-        _unassignedPlayers.Remove(player);
-        _selectedActor = null;
-    }
-    
     #endregion
 }

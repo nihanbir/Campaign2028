@@ -15,7 +15,6 @@ public class UM_SetupPhase : UM_BasePhase
     private PlayerDisplayCard _highlightedCard;
     private readonly List<PlayerDisplayCard> _playerDisplayCards = new();
     private PlayerDisplayCard _selectedActorCard;
-    private GM_SetupPhase _setupPhase;
 
     [Header("UI Animation Settings")]
     public float assignDuration = 0.5f;
@@ -29,13 +28,14 @@ public class UM_SetupPhase : UM_BasePhase
     public float rerollPulseDuration = 0.5f;
     public Ease rerollEase = Ease.InOutSine;
 
-    // Helper to check if command system is enabled
-    private bool UseCommandSystem => NetworkAdapter.Instance != null && NetworkAdapter.Instance.IsCommandSystemEnabled;
+    private List<ActorCard> _unassignedActors;
+    private List<Player> _unassignedPlayers;
 
     #region Initialize Phase UI
     
     protected override void HandleTurnEvent(IGameEvent e)
     {
+        // UI ALWAYS handles events (both offline and online)
         base.HandleTurnEvent(e);
 
         if (!isCurrent) return;
@@ -44,6 +44,10 @@ public class UM_SetupPhase : UM_BasePhase
         {
             switch (t.stage)
             {
+                case SetupStage.BeginPhase:
+                    InitializeUI();
+                    break;
+                
                 case SetupStage.Roll:
                     EnqueueUI(OnRollStage());
                     break;
@@ -71,11 +75,6 @@ public class UM_SetupPhase : UM_BasePhase
                     EnqueueUI(UpdatePlayerUIWithActor(assigned.player, assigned.actor));
                     break;
                 
-                case SetupStage.AllegianceAssigned:
-                    var allegianceData = (AllegianceAssignedData)t.payload;
-                    EnqueueUI(UpdatePlayerUIWithAllegiance(allegianceData.player, allegianceData.allegiance));
-                    break;
-                
                 case SetupStage.LastActorAssigned:
                     break;
             }
@@ -94,56 +93,52 @@ public class UM_SetupPhase : UM_BasePhase
         }
     }
 
-    protected override void OnPhaseEnabled()
+    private void InitializeUI()
     {
-        _setupPhase = game.setupPhase;
-        
         CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent);
         CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
-        
-        base.OnPhaseEnabled();
     }
-    
-    void CreateCardUI(CardDisplayType cardType, Transform parent)
-    {
-        if (!GameManager.Instance)
-        {
-            Debug.LogError("GameManager instance is not set");
-            return;
-        }
 
-        int count = cardType switch
+    private void CreateCardUI(CardDisplayType cardType, Transform parent)
         {
-            CardDisplayType.UnassignedActor => _setupPhase.GetUnassignedActors().Count,
-            CardDisplayType.UnassignedPlayer => _setupPhase.GetUnassignedPlayers().Count,
-            _ => 0
-        };
-
-        if (count == 0) return;
-
-        for (int i = 0; i < count; i++)
-        {
-            GameObject uiInstance = Instantiate(cardDisplayPrefab, parent);
-            PlayerDisplayCard displayCard = uiInstance.GetComponent<PlayerDisplayCard>();
-            
-            if (displayCard)
+            if (!GameManager.Instance)
             {
-                displayCard.displayType = cardType;
+                Debug.LogError("GameManager instance is not set");
+                return;
+            }
 
-                if (cardType == CardDisplayType.UnassignedActor)
+            int count = cardType switch
+            {
+                CardDisplayType.UnassignedActor => _unassignedActors.Count,
+                CardDisplayType.UnassignedPlayer => _unassignedPlayers.Count,
+                _ => 0
+            };
+
+            if (count == 0) return;
+
+            for (int i = 0; i < count; i++)
+            {
+                GameObject uiInstance = Instantiate(cardDisplayPrefab, parent);
+                PlayerDisplayCard displayCard = uiInstance.GetComponent<PlayerDisplayCard>();
+                
+                if (displayCard)
                 {
-                    displayCard.SetCard(_setupPhase.GetUnassignedActors()[i]);
+                    displayCard.displayType = cardType;
+
+                    if (cardType == CardDisplayType.UnassignedActor)
+                    {
+                        displayCard.SetCard(_unassignedActors[i]);
+                    }
+                    else
+                    {
+                        _unassignedPlayers[i].SetDisplayCard(displayCard);
+                        _playerDisplayCards.Add(displayCard);
+                    }
                 }
                 else
-                {
-                    _setupPhase.GetUnassignedPlayers()[i].SetDisplayCard(displayCard);
-                    _playerDisplayCards.Add(displayCard);
-                }
+                    Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
             }
-            else
-                Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
         }
-    }
     
     #endregion
     
@@ -155,24 +150,12 @@ public class UM_SetupPhase : UM_BasePhase
         diceImage.gameObject.SetActive(true);
         yield break;
     }
-
+    
     protected override void OnPlayerTurnStarted(Player player)
     {
         base.OnPlayerTurnStarted(player);
         
         EnqueueUI(EnableDiceButtonRoutine(!isAIPlayer));
-    }
-
-    protected override void OnRollDiceClicked()
-    {
-        if (UseCommandSystem)
-        {
-            NetworkAdapter.Instance.RequestSetupRollDice(currentPlayer.playerID);
-        }
-        else
-        {
-            base.OnRollDiceClicked();
-        }
     }
 
     protected override void OnPlayerRolledDice(Player player, int roll)
@@ -201,7 +184,6 @@ public class UM_SetupPhase : UM_BasePhase
         _selectedActorCard = FindDisplayCardForUnassignedActor(actorCard);
         _selectedActorCard?.SetIsSelected(true);
 
-        // Selection feedback
         _selectedActorCard?.transform.DOPunchScale(Vector3.one * 0.15f, 0.25f, 8, 1f);
 
         Debug.Log($"Selected actor: {_selectedActorCard?.GetCard().cardName}");
@@ -293,27 +275,6 @@ public class UM_SetupPhase : UM_BasePhase
         s.Append(actor.DOMove(target.position, assignDuration).SetEase(Ease.InBack));
         s.Join(actor.DOScale(1.3f, assignDuration * 0.5f).SetLoops(2, LoopType.Yoyo));
         return s;
-    }
-    
-    private IEnumerator UpdatePlayerUIWithAllegiance(Player player, AllegianceCard allegiance)
-    {
-        var playerCard = FindDisplayCardForPlayer(player);
-        if (!playerCard) yield break;
-    
-        // Update the player display card with allegiance info
-        playerCard.SetAllegiance(allegiance);
-    
-        // Optional: Add visual feedback for allegiance assignment
-        bool done = false;
-    
-        // Pulse animation to show allegiance was assigned
-        playerCard.transform.DOPunchScale(Vector3.one * 0.1f, 0.3f, 2)
-            .OnComplete(() => done = true);
-    
-        while (!done)
-            yield return null;
-    
-        Debug.Log($"UI updated: Player {player.playerID} has {allegiance.allegiance} allegiance");
     }
     
     private IEnumerator AnimateRerollPlayers(List<Player> rerollingPlayers)

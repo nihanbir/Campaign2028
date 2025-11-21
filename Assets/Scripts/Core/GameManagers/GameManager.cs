@@ -14,15 +14,26 @@ public class GameManager : GameManagerBase
 
     public event Action<GM_BasePhase> OnPhaseChanged;
     
+    public static bool IsServer { get; private set; } = true;
+    
     protected override void Awake()
     {
-        base.Awake();
-        if (Instance == null) Instance = this;
+        if (!IsServer)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        if (Instance == null) 
+            Instance = this;
+        
         else Destroy(gameObject);
     }
 
     private void Start()
     {
+        if (!IsServer) return;
+        
         InitializePhases();
         SetPhase(setupPhase);
     }
@@ -35,7 +46,6 @@ public class GameManager : GameManagerBase
 
         _currentPhaseManager = newPhase;
         
-        //TODO:make this a bus later
         OnPhaseChanged?.Invoke(newPhase);
     }
     
@@ -45,12 +55,12 @@ public class GameManager : GameManagerBase
         mainPhase = new GM_MainPhase();
     }
     
-    // public T GetCurrentPhaseAs<T>() where T : GM_BasePhase
-    // {
-    //     return _currentPhaseManager as T;
-    // }
-    
+    public static void SetNetworkMode(bool isServer)
+    {
+        IsServer = isServer;
+    }
 }
+
 public enum GamePhase
 {
     None,
