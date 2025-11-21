@@ -28,9 +28,6 @@ public class UM_SetupPhase : UM_BasePhase
     public float rerollPulseDuration = 0.5f;
     public Ease rerollEase = Ease.InOutSine;
 
-    private List<ActorCard> _unassignedActors;
-    private List<Player> _unassignedPlayers;
-
     #region Initialize Phase UI
     
     protected override void HandleTurnEvent(IGameEvent e)
@@ -45,7 +42,8 @@ public class UM_SetupPhase : UM_BasePhase
             switch (t.stage)
             {
                 case SetupStage.BeginPhase:
-                    InitializeUI();
+                    var data = (BeginPhaseData)t.payload;
+                    CreateCardUI(data.unassignedPlayers, data.unassignedActors);
                     break;
                 
                 case SetupStage.Roll:
@@ -93,52 +91,44 @@ public class UM_SetupPhase : UM_BasePhase
         }
     }
 
-    private void InitializeUI()
+    private void CreateCardUI(List<Player> unassignedPlayers, List<ActorCard> unassignedActors)
     {
-        CreateCardUI(CardDisplayType.UnassignedActor, actorUIParent);
-        CreateCardUI(CardDisplayType.UnassignedPlayer, playerUIParent);
-    }
-
-    private void CreateCardUI(CardDisplayType cardType, Transform parent)
+        if (!GameManager.Instance)
         {
-            if (!GameManager.Instance)
-            {
-                Debug.LogError("GameManager instance is not set");
-                return;
-            }
-
-            int count = cardType switch
-            {
-                CardDisplayType.UnassignedActor => _unassignedActors.Count,
-                CardDisplayType.UnassignedPlayer => _unassignedPlayers.Count,
-                _ => 0
-            };
-
-            if (count == 0) return;
-
-            for (int i = 0; i < count; i++)
-            {
-                GameObject uiInstance = Instantiate(cardDisplayPrefab, parent);
-                PlayerDisplayCard displayCard = uiInstance.GetComponent<PlayerDisplayCard>();
-                
-                if (displayCard)
-                {
-                    displayCard.displayType = cardType;
-
-                    if (cardType == CardDisplayType.UnassignedActor)
-                    {
-                        displayCard.SetCard(_unassignedActors[i]);
-                    }
-                    else
-                    {
-                        _unassignedPlayers[i].SetDisplayCard(displayCard);
-                        _playerDisplayCards.Add(displayCard);
-                    }
-                }
-                else
-                    Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
-            }
+            Debug.LogError("GameManager instance is not set");
+            return;
         }
+        
+        for (int i = 0; i < unassignedActors.Count; i++)
+        {
+            GameObject uiInstance = Instantiate(cardDisplayPrefab, actorUIParent);
+            PlayerDisplayCard displayCard = uiInstance.GetComponent<PlayerDisplayCard>();
+                
+            if (displayCard)
+            {
+                displayCard.displayType = CardDisplayType.UnassignedActor;
+                displayCard.SetCard(unassignedActors[i]);
+            }
+            else
+                Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
+        }
+        
+        for (int i = 0; i < unassignedPlayers.Count; i++)
+        {
+            GameObject uiInstance = Instantiate(cardDisplayPrefab, playerUIParent);
+            PlayerDisplayCard displayCard = uiInstance.GetComponent<PlayerDisplayCard>();
+                
+            if (displayCard)
+            {
+                unassignedPlayers[i].SetDisplayCard(displayCard);
+                _playerDisplayCards.Add(displayCard);
+            }
+            else
+                Debug.LogError("CardDisplayPrefab missing DisplayCard component.");
+        }
+        
+        InitUI();
+    }
     
     #endregion
     

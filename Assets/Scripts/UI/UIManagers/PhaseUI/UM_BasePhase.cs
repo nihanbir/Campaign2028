@@ -28,6 +28,7 @@ public abstract class UM_BasePhase : MonoBehaviour
     protected Player currentPlayer = null;
     protected bool isScreenActive = false;
     protected bool isCurrent = false;
+    protected bool initDone = false;
     
     private readonly Queue<IEnumerator> _uiQueue = new();
     private bool _uiQueueRunning;
@@ -112,7 +113,7 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         EnableDiceButton(false);
         
-        InitUIRoutine();
+        EnqueueUI(WaitUntilInitDone());
         
         // Animate UI entry
         EnqueueUI(AnimatePhaseEntryRoutine());
@@ -142,10 +143,17 @@ public abstract class UM_BasePhase : MonoBehaviour
         TurnFlowBus.Instance.OnEvent -= HandleTurnEvent;
     }
 
-    protected virtual void InitUIRoutine()
+    protected virtual void InitUI()
     {
-        
+        initDone = true;
     }
+
+    private IEnumerator WaitUntilInitDone()
+    {
+        while (!initDone)
+            yield return null;
+    }
+    
     protected virtual void HandleTurnEvent(IGameEvent e)
     {
         if (!isCurrent) return;

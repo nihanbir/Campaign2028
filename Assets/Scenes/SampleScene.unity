@@ -627,9 +627,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1600293382}
-  - component: {fileID: 1600293387}
   - component: {fileID: 1600293385}
   - component: {fileID: 1600293386}
+  - component: {fileID: 1600293387}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -699,10 +699,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1600293380}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7951d1d4ebd4cfb8682567918cb44b6, type: 3}
+  m_Script: {fileID: 11500000, guid: 7974a6c6f3584f6fa0ef8445b8ed5e47, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkAdapter
-  enableCommandSystem: 0
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEventForwarder
 --- !u!114 &2031575820 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2672511314526740918, guid: 360f1d758a190a04988234ec35fe7d41, type: 3}
