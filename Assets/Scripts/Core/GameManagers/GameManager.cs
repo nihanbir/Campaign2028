@@ -28,6 +28,8 @@ public class GameManager : GameManagerBase
             Instance = this;
         
         else Destroy(gameObject);
+        
+        base.Awake();
     }
 
     private void Start()
