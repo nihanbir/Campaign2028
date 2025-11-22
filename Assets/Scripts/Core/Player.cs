@@ -28,6 +28,7 @@ public class Player
     
     // Flags
     public bool IsAI = false;
+    public bool hasCIA = false;
     
     // Display reference (not serialized)
     [NonSerialized] public PlayerDisplayCard PlayerDisplayCard;
@@ -73,23 +74,52 @@ public class Player
         switch (card)
         {
             case StateCard stateCard:
-                if (!HeldStateCards.Contains(stateCard))
-                {
-                    HeldStateCards.Add(stateCard);
-                    ElectoralVotes += stateCard.electoralVotes;
-                }
+                CaptureStateCard(stateCard);
                 break;
 
             case InstitutionCard institutionCard:
-                if (!HeldInstitutionCards.Contains(institutionCard))
-                {
-                    HeldInstitutionCards.Add(institutionCard);
-                    InstitutionCount++;
-                }
+                CaptureInstCard(institutionCard);
                 break;
         }
         
+        //TODO:move this to UI
         PlayerDisplayCard?.UpdateScore();
+    }
+
+    public void CaptureStateCard(StateCard stateCard)
+    {
+        if (HeldStateCards.Contains(stateCard)) return;
+        HeldStateCards.Add(stateCard);
+        ElectoralVotes += stateCard.electoralVotes;
+    }
+
+    public void CaptureInstCard(InstitutionCard instCard)
+    {
+        if (HeldInstitutionCards.Contains(instCard)) return;
+        HeldInstitutionCards.Add(instCard);
+        if (instCard.cardName == "CIA")
+            hasCIA = true;
+        InstitutionCount++;
+        CheckInstWinConditions();
+    }
+
+    private void CheckStateWinConditions()
+    {
+        if (ElectoralVotes != 290) 
+            return;
+        
+        TurnFlowBus.Instance.Raise(new PhaseChangeEvent(GamePhase.GameOver, new GameOverData(this, VictoryType.ElectoralVotes)));
+        Debug.Log($"Player {playerID} won!");
+    }
+    
+    private void CheckInstWinConditions()
+    {
+        if (!hasCIA) return;
+        if (InstitutionCount != 4) 
+            return;
+        
+        TurnFlowBus.Instance.Raise(new PhaseChangeEvent(GamePhase.GameOver, new GameOverData(this, VictoryType.Institutions)));
+        Debug.Log($"Player {playerID} won!");
     }
     
     public void RemoveCapturedCard(Card card)
