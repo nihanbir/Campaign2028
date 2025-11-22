@@ -13,6 +13,7 @@ public class Player
     
     // Card data
     public ActorCard assignedActor;
+    public AllegianceCard assignedAllegiance;
     public List<StateCard> HeldStateCards = new();
     public List<InstitutionCard> HeldInstitutionCards = new();
     public EventCard HeldEvent;
