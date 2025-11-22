@@ -65,8 +65,9 @@ public class UM_MainPhase : UM_BasePhase
         _eventManager = _mainPhase.EventManager;
         
         eventUI.Initialize();
-        
-        EnqueueUI(PhaseEnabledRoutine());
+       
+        //TODO: dont forget to change this to instantiating
+        // RelocatePlayerCards(playerUIParent);
         
         //TODO: dont forget to remove
         InitializePlayersForTesting();
@@ -75,15 +76,6 @@ public class UM_MainPhase : UM_BasePhase
         SetEventButtonsInteractable(false);
         
         base.OnPhaseEnabled();
-    }
-
-    private IEnumerator PhaseEnabledRoutine()
-    {
-        if (gameUI.previouslyActiveUI)
-            yield return gameUI.previouslyActiveUI.WaitUntilScreenState(false);
-        
-        //TODO: dont forget to uncomment
-        // RelocatePlayerCards(playerUIParent);
     }
     
     protected override void SubscribeToPhaseEvents()
@@ -687,6 +679,7 @@ public class UM_MainPhase : UM_BasePhase
     
         private void InitializePlayersForTesting()
         {
+            //TODO:
             var gm = GameManager.Instance;
             var ui = GameUIManager.Instance;
     
@@ -723,6 +716,7 @@ public class UM_MainPhase : UM_BasePhase
                 }
             }
     
+            InitUI();
             // RelocatePlayerCards(playerUIParent);
             Debug.Log("[MainPhaseUIManager] Test players initialized successfully!");
         }

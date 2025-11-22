@@ -115,6 +115,8 @@ public abstract class UM_BasePhase : MonoBehaviour
         
         EnqueueUI(WaitUntilInitDone());
         
+        EnqueueUI(WaitUntilPrevScreen());
+        
         // Animate UI entry
         EnqueueUI(AnimatePhaseEntryRoutine());
     }
@@ -152,6 +154,12 @@ public abstract class UM_BasePhase : MonoBehaviour
     {
         while (!initDone)
             yield return null;
+    }
+    
+    private IEnumerator WaitUntilPrevScreen()
+    {
+        if (gameUI.previouslyActiveUI)
+            yield return gameUI.previouslyActiveUI.WaitUntilScreenState(false);
     }
     
     protected virtual void HandleTurnEvent(IGameEvent e)
